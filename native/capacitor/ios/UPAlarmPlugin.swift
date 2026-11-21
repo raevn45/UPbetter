@@ -36,7 +36,8 @@ public class UPAlarmPlugin: CAPPlugin, CAPBridgedPlugin {
     @objc func requestPermission(_ call: CAPPluginCall) {
         guard #available(iOS 26.0, *) else {
             call.resolve(["platform": "ios", "nativeAlarmSupported": false, "exactScheduling": false,
-                          "requiresPermission": false, "permissionGranted": false, "notes": ["AlarmKit requires iOS 26 or later."]])
+                          "requiresPermission": false, "permissionGranted": false,
+                          "notes": ["AlarmKit requires iOS 26 or later."]])
             return
         }
         Task {
@@ -54,6 +55,7 @@ public class UPAlarmPlugin: CAPPlugin, CAPBridgedPlugin {
             call.resolve(["state": "unsupported", "message": "AlarmKit requires iOS 26 or later."]); return
         }
         guard let alarm = call.getObject("alarm"), let idString = alarm["id"] as? String,
+              let id = UUID(uuidString: idString),
               let nextString = call.getString("nextOccurrence"),
               let instant = ISO8601DateFormatter().date(from: nextString) else {
             call.reject("Alarm payload or next occurrence is invalid."); return
@@ -61,14 +63,33 @@ public class UPAlarmPlugin: CAPPlugin, CAPBridgedPlugin {
         guard AlarmManager.shared.authorizationState == .authorized else {
             call.resolve(["state": "permission_required", "message": "Allow UP to schedule alarms in iOS Settings."]); return
         }
-        let repeatDays = alarm["repeatDays"] as? [Int] ?? [];
-        if !repeatDays.isEmpty {
-            call.resolve(["state": "unsupported", "message": "This iOS bridge currently schedules one occurrence only. Weekly recurrence and target-timezone replenishment are not yet implemented."])
-            return
+
+        let repeatDays = alarm["repeatDays"] as? [Int] ?? []
+        let alarmTimeZone = alarm["timeZone"] as? String ?? TimeZone.current.identifier
+        let schedule: Alarm.Schedule
+        if repeatDays.isEmpty {
+            schedule = .fixed(instant)
+        } else {
+            // AlarmKit's weekly relative schedule follows the device's local calendar.
+            // Refuse to silently reinterpret a user-selected remote timezone.
+            guard alarmTimeZone == TimeZone.current.identifier else {
+                call.resolve(["state": "unsupported", "message": "Weekly alarms in a timezone different from this iPhone are not supported yet. Change the alarm timezone to the iPhone's current timezone, or use a one-time alarm."]); return
+            }
+            let weekdayMap: [Int: Locale.Weekday] = [
+                0: .sunday, 1: .monday, 2: .tuesday, 3: .wednesday,
+                4: .thursday, 5: .friday, 6: .saturday
+            ]
+            let weekdays = repeatDays.compactMap { weekdayMap[$0] }
+            guard !weekdays.isEmpty else {
+                call.resolve(["state": "failed", "message": "Choose at least one repeat day."]); return
+            }
+            let time = Alarm.Schedule.Relative.Time(hour: alarm["hour"] as? Int ?? 7,
+                                                    minute: alarm["minute"] as? Int ?? 0)
+            schedule = .relative(.init(time: time, repeats: .weekly(weekdays)))
         }
+
         Task {
             do {
-                let id = UUID(uuidString: idString) ?? UUID()
                 let label = (alarm["label"] as? String).flatMap { $0.isEmpty ? nil : $0 } ?? "Time to get up"
                 let stop = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.circle")
                 let alert = AlarmPresentation.Alert(title: LocalizedStringResource(stringLiteral: label), stopButton: stop)
@@ -77,7 +98,7 @@ public class UPAlarmPlugin: CAPPlugin, CAPBridgedPlugin {
                     metadata: UPAlarmMetadata(label: label),
                     tintColor: Color(red: 0.09, green: 0.24, blue: 0.26))
                 let configuration = AlarmManager.AlarmConfiguration<UPAlarmMetadata>(
-                    schedule: .fixed(instant), attributes: attributes)
+                    schedule: schedule, attributes: attributes)
                 try await AlarmManager.shared.schedule(id: id, configuration: configuration)
                 call.resolve(["state": "scheduled", "message": "Scheduled with Apple AlarmKit."])
             } catch { call.resolve(["state": "failed", "message": error.localizedDescription]) }
