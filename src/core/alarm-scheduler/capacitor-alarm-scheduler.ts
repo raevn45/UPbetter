@@ -10,7 +10,7 @@ export class CapacitorAlarmScheduler implements AlarmScheduler {
   private readonly fallback = new WebAlarmScheduler();
 
   async schedule(alarm: Alarm): Promise<{ state: AlarmWithStatus["scheduleState"]; message?: string }> {
-    if (!Capacitor.isNativePlatform()) return this.fallback.schedule(alarm);
+    if (!Capacitor.isNativePlatform()) return this.fallback.schedule();
     const { nextAlarmOccurrence } = await import("../time/time-service");
     const nextOccurrence = nextAlarmOccurrence(alarm);
     if (!nextOccurrence) return { state: "failed", message: "No upcoming occurrence could be calculated." };
