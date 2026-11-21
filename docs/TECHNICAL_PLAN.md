@@ -7,13 +7,22 @@ Use a shared TypeScript codebase for the web experience and reusable UI/business
 Suggested starting point:
 - React + TypeScript + Vite
 - Tailwind CSS plus a small, deliberately designed component system
-- IndexedDB for local structured data (Dexie is a reasonable wrapper)
+- IndexedDB for local web structured data (Dexie is a reasonable wrapper)
+- Native local persistence on mobile as appropriate to the selected framework
 - `Intl.DateTimeFormat` and IANA timezone identifiers for display; use a timezone-aware library such as Temporal/polyfill or date-fns-tz for scheduling calculations
 - PWA support for installability and offline web use
-- Capacitor for mobile packaging only if its native plugin path meets the alarm requirements
-- Tauri for a Windows desktop package if the chosen native alarm/background implementation is viable
+- Evaluate Capacitor plus custom native plugins for Android/iOS, or another cross-platform shell, only after proving the native alarm APIs are accessible and reliable
+- Evaluate Tauri for a Windows desktop package if the chosen native alarm/background implementation is viable
 
-Do not assume that a shared web runtime can provide reliable alarms in the background. Keep native scheduling behind an interface.
+Do not assume that a shared web runtime can provide reliable alarms in the background. Keep native scheduling behind an interface. First inspect the repository and choose the smallest viable architecture; do not blindly scaffold multiple shells before the shared core works.
+
+## Locked product decisions
+
+- Product name: UP
+- Pet: original cat companion
+- Targets: Windows, Android, iPhone
+- Data: local-first, no account/backend/cloud sync in MVP
+- Web UI may support setup and foreground features but is not a guaranteed background alarm engine
 
 ## Core domain types
 
@@ -56,7 +65,7 @@ type SavedCity = {
 };
 ```
 
-Keep sound metadata, pet state, user preferences and wake history in separate models. Validate all persisted data at the boundary.
+Keep sound metadata, cat state, user preferences and wake history in separate models. Validate all persisted data at the boundary.
 
 ## Alarm scheduler boundary
 
@@ -72,9 +81,9 @@ interface AlarmScheduler {
 }
 ```
 
-Each platform implements this contract natively. The UI must display capability and permission state. Include a test-alarm action and a setup checklist.
+Each platform implements this contract natively. The UI must display capability and permission state. Include a test-alarm action and a setup checklist. If an integration is not implemented or verified, show it as unsupported/not yet configured rather than simulating success.
 
-### Platform notes
+## Platform notes
 
 **Web/PWA**
 - Useful for the interface, setup, world clock and foreground timers.
@@ -90,11 +99,13 @@ Each platform implements this contract natively. The UI must display capability 
 - Implement native alarm scheduling and exact-alarm permission handling where required.
 - Handle reboot rescheduling, Doze, battery optimisation and permission revocation.
 - Test on multiple manufacturers because background restrictions differ.
+- Never claim alarms will ring if the phone is powered off.
 
 **iOS**
 - Investigate the current AlarmKit/API availability and requirements for the deployment target.
 - Where a true alarm API is unavailable, use supported notification behaviour and label the limitation clearly.
 - Test interruption, Focus, silent mode and permission behaviour on physical devices; do not infer guarantees from simulator tests.
+- Never claim alarms will ring if the phone is powered off.
 
 ## Timezone correctness
 
@@ -107,11 +118,11 @@ Each platform implements this contract natively. The UI must display capability 
 
 ## Sound pipeline
 
-Use a catalogue manifest containing id, title, category, duration, source, licence, attribution and asset path. Keep previews short and avoid autoplay. Custom audio imports should be local and validated. Native clients may need platform-specific audio packaging and playback handling.
+Use a catalogue manifest containing id, title, category, duration, source, licence, attribution and asset path. Keep previews short and avoid autoplay. Custom audio imports should be local and validated. Native clients may need platform-specific audio packaging and playback handling. Do not commit copyrighted commercial tracks.
 
-## Pet implementation
+## Cat implementation
 
-Start with a small set of original vector or sprite animations (idle, curious, sleepy, celebrating). Keep pet state in a simple reducer/state machine. Do not pull in an entire game engine for the MVP. If adapting an existing pet asset or code, verify its licence, attribution requirements and redistribution terms before use.
+Start with a small set of original vector or sprite animations (idle, sleepy, curious, celebrating). Keep cat state in a simple reducer/state machine. Do not pull in an entire game engine for the MVP. If adapting an existing pet asset or code, verify its licence, attribution requirements and redistribution terms before use.
 
 ## Suggested repository layout
 
@@ -123,7 +134,7 @@ src/
     alarms/
     sounds/
     missions/
-    pet/
+    cat/
     timer/
     countdown/
     world-clock/
@@ -139,24 +150,46 @@ src/
   tests/
 apps/
   windows/
-  mobile/
+  android/
+  ios/
 docs/
   PRODUCT_SPEC.md
   TECHNICAL_PLAN.md
+  CLAUDE_BUILD_PROMPT.md
 ```
 
 The exact workspace layout can change once the framework is selected. Keep platform adapters separate from shared feature logic.
 
 ## Build sequence
 
-1. Establish the app shell, design tokens, navigation and local persistence.
-2. Build the alarm editor and alarm list with a mock scheduler.
-3. Build sound browsing/preview and mission flows.
-4. Add pet states and Today screen.
-5. Add timer, countdown and world clock.
-6. Add timezone alarm calculations and DST tests.
-7. Implement native Windows and mobile scheduler adapters.
-8. Test on physical devices, document permissions and package installers.
+### Phase 0: repository and architecture audit
+- Inspect the repository, existing docs, branches and any code already present.
+- Confirm the supported framework and package manager.
+- Write down the chosen architecture and its trade-offs before adding a large dependency set.
+- Keep the first implementation runnable locally.
+
+### Phase 1: polished shared-core MVP
+- Establish the app shell, design tokens, responsive navigation and local persistence.
+- Build the Today screen and alarm list/editor with a clearly labelled mock scheduler.
+- Build sound browsing/preview with a small original/licensed starter set.
+- Build at least one complete mission flow.
+- Build the cat's idle and wake-up reactions.
+- Add timer, countdown and world clock.
+- Add timezone alarm calculations and DST tests.
+- Make all core flows work offline after initial load.
+
+### Phase 2: native alarm proof of concept
+- Prove Android exact alarm scheduling and permission flow on a physical device.
+- Prove iOS AlarmKit or the best currently supported native alarm path on a physical device.
+- Prove Windows scheduling behaviour on a real Windows machine.
+- Document limitations and permission setup separately for each platform.
+- Do not advertise an alarm capability until it has passed the platform test matrix.
+
+### Phase 3: hardening and packaging
+- Test reboot, force-close, locked-screen and permission-revocation cases.
+- Add export/import backup for local data.
+- Add accessibility and reduced-motion checks.
+- Package installable builds and document installation.
 
 ## Non-negotiable tests
 
@@ -169,3 +202,4 @@ The exact workspace layout can change once the framework is selected. Keep platf
 - App backgrounded, force-closed and device locked
 - Mission interrupted and emergency stop used
 - Timer expires while app is backgrounded
+- Local data survives app restart and app update
