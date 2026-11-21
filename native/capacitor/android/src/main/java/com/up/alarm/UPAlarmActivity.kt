@@ -24,7 +24,7 @@ class UPAlarmActivity : Activity() {
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         val id = intent.getStringExtra("alarmId")
-        val label = id?.let { UPAlarmStore(this).all()[it]?.let { raw -> org.json.JSONObject(raw).optString("label") } }.orEmpty()
+        val label = intent.getStringExtra("alarmLabel") ?: id?.let { UPAlarmStore(this).all()[it]?.let { raw -> org.json.JSONObject(raw).optString("label") } }.orEmpty()
         val layout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(32, 32, 32, 32) }
         layout.addView(TextView(this).apply { text = label.ifBlank { "Time to get up" }; textSize = 30f; gravity = Gravity.CENTER })
         layout.addView(Button(this).apply {
