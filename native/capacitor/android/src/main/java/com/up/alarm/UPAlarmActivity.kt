@@ -246,7 +246,11 @@ class UPAlarmActivity : Activity() {
     }
 
     private fun stopAlarm() {
-        alarmId?.let { (getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(it.hashCode()) }
+        alarmId?.let { id ->
+            (getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(id.hashCode())
+            val days = record?.optJSONArray("repeatDays")
+            if (days == null || days.length() == 0) UPAlarmStore(this).remove(id)
+        }
         finishWithoutSchedule()
     }
 
