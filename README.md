@@ -18,6 +18,34 @@ The repository now contains the first local-core foundation:
 
 A first responsive React frontend has now been added and wired to the local core. It is an initial MVP implementation and still needs CI/build verification, browser QA and interaction polish. Native Android/iOS/Windows alarm reliability remains a separate milestone. A saved alarm in the current web runtime is **not** a guaranteed background alarm.
 
+## Deploy the web app to Vercel
+
+1. Push this repository to GitHub (it already is) and import `raevn45/alarm` in Vercel.
+2. Keep the project root as `.`. The checked-in `vercel.json` sets the Vite build command (`npm run build`) and output folder (`dist`).
+3. No environment variables or separate backend deployment are required for the current local-first MVP.
+4. Deploy. Vercel serves the website over HTTPS; the web app can be installed from a supported browser and has an offline app-shell cache.
+
+**Important:** web data is stored in that browser/device's IndexedDB. It does not automatically sync between your laptop and phone. A web alarm is not a reliable background alarm after the browser is closed or the device is suspended.
+
+## Android test build
+
+The repository contains the first Capacitor Android bridge source, but it is not yet a complete generated Android Studio project and has not been device-tested. On a computer with Node 20+, Android Studio and the Android SDK:
+
+```bash
+npm install
+npm run build
+npx cap add android
+npx cap sync android
+```
+
+Then merge the Kotlin sources and manifest entries from `native/capacitor/android/` into the generated `android/app/src/main/`, register `UPAlarmPlugin` in the generated `MainActivity`, and open Android Studio:
+
+```bash
+npm run cap:android
+```
+
+Follow [native bridge wiring and the physical-device test matrix](native/capacitor/README.md). Do not rely on UP for a critical wake-up until exact-alarm permission, lock-screen behaviour, reboot recovery, sound and force-closed behaviour have all been tested on your phone.
+
 ## Development
 
 Requirements: Node.js 20+ and npm.
