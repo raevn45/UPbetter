@@ -61,6 +61,11 @@ public class UPAlarmPlugin: CAPPlugin, CAPBridgedPlugin {
         guard AlarmManager.shared.authorizationState == .authorized else {
             call.resolve(["state": "permission_required", "message": "Allow UP to schedule alarms in iOS Settings."]); return
         }
+        let repeatDays = alarm["repeatDays"] as? [Int] ?? [];
+        if !repeatDays.isEmpty {
+            call.resolve(["state": "unsupported", "message": "This iOS bridge currently schedules one occurrence only. Weekly recurrence and target-timezone replenishment are not yet implemented."])
+            return
+        }
         Task {
             do {
                 let id = UUID(uuidString: idString) ?? UUID()
