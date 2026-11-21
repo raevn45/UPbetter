@@ -165,3 +165,32 @@ export interface SoundService {
 ## Change management
 
 If a service signature or domain type must change, update this document first and tell the other owner what changed. Keep mocks, frontend and core implementations type-compatible.
+
+
+## Additional core services
+
+The core package also exports:
+
+```ts
+export class MissionService {
+  create(config: MissionConfig): WakeChallenge;
+  check(challengeId: string, response: string): { correct: boolean; message: string };
+  completeAction(challengeId: string): { completed: boolean };
+}
+
+export type UpSettings = {
+  catName: string;
+  motivationStyle: "direct" | "warm" | "competitive" | "reflective";
+  reducedMotion: boolean;
+  wakeReason: string;
+};
+
+export class SettingsService {
+  get(): Promise<Result<UpSettings>>;
+  update(patch: Partial<UpSettings>): Promise<Result<UpSettings>>;
+}
+```
+
+The sound preview implementation currently synthesises short original tones with the Web Audio API. It does not yet include a large recorded sound library or native audio packaging.
+
+The current `WebAlarmScheduler` is deliberately conservative: it saves alarm data but returns `saved_only`. Native platform adapters must replace it before background alarm support can be claimed. Timer persistence stores deadlines, but background expiration alerts also require native/platform integration.
