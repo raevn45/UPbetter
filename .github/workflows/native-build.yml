@@ -62,7 +62,7 @@ jobs:
         run: node scripts/prepare-native-ios.mjs
       - name: Build iOS simulator app
         run: |
-          xcodebuild -project ios/App/App.xcodeproj \
+          xcodebuild -workspace ios/App/App.xcworkspace \
             -scheme App \
             -sdk iphonesimulator \
             -configuration Debug \
