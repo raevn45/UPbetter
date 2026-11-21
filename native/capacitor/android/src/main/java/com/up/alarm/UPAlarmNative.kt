@@ -27,6 +27,7 @@ internal object UPAlarmScheduling {
     fun schedule(context: Context, id: String, record: JSONObject) {
         val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val instant = Instant.parse(record.getString("nextOccurrence"))
+        require(instant.isAfter(Instant.now())) { "The next alarm time must be in the future." }
         val trigger = PendingIntent.getBroadcast(context, id.hashCode(),
             Intent(context, UPAlarmReceiver::class.java).putExtra("alarmId", id),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
@@ -62,6 +63,27 @@ internal object UPAlarmScheduling {
         }
         return null
     }
+
+    fun refreshAfterClockChange(context: Context) {
+        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        if (Build.VERSION.SDK_INT >= 31 && !manager.canScheduleExactAlarms()) return
+        val store = UPAlarmStore(context)
+        store.all().forEach { (id, raw) ->
+            try {
+                val record = JSONObject(raw)
+                val weekly = nextWeekly(record)
+                if (weekly != null) {
+                    record.put("nextOccurrence", weekly.toString())
+                    store.put(id, record.toString())
+                    schedule(context, id, record)
+                } else {
+                    val next = Instant.parse(record.getString("nextOccurrence"))
+                    if (next.isAfter(Instant.now())) schedule(context, id, record)
+                    else { cancel(context, id); store.remove(id) }
+                }
+            } catch (_: Exception) { cancel(context, id); store.remove(id) }
+        }
+    }
 }
 
 class UPAlarmReceiver : BroadcastReceiver() {
@@ -81,11 +103,7 @@ class UPAlarmReceiver : BroadcastReceiver() {
 
 class UPBootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-        if (Build.VERSION.SDK_INT >= 31 && !manager.canScheduleExactAlarms()) return
-        UPAlarmStore(context).all().forEach { (id, raw) ->
-            try { UPAlarmScheduling.schedule(context, id, JSONObject(raw)) } catch (_: Exception) { }
-        }
+        UPAlarmScheduling.refreshAfterClockChange(context)
     }
 }
 
@@ -94,22 +112,34 @@ internal object UPAlarmNotifications {
     fun show(context: Context, id: String, label: String) {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         if (Build.VERSION.SDK_INT >= 26) {
-            val channel = NotificationChannel(CHANNEL, "UP alarms", NotificationManager.IMPORTANCE_HIGH)
-            channel.description = "Alarms created in UP"
-            channel.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
-                AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build())
-            manager.createNotificationChannel(channel)
+            if (manager.getNotificationChannel(CHANNEL) == null) {
+                val channel = NotificationChannel(CHANNEL, "UP alarms", NotificationManager.IMPORTANCE_HIGH)
+                channel.description = "Alarms created in UP"
+                channel.setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM),
+                    AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM).build())
+                manager.createNotificationChannel(channel)
+            }
         }
         val fullScreen = PendingIntent.getActivity(context, id.hashCode(),
             Intent(context, UPAlarmActivity::class.java).putExtra("alarmId", id).putExtra("alarmLabel", label),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
-        val notification = android.app.Notification.Builder(context, CHANNEL)
-            .setSmallIcon(context.applicationInfo.icon)
-            .setContentTitle(label.ifBlank { "Time to get up" })
-            .setContentText("Your UP alarm is ringing.")
-            .setCategory(Notification.CATEGORY_ALARM)
-            .setFullScreenIntent(fullScreen, true)
-            .setAutoCancel(true).build()
+        val notification = if (Build.VERSION.SDK_INT >= 26) {
+            Notification.Builder(context, CHANNEL)
+                .setSmallIcon(context.applicationInfo.icon)
+                .setContentTitle(label.ifBlank { "Time to get up" })
+                .setContentText("Your UP alarm is ringing.")
+                .setCategory(Notification.CATEGORY_ALARM)
+                .setFullScreenIntent(fullScreen, true)
+                .setAutoCancel(true).build()
+        } else {
+            @Suppress("DEPRECATION")
+            Notification.Builder(context)
+                .setSmallIcon(context.applicationInfo.icon)
+                .setContentTitle(label.ifBlank { "Time to get up" })
+                .setContentText("Your UP alarm is ringing.")
+                .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
+                .setAutoCancel(true).build()
+        }
         manager.notify(id.hashCode(), notification)
     }
 }
