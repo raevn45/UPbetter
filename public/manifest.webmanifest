@@ -1,0 +1,20 @@
+{
+  "id": "/",
+  "name": "UP - Make room for morning",
+  "short_name": "UP",
+  "description": "A thoughtful personal alarm clock, timer and world clock.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#10191b",
+  "theme_color": "#10191b",
+  "icons": [
+    {
+      "src": "/up-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
