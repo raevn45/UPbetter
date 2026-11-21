@@ -1,0 +1,3 @@
+<!-- Merge these keys into the generated iOS app Info.plist. -->
+<key>NSAlarmKitUsageDescription</key>
+<string>UP schedules the alarms you create so you can wake up on time.</string>
