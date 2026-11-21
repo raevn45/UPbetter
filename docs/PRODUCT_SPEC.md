@@ -12,6 +12,7 @@ Palette:
 - Ink: `#10191B`
 - Deep petrol: `#173D43`
 - Forest: `#294B3A`
+- Burgundy: `#642F3D`
 - Warm ochre: `#C49A55`
 - Soft ivory: `#F2EFE6`
 - Muted text: `#A7B0AA`
