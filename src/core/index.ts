@@ -7,3 +7,5 @@ export { TimerService } from "./services/timer-service";
 export { SoundService } from "./services/sound-service";
 export { MissionService } from "./services/mission-service";
 export { SettingsService } from "./services/settings-service";
+export { BackupService } from "./services/backup-service";
+export { upCore } from "./app";
