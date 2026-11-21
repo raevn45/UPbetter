@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  AlarmClock, ArrowUpRight, Bell, CalendarDays, Check, ChevronDown, Clock3,
+  AlarmClock, ArrowUpRight, Bell, CalendarDays, Check, ChevronDown, Clock3, Apple, Monitor, Smartphone,
   CloudSun, Compass, Heart, Home, Moon, MoreHorizontal, Music2, Pause, PawPrint,
   Play, Plus, Settings2, ShieldCheck, SkipForward, Sparkles, Sun, Timer,
   Trash2, Volume2, X, Globe2, Download, Upload, Cat, Coffee
@@ -60,6 +60,9 @@ function CatPortrait({ mood = "sleepy", small = false }: { mood?: string; small?
 
 export default function App() {
   const [tab, setTab] = useState<Tab>("today");
+  const [installOpen, setInstallOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [installHelp, setInstallHelp] = useState("");
   const [now, setNow] = useState(new Date());
   const [alarms, setAlarms] = useState<AlarmWithStatus[]>([]);
   const [sounds, setSounds] = useState<SoundItem[]>([]);
@@ -97,6 +100,11 @@ export default function App() {
   }, []);
 
   useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    const capture = (event: Event) => { event.preventDefault(); setInstallPrompt(event as BeforeInstallPromptEvent); };
+    window.addEventListener("beforeinstallprompt", capture);
+    return () => window.removeEventListener("beforeinstallprompt", capture);
+  }, []);
   useEffect(() => {
     const syncOnReturn = () => { if (document.visibilityState === "visible") void refresh(); };
     window.addEventListener("focus", syncOnReturn);
@@ -137,6 +145,22 @@ export default function App() {
       setNotice(saved.scheduleState === "scheduled" ? "Alarm saved and scheduled on this device." : "Alarm saved in UP. Native background scheduling isn't active in this web build.");
     } catch (e) { setError(e instanceof Error ? e.message : "Could not save alarm."); }
   };
+  const installOnDevice = async (platform: "windows" | "android" | "iphone") => {
+    setInstallHelp("");
+    if (platform === "iphone") {
+      setInstallHelp("On your iPhone: open this site in Safari, tap Share, choose Add to Home Screen, then tap Add. iPhone uses this manual install flow.");
+      return;
+    }
+    if (installPrompt) {
+      await installPrompt.prompt();
+      const choice = await installPrompt.userChoice;
+      if (choice.outcome === "accepted") { setInstallPrompt(null); setNotice("UP is being installed on this device."); setInstallHelp("UP is being added to your apps."); }
+      else setInstallHelp("You can install UP later from your browser menu.");
+      return;
+    }
+    if (platform === "android") setInstallHelp("On Android: open this page in Chrome, tap the three-dot menu, then choose Install app or Add to Home screen.");
+    else setInstallHelp("On Windows: open this page in Microsoft Edge or Chrome. Use the install icon in the address bar, or open the browser menu and choose Apps, then Install this site as an app.");
+  };
   const requestAlarmPermission = async () => { const r = await upCore.alarms.requestAlarmPermission(); if (!r.ok) setError(r.error.message); else { await refresh(); setNotice(r.value.permissionGranted ? "Alarm permissions are ready." : (r.value.notes[0] || "Finish enabling alarm permissions in device settings.")); } };
   const toggleAlarm = async (item: AlarmWithStatus) => {
     const r = await upCore.alarms.setEnabled(item.alarm.id, !item.alarm.enabled);
@@ -174,7 +198,7 @@ export default function App() {
       </div>
     </aside>
     <main className="main-area">
-      <header className="topbar"><div className="crumb">UP <span>/</span> {nav.find(n => n.id === tab)?.label.toUpperCase()}</div><div className="top-right"><span className="date-top">{localDate}</span><span className="avatar">R</span></div></header>
+      <header className="topbar"><div className="crumb">UP <span>/</span> {nav.find(n => n.id === tab)?.label.toUpperCase()}</div><div className="top-right"><span className="date-top">{localDate}</span><button className="install-top-btn" onClick={()=>{setInstallOpen(true);setInstallHelp("");}}><Download size={14}/> Get UP</button><span className="avatar">R</span></div></header>
       {(notice || error) && <div className={`toast ${error ? "toast-error" : ""}`}>{error || notice}<button onClick={() => { setNotice(""); setError(""); }}><X size={14}/></button></div>}
       <div className="page-content">
         {tab === "today" && <section className="today-page">
@@ -199,6 +223,7 @@ export default function App() {
     </main>
     <nav className="mobile-nav">{nav.slice(0,5).map(item=>{const Icon=item.icon;return <button key={item.id} className={tab===item.id?"active":""} onClick={()=>setTab(item.id)}><Icon size={18}/><span>{item.label==="World clock"?"World":item.label}</span></button>})}<button onClick={()=>setTab("settings")}><MoreHorizontal size={18}/><span>More</span></button></nav>
 
+    {installOpen && <div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setInstallOpen(false);}}><div className="modal install-modal"><div className="modal-head"><div><span className="eyebrow">TAKE UP WITH YOU</span><h2>Get UP on your device.</h2></div><button className="icon-btn" onClick={()=>setInstallOpen(false)}><X/></button></div><div className="modal-body"><p className="install-intro">Install the UP app experience on the device you use every day. Your alarms and preferences stay stored on that device.</p><div className="install-options"><button className="install-option" onClick={()=>void installOnDevice("windows")}><span className="install-option-icon"><Monitor/></span><span><strong>Windows</strong><small>Install as a desktop app</small></span><ArrowUpRight/></button><button className="install-option" onClick={()=>void installOnDevice("android")}><span className="install-option-icon"><Smartphone/></span><span><strong>Android</strong><small>Install from Chrome</small></span><ArrowUpRight/></button><button className="install-option" onClick={()=>void installOnDevice("iphone")}><span className="install-option-icon"><Apple/></span><span><strong>iPhone</strong><small>Add UP to your Home Screen</small></span><ArrowUpRight/></button></div>{installHelp && <div className="install-help" role="status">{installHelp}</div>}<p className="fine-print">This installs the web app (PWA), not the separate native alarm package. Native Android and iOS alarm builds are still being completed and tested. The web app cannot guarantee alarms while closed or suspended.</p></div></div></div>}
     {modal && <div className="modal-backdrop" onMouseDown={e=>{if(e.target===e.currentTarget)setModal(null);}}><div className="modal"><div className="modal-head"><div><span className="eyebrow">{modal==="alarm"?"MAKE A PLAN":modal==="city"?"ADD A PLACE":"MARK THE MOMENT"}</span><h2>{modal==="alarm"?(editing?"Edit alarm":"New alarm"):modal==="city"?"Add a city":"New countdown"}</h2></div><button className="icon-btn" onClick={()=>setModal(null)}><X/></button></div>
       {modal==="alarm" && <div className="modal-body"><label>What is this alarm for?</label><input className="field-input" value={alarmForm.label} onChange={e=>setAlarmForm({...alarmForm,label:e.target.value})} placeholder="Wake up, gym, remember…"/><div className="time-inputs"><div><label>HOUR</label><input type="number" min="0" max="23" value={Number(alarmForm.hour)} onChange={e=>setAlarmForm({...alarmForm,hour:pad(Math.min(23,Math.max(0,Number(e.target.value))))})}/></div><span>:</span><div><label>MINUTE</label><input type="number" min="0" max="59" value={Number(alarmForm.minute)} onChange={e=>setAlarmForm({...alarmForm,minute:pad(Math.min(59,Math.max(0,Number(e.target.value))))})}/></div></div><label>Repeat</label><div className="day-picker">{days.map(d=><button key={d.value} className={alarmForm.repeatDays.includes(d.value)?"selected":""} onClick={()=>setAlarmForm({...alarmForm,repeatDays:alarmForm.repeatDays.includes(d.value)?alarmForm.repeatDays.filter(x=>x!==d.value):[...alarmForm.repeatDays,d.value]})}>{d.label}</button>)}</div><label>Timezone</label><select className="field-input" value={alarmForm.timeZone} onChange={e=>setAlarmForm({...alarmForm,timeZone:e.target.value})}>{cityOptions.map(c=><option key={c.timeZone} value={c.timeZone}>{c.cityName} · {c.timeZone}</option>)}</select><label>Wake-up sound</label><select className="field-input" value={alarmForm.soundId} onChange={e=>setAlarmForm({...alarmForm,soundId:e.target.value})}>{sounds.map(s=><option key={s.id} value={s.id}>{s.title}</option>)}</select><div className="range-row"><label>Volume</label><input type="range" min="0" max="1" step="0.05" value={alarmForm.volume} onChange={e=>setAlarmForm({...alarmForm,volume:Number(e.target.value)})}/><span>{Math.round(alarmForm.volume*100)}%</span></div><div className="check-row"><label><input type="checkbox" checked={alarmForm.gradualVolume} onChange={e=>setAlarmForm({...alarmForm,gradualVolume:e.target.checked})}/> Gentle volume fade-in</label><label><input type="checkbox" checked={alarmForm.vibration} onChange={e=>setAlarmForm({...alarmForm,vibration:e.target.checked})}/> Vibration</label></div><label>Wake-up mission</label><select className="field-input" value={alarmForm.mission?.kind ?? "none"} onChange={e=>setAlarmForm({...alarmForm,mission:e.target.value==="none"?null:{kind:e.target.value as NonNullable<Alarm["mission"]>["kind"],difficulty:alarmForm.mission?.difficulty ?? "easy",rounds:alarmForm.mission?.rounds ?? 3}})}><option value="none">No mission</option><option value="math">Quick maths</option><option value="memory">Memory cards</option><option value="sequence">Repeat a sequence</option><option value="typing">Type a phrase</option><option value="logic">Logic puzzle</option><option value="checklist">Morning checklist</option><option value="movement">Gentle movement prompt</option><option value="random">Surprise me</option></select>{alarmForm.mission && <><label>Mission difficulty</label><select className="field-input" value={alarmForm.mission.difficulty} onChange={e=>setAlarmForm({...alarmForm,mission:{...alarmForm.mission!,difficulty:e.target.value as "easy"|"medium"|"hard"}})}><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select><label>Rounds</label><select className="field-input" value={alarmForm.mission.rounds} onChange={e=>setAlarmForm({...alarmForm,mission:{...alarmForm.mission!,rounds:Number(e.target.value)}})}><option value={1}>1 round</option><option value={3}>3 rounds</option><option value={5}>5 rounds</option></select><p className="fine-print">Mission settings are saved with this alarm. The native ringing-to-mission handoff is still being integrated.</p></>}<label>Snooze duration</label><select className="field-input" value={alarmForm.snoozeMinutes} onChange={e=>setAlarmForm({...alarmForm,snoozeMinutes:Number(e.target.value)})}><option value="5">5 minutes</option><option value="8">8 minutes</option><option value="10">10 minutes</option><option value="15">15 minutes</option></select><div className="modal-foot"><button className="outline-btn" onClick={()=>setModal(null)}>Cancel</button><button className="primary-btn" onClick={()=>void saveAlarm()}><Check size={16}/> Save alarm</button></div></div>}
       {modal==="city" && <div className="modal-body"><label>Choose a timezone</label><select className="field-input" value={cityChoice} onChange={e=>setCityChoice(e.target.value)}>{cityOptions.map(c=><option key={c.timeZone} value={c.timeZone}>{c.cityName} · {c.timeZone}</option>)}</select><div className="modal-foot"><button className="outline-btn" onClick={()=>setModal(null)}>Cancel</button><button className="primary-btn" onClick={()=>void addCity()}><Plus size={16}/> Add city</button></div></div>}
