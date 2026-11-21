@@ -1,0 +1,78 @@
+name: Native app builds
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  android:
+    name: Android debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+      - name: Install audio converter
+        run: sudo apt-get update && sudo apt-get install -y ffmpeg
+      - name: Install dependencies and build web app
+        run: |
+          npm ci
+          npm run build
+      - name: Generate Capacitor Android project
+        run: npx cap add android
+      - name: Add UP native alarm bridge and CC0 sound assets
+        run: node scripts/prepare-native-android.mjs
+      - name: Build APK
+        run: |
+          cd android
+          chmod +x gradlew
+          ./gradlew assembleDebug
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UP-android-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 14
+
+  ios:
+    name: iOS simulator build
+    runs-on: macos-26
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies and build web app
+        run: |
+          npm ci
+          npm run build
+      - name: Generate Capacitor iOS project
+        run: npx cap add ios
+      - name: Add UP AlarmKit bridge
+        run: node scripts/prepare-native-ios.mjs
+      - name: Build iOS simulator app
+        run: |
+          xcodebuild -project ios/App/App.xcodeproj \
+            -scheme App \
+            -sdk iphonesimulator \
+            -configuration Debug \
+            -derivedDataPath ios-build \
+            CODE_SIGNING_ALLOWED=NO build
+          cd ios-build/Build/Products/Debug-iphonesimulator
+          /usr/bin/zip -r "$GITHUB_WORKSPACE/UP-iOS-simulator-build.zip" App.app
+      - uses: actions/upload-artifact@v4
+        with:
+          name: UP-ios-simulator-build
+          path: UP-iOS-simulator-build.zip
+          if-no-files-found: error
+          retention-days: 14
