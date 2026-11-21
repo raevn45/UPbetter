@@ -8,10 +8,10 @@ const pluginSource = await readFile(path.join(root, "native/capacitor/ios/UPAlar
 const bridgeSource = await readFile(path.join(root, "native/capacitor/ios/UPBridgeViewController.swift"), "utf8");
 let appDelegate = await readFile(appDelegatePath, "utf8");
 
-const stripImports = value => value.replace(/^import [^\\n]+\\n/gm, "");
+const stripImports = value => value.replace(/^import [^\n]+\n/gm, "");
 if (!appDelegate.includes("class UPAlarmPlugin")) {
-  if (!appDelegate.includes("import AlarmKit")) appDelegate = "import AlarmKit\\nimport SwiftUI\\n" + appDelegate;
-  appDelegate += "\\n\\n" + stripImports(pluginSource) + "\\n\\n" + stripImports(bridgeSource);
+  if (!appDelegate.includes("import AlarmKit")) appDelegate = "import AlarmKit\nimport SwiftUI\n" + appDelegate;
+  appDelegate += "\n\n" + stripImports(pluginSource) + "\n\n" + stripImports(bridgeSource);
 }
 await writeFile(appDelegatePath, appDelegate);
 
@@ -27,7 +27,7 @@ await writeFile(storyboardPath, storyboard);
 const plistPath = path.join(appDir, "Info.plist");
 let plist = await readFile(plistPath, "utf8");
 if (!plist.includes("NSAlarmKitUsageDescription")) {
-  plist = plist.replace("</dict>", "    <key>NSAlarmKitUsageDescription</key>\\n    <string>UP schedules the alarms you create so you can wake up on time.</string>\\n</dict>");
+  plist = plist.replace("</dict>", "    <key>NSAlarmKitUsageDescription</key>\n    <string>UP schedules the alarms you create so you can wake up on time.</string>\n</dict>");
 }
 await writeFile(plistPath, plist);
 console.log("UP iOS project prepared: AlarmKit plugin registered and usage description installed.");
