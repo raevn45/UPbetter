@@ -35,8 +35,7 @@ export class AlarmService {
 
   private async withStatus(alarm: Alarm): Promise<AlarmWithStatus> {
     const scheduling = alarm.enabled ? await this.scheduler.schedule(alarm) : { state: "saved_only" as const, message: "Alarm is disabled." };
-    let nextOccurrence: string | null = null;
-    if (alarm.enabled) nextOccurrence = nextAlarmOccurrence(alarm);
+    const nextOccurrence = alarm.enabled ? nextAlarmOccurrence(alarm) : null;
     return { alarm, scheduleState: scheduling.state, nextOccurrence, ...(scheduling.message ? { message: scheduling.message } : {}) };
   }
 
@@ -51,7 +50,7 @@ export class AlarmService {
   async create(input: Omit<Alarm, "id" | "createdAt" | "updatedAt">): Promise<Result<AlarmWithStatus>> {
     try {
       if (!validInput(input)) return failure("INVALID_ALARM", "Check the alarm time, volume, repeat days and snooze duration.");
-      nextAlarmOccurrence(input); // Validate timezone and recurrence before saving.
+      nextAlarmOccurrence(input);
       const now = new Date().toISOString();
       const alarm: Alarm = { ...input, id: makeId(), createdAt: now, updatedAt: now };
       await localStore.put("alarms", alarm);
@@ -63,7 +62,7 @@ export class AlarmService {
     try {
       const current = await localStore.get("alarms", id);
       if (!current) return failure("NOT_FOUND", "That alarm no longer exists.");
-      const alarm = { ...current, ...patch, id, updatedAt: new Date().toISOString() };
+      const alarm: Alarm = { ...current, ...patch, id, updatedAt: new Date().toISOString() };
       if (!validInput(alarm)) return failure("INVALID_ALARM", "Check the alarm settings.");
       nextAlarmOccurrence(alarm);
       await localStore.put("alarms", alarm);
@@ -77,9 +76,18 @@ export class AlarmService {
   }
 
   async setEnabled(id: string, enabled: boolean) { return this.update(id, { enabled }); }
-  getCapabilities() { return this.scheduler.capabilities(); }
-  requestAlarmPermission() { return this.scheduler.requestPermission(); }
-  testAlarm() { return this.scheduler.test(); }
+  async getCapabilities(): Promise<Result<AlarmCapabilities>> {
+    try { return success(await this.scheduler.capabilities()); }
+    catch (e) { return failure("CAPABILITIES_FAILED", e instanceof Error ? e.message : "Could not read alarm capabilities."); }
+  }
+  async requestAlarmPermission(): Promise<Result<AlarmCapabilities>> {
+    try { return success(await this.scheduler.requestPermission()); }
+    catch (e) { return failure("PERMISSION_FAILED", e instanceof Error ? e.message : "Could not request alarm permission."); }
+  }
+  async testAlarm(): Promise<Result<void>> {
+    try { await this.scheduler.test(); return success(undefined); }
+    catch (e) { return failure("TEST_ALARM_FAILED", e instanceof Error ? e.message : "Alarm test is unavailable."); }
+  }
 }
 
 export type AlarmInput = Omit<Alarm, "id" | "createdAt" | "updatedAt">;
