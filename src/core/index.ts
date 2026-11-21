@@ -13,3 +13,5 @@ export { SettingsService } from "./services/settings-service";
 export type { UpSettings } from "./services/settings-service";
 export { BackupService } from "./services/backup-service";
 export { upCore } from "./app";
+
+export { CapacitorAlarmScheduler, createAlarmScheduler } from "./alarm-scheduler/capacitor-alarm-scheduler";
