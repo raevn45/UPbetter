@@ -55,7 +55,9 @@ jobs:
           npm install --no-audit --no-fund
           npm run build
       - name: Generate Capacitor iOS project
-        run: npx cap add ios
+        run: |
+          npx cap add ios
+          npx cap sync ios
       - name: Add UP AlarmKit bridge
         run: node scripts/prepare-native-ios.mjs
       - name: Build iOS simulator app
