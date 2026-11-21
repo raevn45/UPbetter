@@ -2,7 +2,7 @@ import { Temporal } from "@js-temporal/polyfill";
 import type { Weekday } from "../domain/types";
 
 export type DstDisambiguation = "earlier" | "later" | "compatible" | "reject";
-export type AlarmTimeInput = { hour: number; minute: number; timeZone: string; repeatDays: Weekday[] };
+export type AlarmTimeInput = { hour: number; minute: number; timeZone: string; repeatDays: readonly Weekday[] };
 
 const jsDay = (dayOfWeek: number): Weekday => (dayOfWeek % 7) as Weekday;
 
