@@ -10,7 +10,7 @@ The local-first React/Vite app is connected to the typed core and IndexedDB stor
 
 - **Android:** AlarmManager exact scheduling, permission checks, boot/time-change recovery, full-screen alarm notification, selected CC0 sound playback, snooze, and native wake-challenge flow. The native build workflow generates a debug APK.
 - **iOS:** AlarmKit bridge for iOS 26+, one-time alarms and weekly recurrence when the alarm timezone matches the iPhone's current timezone. The build workflow generates an unsigned simulator build.
-- **Sounds:** seven real ambient recordings from a CC0 1.0 library, with creator credits. Android build assets are compressed and bundled for offline alarm playback.
+- **Sounds:** 22 CC0 1.0 soundscapes, including seven recorded field sounds and 15 original designed ambiences, with creator credits. Android build assets are compressed and bundled for offline alarm playback.
 - **Miso:** animated, cursor-reactive, draggable pixel cat based on the MIT-licensed PixelPets renderer, with pet/treat/butterfly interactions.
 - **Web:** Vercel PWA remains a preview and cannot guarantee background ringing after the browser is closed or the device is suspended.
 
