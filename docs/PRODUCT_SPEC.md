@@ -4,6 +4,14 @@
 
 UP helps the user wake up, get oriented and start the day. It is an alarm clock first, with a companion and useful time tools around it.
 
+## Locked product decisions
+
+- **Pet:** an original cat companion, not an emoji or a copied character.
+- **Phone targets:** Android and iPhone.
+- **Data:** local-first. The MVP requires no account, backend, or cloud sync. Data should remain on the device and be exportable where practical.
+- **Desktop:** Windows.
+- **Web:** a responsive web experience for setup, preview and supported foreground features. Do not present the web app as a reliable background alarm engine.
+
 ## Experience and visual identity
 
 **Chosen direction: atmospheric editorial.** The interface should feel like opening a beautifully designed personal object: calm at night, clear and energising in the morning.
@@ -17,7 +25,7 @@ Palette:
 - Soft ivory: `#F2EFE6`
 - Muted text: `#A7B0AA`
 
-Use the palette as a system, not as a set of giant gradients. Typography should pair a distinctive editorial display face with a highly legible UI sans. Use restrained grain/texture, subtle light, strong hierarchy and meaningful transitions. The pet supplies warmth and personality.
+Use the palette as a system, not as a set of giant gradients. Typography should pair a distinctive editorial display face with a highly legible UI sans. Use restrained grain/texture, subtle light, strong hierarchy and meaningful transitions. The cat supplies warmth and personality.
 
 ## Information architecture
 
@@ -28,7 +36,7 @@ Primary navigation:
 - Timer
 - World clock
 - Countdown
-- Pet
+- Cat
 - Settings
 
 On mobile, use a compact bottom navigation for the most-used destinations and place secondary tools in a clear More area.
@@ -40,7 +48,7 @@ On mobile, use a compact bottom navigation for the most-used destinations and pl
 - Quick create alarm action
 - Today's intention / personal reason to get up
 - First upcoming task or commitment
-- Pet idle animation and contextual reaction
+- Cat idle animation and contextual reaction
 - Quick access to timer and countdowns
 
 Avoid turning this into a wall of cards. One clear hero element, then a few useful supporting elements.
@@ -95,18 +103,18 @@ Settings: enabled/disabled, difficulty, number of rounds and estimated duration.
 
 Provide accessible alternatives and an emergency stop. A mission is a wake-up aid, not a safety barrier.
 
-## Pet companion
+## Cat companion
 
-The pet is a small original character. Its visual language should fit the atmospheric editorial UI rather than look like a generic emoji or copied game asset.
+The cat is a small original character with a distinct silhouette, expressive face and a restrained animation set. It should feel integrated into the editorial visual system, not like a sticker pasted onto the interface.
 
 Initial behaviour:
 - Idle animation on Today
 - Reacts when an alarm is created, when the user wakes, and when a mission is completed
-- A few moods/expressions
+- A few moods/expressions (sleepy, curious, content, celebratory)
 - Name and a small set of cosmetic choices
 - Gentle progression/unlocks
 
-No punishment for missed days, no guilt messages, no forced daily engagement. Keep pet data local initially.
+No punishment for missed days, no guilt messages, no forced daily engagement. Keep pet data local initially. Create original artwork or use assets with verified licences.
 
 ## Timer
 
@@ -167,4 +175,5 @@ Optional wake-time history and consistency trends. No body metrics, no sleep sco
 - Timezone/DST logic is based on IANA identifiers and has tests.
 - Data persists after app restart.
 - App clearly distinguishes native alarm capability from notification fallback.
-- Pet appears in the experience and reacts to meaningful events.
+- Cat appears in the experience and reacts to meaningful events.
+- Android and iOS builds are treated as separate native alarm integrations, not assumed to behave identically.
