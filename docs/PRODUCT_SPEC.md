@@ -177,3 +177,26 @@ Optional wake-time history and consistency trends. No body metrics, no sleep sco
 - App clearly distinguishes native alarm capability from notification fallback.
 - Cat appears in the experience and reacts to meaningful events.
 - Android and iOS builds are treated as separate native alarm integrations, not assumed to behave identically.
+
+## User-supplied UI and motion references
+
+The user previously supplied these design resources. Treat them as inspiration sources, not as a requirement to copy a website wholesale:
+
+**UI/component inspiration**
+- [React Bits](https://reactbits.dev/)
+- [Kokonut UI](https://kokonutui.com/)
+- [Bklit UI](https://bklitui.com/)
+- [21st.dev](https://21st.dev/)
+
+**Motion and interaction**
+- [Motion](https://motion.dev/)
+- [GSAP](https://gsap.com/)
+- [Anime.js](https://animejs.com/)
+- [React Spring](https://react-spring.dev/)
+
+**Visual references and tools**
+- [Motion Sites](https://motionsites.ai/)
+- [Manus](https://manus.im/)
+- [Coolors](https://coolors.co/)
+
+The user originally described these alongside high-budget drink landing pages and Haoqi-style brutalist/experimental UI. Translate that ambition into UP's own atmospheric editorial language: tactile transitions, crisp type, unusual but usable composition, purposeful motion and strong visual identity. Do not turn UP into a drink landing page, portfolio, or motion-demo gallery. Keep the alarm workflow fast and legible. Use Coolors only as a palette exploration aid; the approved UP palette remains authoritative.
