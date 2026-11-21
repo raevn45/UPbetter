@@ -10,7 +10,7 @@ let appDelegate = await readFile(appDelegatePath, "utf8");
 
 const stripImports = value => value.replace(/^import [^\n]+\n/gm, "");
 if (!appDelegate.includes("class UPAlarmPlugin")) {
-  if (!appDelegate.includes("import AlarmKit")) appDelegate = "import AlarmKit\nimport SwiftUI\n" + appDelegate;
+  if (!appDelegate.includes("import AlarmKit")) appDelegate = "import Foundation\nimport AlarmKit\nimport SwiftUI\n" + appDelegate;
   appDelegate += "\n\n" + stripImports(pluginSource) + "\n\n" + stripImports(bridgeSource);
 }
 await writeFile(appDelegatePath, appDelegate);
