@@ -6,45 +6,35 @@ UP is a personal alarm, timer and world-clock app built around one simple idea: 
 
 ## Current development status
 
-The repository now contains the first local-core foundation:
-- Typed domain models and frontend/core service contracts
-- IndexedDB local persistence
-- Alarm CRUD and honest web scheduler capability reporting
-- IANA timezone recurrence calculations using Temporal
-- Timer, countdown and world-clock services
-- Original synthesised sound previews and favourites
-- Offline wake-up mission logic
-- Local preferences, including the cat's name and motivation style
+The local-first React/Vite app is connected to the typed core and IndexedDB storage. The native bridge is now wired into the Capacitor service container.
 
-A first responsive React frontend has now been added and wired to the local core. It is an initial MVP implementation and still needs CI/build verification, browser QA and interaction polish. Native Android/iOS/Windows alarm reliability remains a separate milestone. A saved alarm in the current web runtime is **not** a guaranteed background alarm.
+- **Android:** AlarmManager exact scheduling, permission checks, boot/time-change recovery, full-screen alarm notification, selected CC0 sound playback, snooze, and native wake-challenge flow. The native build workflow generates a debug APK.
+- **iOS:** AlarmKit bridge for iOS 26+, one-time alarms and weekly recurrence when the alarm timezone matches the iPhone's current timezone. The build workflow generates an unsigned simulator build.
+- **Sounds:** seven real ambient recordings from a CC0 1.0 library, with creator credits. Android build assets are compressed and bundled for offline alarm playback.
+- **Miso:** animated, cursor-reactive, draggable pixel cat based on the MIT-licensed PixelPets renderer, with pet/treat/butterfly interactions.
+- **Web:** Vercel PWA remains a preview and cannot guarantee background ringing after the browser is closed or the device is suspended.
+
+Native builds are not the same as device verification. Physical Android and iPhone tests are still required before treating UP as a dependable wake-up alarm. iOS currently uses the system alarm sound and does not yet run the custom mission challenge in the system alarm UI. Windows still uses the installed web app; a native Windows installer is not built.
 
 ## Deploy the web app to Vercel
 
-1. Push this repository to GitHub (it already is) and import `raevn45/alarm` in Vercel.
+1. Import `raevn45/alarm` in Vercel.
 2. Keep the project root as `.`. The checked-in `vercel.json` sets the Vite build command (`npm run build`) and output folder (`dist`).
 3. No environment variables or separate backend deployment are required for the current local-first MVP.
 4. Deploy. Vercel serves the website over HTTPS; the web app can be installed from a supported browser and has an offline app-shell cache.
 
 **Important:** web data is stored in that browser/device's IndexedDB. It does not automatically sync between your laptop and phone. A web alarm is not a reliable background alarm after the browser is closed or the device is suspended.
 
-## Android test build
+## Native build downloads
 
-The repository contains the first Capacitor Android bridge source, but it is not yet a complete generated Android Studio project and has not been device-tested. On a computer with Node 20+, Android Studio and the Android SDK:
+Every push to `main` runs [Native app builds](https://github.com/raevn45/alarm/actions/workflows/native-build.yml).
 
-```bash
-npm install
-npm run build
-npx cap add android
-npx cap sync android
-```
+- **Android:** download the `UP-android-debug-apk` artifact from a successful run. It is a debug APK for testing, not a Play Store release.
+- **iOS:** download `UP-ios-simulator-build` for simulator QA. This is not an installable signed iPhone IPA. An Apple signing setup and a physical-device build are still needed for distribution.
 
-Then merge the Kotlin sources and manifest entries from `native/capacitor/android/` into the generated `android/app/src/main/`, register `UPAlarmPlugin` in the generated `MainActivity`, and open Android Studio:
+The Android workflow generates the Capacitor project, registers the UP plugin, merges alarm receivers and permissions, downloads the CC0 recordings, converts them to compact MP3 assets, and builds the APK. The iOS workflow generates the Capacitor project and registers the AlarmKit plugin.
 
-```bash
-npm run cap:android
-```
-
-Follow [native bridge wiring and the physical-device test matrix](native/capacitor/README.md). Do not rely on UP for a critical wake-up until exact-alarm permission, lock-screen behaviour, reboot recovery, sound and force-closed behaviour have all been tested on your phone.
+For local native development, follow [native bridge build and test notes](native/capacitor/README.md).
 
 ## Development
 
