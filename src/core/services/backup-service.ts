@@ -58,11 +58,14 @@ export class BackupService {
         tx.objectStore("timers").clear(),
         tx.objectStore("settings").clear()
       ]);
-      for (const item of payload.alarms) await tx.objectStore("alarms").put(item);
-      for (const item of payload.countdowns) await tx.objectStore("countdowns").put(item);
-      for (const item of payload.cities) await tx.objectStore("cities").put(item);
-      for (const item of payload.timers) await tx.objectStore("timers").put(item);
-      for (const item of payload.settings) await tx.objectStore("settings").put(item.value, item.key);
+      const writes = [
+        ...payload.alarms.map(item => tx.objectStore("alarms").put(item)),
+        ...payload.countdowns.map(item => tx.objectStore("countdowns").put(item)),
+        ...payload.cities.map(item => tx.objectStore("cities").put(item)),
+        ...payload.timers.map(item => tx.objectStore("timers").put(item)),
+        ...payload.settings.map(item => tx.objectStore("settings").put(item.value, item.key))
+      ];
+      await Promise.all(writes);
       await tx.done;
       return success({ alarms: payload.alarms.length, countdowns: payload.countdowns.length, cities: payload.cities.length });
     } catch (e) { return failure("BACKUP_IMPORT_FAILED", e instanceof Error ? e.message : "Could not restore this backup."); }
