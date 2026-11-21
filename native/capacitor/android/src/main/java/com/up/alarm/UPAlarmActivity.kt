@@ -1,19 +1,46 @@
 package com.up.alarm
 
 import android.app.Activity
-import android.media.Ringtone
-import android.media.RingtoneManager
+import android.content.Context
+import android.media.MediaPlayer
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.os.VibrationEffect
 import android.os.Vibrator
 import android.view.Gravity
 import android.view.WindowManager
 import android.widget.Button
+import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
+import org.json.JSONObject
+import java.time.Instant
+import kotlin.random.Random
 
 class UPAlarmActivity : Activity() {
-    private var ringtone: Ringtone? = null
+    private var player: MediaPlayer? = null
+    private var record: JSONObject? = null
+    private var alarmId: String? = null
+    private var currentAnswer = ""
+    private var completedRounds = 0
+    private var totalRounds = 0
+    private var challengeText: TextView? = null
+    private var answerInput: EditText? = null
+    private var feedbackText: TextView? = null
+    private var stopButton: Button? = null
+    private val handler = Handler(Looper.getMainLooper())
+    private var fadeLevel = 0.05f
+    private val fade = object : Runnable {
+        override fun run() {
+            val settings = record
+            val target = (settings?.optDouble("volume", 0.8)?.toFloat() ?: 0.8f).coerceIn(0f, 1f)
+            fadeLevel = (fadeLevel + 0.035f).coerceAtMost(target)
+            player?.setVolume(fadeLevel, fadeLevel)
+            if (fadeLevel < target) handler.postDelayed(this, 250)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         if (android.os.Build.VERSION.SDK_INT >= 27) {
@@ -23,31 +50,217 @@ class UPAlarmActivity : Activity() {
             window.addFlags(WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED or WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON)
         }
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        val id = intent.getStringExtra("alarmId")
-        val label = intent.getStringExtra("alarmLabel") ?: id?.let { UPAlarmStore(this).all()[it]?.let { raw -> org.json.JSONObject(raw).optString("label") } }.orEmpty()
-        val layout = LinearLayout(this).apply { orientation = LinearLayout.VERTICAL; gravity = Gravity.CENTER; setPadding(32, 32, 32, 32) }
-        layout.addView(TextView(this).apply { text = label.ifBlank { "Time to get up" }; textSize = 30f; gravity = Gravity.CENTER })
+        alarmId = intent.getStringExtra("alarmId")
+        record = alarmId?.let { UPAlarmStore(this).all()[it]?.let(::JSONObject) }
+        val label = intent.getStringExtra("alarmLabel") ?: record?.optString("label") ?: "Time to get up"
+        buildScreen(label)
+        startAlarmAudio()
+        startVibration()
+        setupChallenge()
+    }
+
+    private fun buildScreen(label: String) {
+        val layout = LinearLayout(this).apply {
+            orientation = LinearLayout.VERTICAL
+            gravity = Gravity.CENTER
+            setPadding(34, 48, 34, 48)
+            setBackgroundColor(android.graphics.Color.rgb(16, 25, 27))
+        }
+        layout.addView(TextView(this).apply {
+            text = "UP  /  TIME TO WAKE"
+            textSize = 12f; setTextColor(android.graphics.Color.rgb(196, 154, 85))
+            gravity = Gravity.CENTER
+        })
+        layout.addView(TextView(this).apply {
+            text = label.ifBlank { "Time to get up" }; textSize = 30f
+            setTextColor(android.graphics.Color.rgb(242, 239, 230))
+            gravity = Gravity.CENTER; setPadding(0, 24, 0, 26)
+        })
+        challengeText = TextView(this).apply {
+            textSize = 20f; setTextColor(android.graphics.Color.rgb(242, 239, 230))
+            gravity = Gravity.CENTER; setPadding(0, 12, 0, 18)
+        }
+        layout.addView(challengeText)
+        answerInput = EditText(this).apply {
+            hint = "Your answer"; setSingleLine(true)
+            setTextColor(android.graphics.Color.WHITE)
+            setHintTextColor(android.graphics.Color.LTGRAY)
+        }
+        layout.addView(answerInput)
+        feedbackText = TextView(this).apply {
+            textSize = 14f; setTextColor(android.graphics.Color.rgb(196, 154, 85))
+            gravity = Gravity.CENTER; setPadding(0, 10, 0, 10)
+        }
+        layout.addView(feedbackText)
         layout.addView(Button(this).apply {
+            text = "Check answer / Complete step"
+            setOnClickListener { checkChallenge() }
+        })
+        stopButton = Button(this).apply {
             text = "Stop alarm"
-            setOnClickListener {
-                ringtone?.stop()
-                val manager = getSystemService(NOTIFICATION_SERVICE) as android.app.NotificationManager
-                if (id != null) manager.cancel(id.hashCode())
-                finish()
-            }
+            isEnabled = false
+            alpha = 0.45f
+            setOnClickListener { stopAlarm() }
+        }
+        layout.addView(stopButton)
+        layout.addView(Button(this).apply {
+            text = "Snooze"
+            setOnClickListener { snoozeAlarm() }
         })
         setContentView(layout)
-        ringtone = RingtoneManager.getRingtone(this, RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM))
-        ringtone?.play()
-        val vibrator = getSystemService(VIBRATOR_SERVICE) as Vibrator
-        if (vibrator.hasVibrator()) {
-            if (android.os.Build.VERSION.SDK_INT >= 26) vibrator.vibrate(VibrationEffect.createWaveform(longArrayOf(0, 500, 500), 0))
-            else @Suppress("DEPRECATION") vibrator.vibrate(longArrayOf(0, 500, 500), 0)
+    }
+
+    private fun startAlarmAudio() {
+        val soundId = record?.optString("soundId", "") ?: ""
+        val resourceName = when (soundId) {
+            "rain-soft" -> "up_rain_soft"
+            "water-stream" -> "up_water_stream"
+            "water-river" -> "up_water_river"
+            "wind-breeze" -> "up_wind_breeze"
+            "nature-forest-day" -> "up_forest_day"
+            "animals-cat" -> "up_cat_purr"
+            "home-air-conditioner" -> "up_quiet_room"
+            else -> ""
+        }
+        val resourceId = if (resourceName.isNotEmpty()) resources.getIdentifier(resourceName, "raw", packageName) else 0
+        player = if (resourceId != 0) MediaPlayer.create(this, resourceId) else null
+        if (player == null) {
+            val fallback = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM)
+            player = MediaPlayer().apply {
+                setDataSource(this@UPAlarmActivity, fallback); isLooping = true; prepare()
+            }
+        }
+        player?.isLooping = true
+        val target = (record?.optDouble("volume", 0.8)?.toFloat() ?: 0.8f).coerceIn(0f, 1f)
+        if (record?.optBoolean("gradualVolume", true) == true) {
+            player?.setVolume(0.05f, 0.05f); player?.start(); handler.post(fade)
+        } else {
+            player?.setVolume(target, target); player?.start()
         }
     }
+
+    private fun startVibration() {
+        if (record?.optBoolean("vibration", true) == false) return
+        val vibrator = getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+        if (vibrator.hasVibrator()) {
+            val pattern = longArrayOf(0, 450, 450, 650)
+            if (android.os.Build.VERSION.SDK_INT >= 26) vibrator.vibrate(VibrationEffect.createWaveform(pattern, 0))
+            else @Suppress("DEPRECATION") vibrator.vibrate(pattern, 0)
+        }
+    }
+
+    private fun setupChallenge() {
+        val mission = record?.optJSONObject("mission")
+        val kind = mission?.optString("kind", "none") ?: "none"
+        if (kind == "none" || kind.isBlank()) {
+            enableStop("No wake-up challenge selected. You can stop the alarm.")
+            return
+        }
+        totalRounds = mission?.optInt("rounds", 1)?.coerceIn(1, 5) ?: 1
+        completedRounds = 0
+        nextChallenge(kind, mission?.optString("difficulty", "easy") ?: "easy")
+    }
+
+    private fun nextChallenge(kind: String, difficulty: String) {
+        answerInput?.setText("")
+        val scale = when (difficulty) { "hard" -> 80; "medium" -> 30; else -> 10 }
+        when (kind) {
+            "movement" -> {
+                currentAnswer = "complete"
+                challengeText?.text = "Take a comfortable moment to stand, stretch gently, or simply sit upright. Tap complete when you're ready."
+                answerInput?.visibility = android.view.View.GONE
+            }
+            "checklist" -> {
+                currentAnswer = "complete"
+                challengeText?.text = "A small reset: sit up, switch on a light, and get some water if you want. Tap complete when ready."
+                answerInput?.visibility = android.view.View.GONE
+            }
+            "typing" -> {
+                currentAnswer = if (difficulty == "hard") "I am awake and ready to begin." else if (difficulty == "medium") "Today starts now." else "I am up."
+                challengeText?.text = "Type this phrase: $currentAnswer"
+                answerInput?.visibility = android.view.View.VISIBLE
+            }
+            "memory" -> {
+                val digits = (1..if (difficulty == "hard") 5 else if (difficulty == "medium") 4 else 3).map { Random.nextInt(1, 10) }.joinToString("")
+                currentAnswer = digits
+                challengeText?.text = "Memorise this sequence, then type it: " + digits.toCharArray().joinToString("  ")
+                answerInput?.visibility = android.view.View.VISIBLE
+            }
+            "sequence", "logic" -> {
+                val start = Random.nextInt(1, 9)
+                val step = if (difficulty == "hard") 5 else if (difficulty == "medium") 3 else 2
+                currentAnswer = (start + step * 4).toString()
+                challengeText?.text = "Find the next number: ${start}, ${start + step}, ${start + step * 2}, ${start + step * 3}, ?"
+                answerInput?.visibility = android.view.View.VISIBLE
+            }
+            else -> {
+                val a = Random.nextInt(2, scale + 2)
+                val b = Random.nextInt(1, scale + 1)
+                val subtract = Random.nextBoolean()
+                val left = if (subtract) maxOf(a, b) else a
+                val right = if (subtract) minOf(a, b) else b
+                currentAnswer = (if (subtract) left - right else left + right).toString()
+                challengeText?.text = "Quick one: $left ${if (subtract) "−" else "+"} $right = ?"
+                answerInput?.visibility = android.view.View.VISIBLE
+            }
+        }
+        feedbackText?.text = "Challenge ${completedRounds + 1} of $totalRounds"
+    }
+
+    private fun checkChallenge() {
+        val input = if (answerInput?.visibility == android.view.View.GONE) "complete" else answerInput?.text?.toString()?.trim().orEmpty()
+        if (!input.equals(currentAnswer, ignoreCase = true)) {
+            feedbackText?.text = "Not quite. Try again, or snooze if you need a little more time."
+            return
+        }
+        completedRounds++
+        if (completedRounds >= totalRounds) {
+            challengeText?.text = "You're up. Take the morning at your own pace."
+            answerInput?.visibility = android.view.View.GONE
+            feedbackText?.text = "All challenges complete."
+            enableStop("Stop alarm")
+        } else {
+            feedbackText?.text = "That's it. One more."
+            val kind = record?.optJSONObject("mission")?.optString("kind", "math") ?: "math"
+            val difficulty = record?.optJSONObject("mission")?.optString("difficulty", "easy") ?: "easy"
+            nextChallenge(kind, difficulty)
+        }
+    }
+
+    private fun enableStop(message: String) {
+        challengeText?.text = message
+        answerInput?.visibility = android.view.View.GONE
+        stopButton?.isEnabled = true
+        stopButton?.alpha = 1f
+    }
+
+    private fun snoozeAlarm() {
+        val id = alarmId ?: return finishWithoutSchedule()
+        val current = record ?: return finishWithoutSchedule()
+        val minutes = current.optInt("snoozeMinutes", 8).coerceIn(1, 60)
+        val next = Instant.now().plusSeconds(minutes * 60L)
+        current.put("nextOccurrence", next.toString())
+        UPAlarmStore(this).put(id, current.toString())
+        UPAlarmScheduling.schedule(this, id, current)
+        finishWithoutSchedule()
+    }
+
+    private fun stopAlarm() {
+        alarmId?.let { (getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(it.hashCode()) }
+        finishWithoutSchedule()
+    }
+
+    private fun finishWithoutSchedule() {
+        handler.removeCallbacks(fade)
+        player?.stop(); player?.release(); player = null
+        (getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).cancel()
+        finish()
+    }
+
     override fun onDestroy() {
-        ringtone?.stop()
-        (getSystemService(VIBRATOR_SERVICE) as Vibrator).cancel()
+        handler.removeCallbacks(fade)
+        player?.release(); player = null
+        (getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).cancel()
         super.onDestroy()
     }
 }
