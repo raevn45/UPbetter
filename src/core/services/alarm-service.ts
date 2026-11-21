@@ -34,7 +34,16 @@ export class AlarmService {
   constructor(private scheduler: AlarmScheduler = new WebAlarmScheduler()) {}
 
   private async withStatus(alarm: Alarm): Promise<AlarmWithStatus> {
-    const scheduling = alarm.enabled ? await this.scheduler.schedule(alarm) : { state: "saved_only" as const, message: "Alarm is disabled." };
+    let scheduling: { state: AlarmWithStatus["scheduleState"]; message?: string };
+    if (!alarm.enabled) {
+      scheduling = { state: "saved_only", message: "Alarm is disabled." };
+    } else {
+      try {
+        scheduling = await this.scheduler.schedule(alarm);
+      } catch (e) {
+        scheduling = { state: "failed", message: e instanceof Error ? e.message : "The device could not schedule this alarm." };
+      }
+    }
     const nextOccurrence = alarm.enabled ? nextAlarmOccurrence(alarm) : null;
     return { alarm, scheduleState: scheduling.state, nextOccurrence, ...(scheduling.message ? { message: scheduling.message } : {}) };
   }
@@ -65,6 +74,7 @@ export class AlarmService {
       const alarm: Alarm = { ...current, ...patch, id, updatedAt: new Date().toISOString() };
       if (!validInput(alarm)) return failure("INVALID_ALARM", "Check the alarm settings.");
       nextAlarmOccurrence(alarm);
+      if (current.enabled && !alarm.enabled) await this.scheduler.cancel(id);
       await localStore.put("alarms", alarm);
       return success(await this.withStatus(alarm));
     } catch (e) { return failure("ALARM_UPDATE_FAILED", e instanceof Error ? e.message : "Could not update alarm."); }
