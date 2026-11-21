@@ -9,9 +9,10 @@ import android.os.Build
 import android.provider.Settings
 import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
+import com.getcapacitor.annotation.Permission
 import org.json.JSONObject
 
-@CapacitorPlugin(name = "UPAlarm")
+@CapacitorPlugin(name = "UPAlarm", permissions = [Permission(alias = "notifications", strings = [Manifest.permission.POST_NOTIFICATIONS])])
 class UPAlarmPlugin : Plugin() {
     @PluginMethod
     fun capabilities(call: PluginCall) {
@@ -40,9 +41,22 @@ class UPAlarmPlugin : Plugin() {
             call.resolve(permissionResult(false, "Grant Alarms & reminders access, then return to UP."))
             return
         }
+        if (Build.VERSION.SDK_INT >= 33 &&
+            context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != android.content.pm.PackageManager.PERMISSION_GRANTED) {
+            requestPermissionForAlias("notifications", call, "notificationPermissionCallback")
+            return
+        }
+        call.resolve(permissionResult(true, "Alarm permissions are available."))
+    }
+
+    @PermissionCallback
+    private fun notificationPermissionCallback(call: PluginCall) {
+        val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+        val exact = Build.VERSION.SDK_INT < 31 || manager.canScheduleExactAlarms()
         val notifications = Build.VERSION.SDK_INT < 33 ||
             context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
-        call.resolve(permissionResult(notifications, if (notifications) "Alarm permissions are available." else "Enable notifications for UP in Android Settings."))
+        call.resolve(permissionResult(exact && notifications,
+            if (exact && notifications) "Alarm permissions are ready." else "Enable alarm and notification permissions in Android Settings."))
     }
 
     @PluginMethod
