@@ -72,6 +72,9 @@ class UPAlarmPlugin : Plugin() {
             if (Build.VERSION.SDK_INT >= 33 && context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                 call.resolve(result("permission_required", "Enable notifications for UP in Android Settings.")); return
             }
+            if (Build.VERSION.SDK_INT >= 34 && !(context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).canUseFullScreenIntent()) {
+                call.resolve(result("permission_required", "Allow full-screen alarms for UP in Android Settings.")); return
+            }
             val id = alarm.getString("id") ?: throw IllegalArgumentException("Alarm ID is missing.")
             val record = org.json.JSONObject(alarm.toString()).put("nextOccurrence", next)
             UPAlarmStore(context).put(id, record.toString())
