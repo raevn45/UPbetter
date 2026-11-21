@@ -75,12 +75,27 @@ await writeFile(gradlePath, gradle);
 
 const sounds = [
   ["up_rain_soft", "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.1.0-preview/rain-soft.wav"],
+  ["up_rain_heavy", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-heavy.wav"],
+  ["up_rain_tin_roof", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-tin-roof.wav"],
+  ["up_rain_leaves", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-leaves.wav"],
   ["up_water_stream", "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.3.0-preview/water-stream.wav"],
   ["up_water_river", "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.2.0-preview/water-river.wav"],
+  ["up_water_surf", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/water-surf.wav"],
   ["up_wind_breeze", "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.3.0-preview/wind-breeze.wav"],
+  ["up_wind_pines", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/wind-pines.wav"],
   ["up_forest_day", "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.3.0-preview/nature-forest-day.wav"],
+  ["up_nature_jungle", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/nature-jungle.wav"],
+  ["up_nature_meadow", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/nature-meadow.wav"],
+  ["up_fire_camp", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/fire-camp.wav"],
+  ["up_fire_stove", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/fire-stove.wav"],
   ["up_cat_purr", "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.3.0-preview/animals-cat.wav"],
-  ["up_quiet_room", "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.3.0-preview/home-air-conditioner.wav"]
+  ["up_animals_owl", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/animals-owl.wav"],
+  ["up_animals_frogs", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/animals-frogs.wav"],
+  ["up_quiet_room", "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.3.0-preview/home-air-conditioner.wav"],
+  ["up_city_traffic", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/city-distant-traffic.wav"],
+  ["up_space_library", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/space-library.wav"],
+  ["up_texture_clock", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/texture-clock.wav"],
+  ["up_travel_airplane", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/travel-airplane.wav"]
 ];
 const rawDir = path.join(appMain, "res/raw");
 await mkdir(rawDir, { recursive: true });
