@@ -5,3 +5,5 @@ export { CountdownService } from "./services/countdown-service";
 export { WorldClockService } from "./services/world-clock-service";
 export { TimerService } from "./services/timer-service";
 export { SoundService } from "./services/sound-service";
+export { MissionService } from "./services/mission-service";
+export { SettingsService } from "./services/settings-service";
