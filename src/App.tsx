@@ -8,6 +8,11 @@ import {
 import { upCore } from "./core";
 import type { Alarm, AlarmWithStatus, Countdown, SavedCity, SoundItem, Weekday, UpSettings } from "./core";
 
+interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
+}
+
 type Tab = "today" | "alarms" | "sounds" | "timer" | "world" | "countdown" | "cat" | "settings";
 const nav: { id: Tab; label: string; icon: typeof Home }[] = [
   { id: "today", label: "Today", icon: Home },
