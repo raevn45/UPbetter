@@ -91,7 +91,6 @@ class UPAlarmReceiver : BroadcastReceiver() {
         val id = intent.getStringExtra("alarmId") ?: return
         val raw = UPAlarmStore(context).all()[id] ?: return
         val record = JSONObject(raw)
-        UPAlarmNotifications.show(context, id, record.optString("label", "UP alarm"))
         val next = UPAlarmScheduling.nextWeekly(record)
         if (next != null) {
             record.put("nextOccurrence", next.toString())
@@ -104,6 +103,7 @@ class UPAlarmReceiver : BroadcastReceiver() {
             record.put("ringing", true)
             UPAlarmStore(context).put(id, record.toString())
         }
+        UPAlarmNotifications.show(context, id, record.optString("label", "UP alarm"))
     }
 }
 
