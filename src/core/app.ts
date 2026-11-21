@@ -7,10 +7,11 @@ import { TimerService } from "./services/timer-service";
 import { WorldClockService } from "./services/world-clock-service";
 import { TimeService } from "./time/time-service";
 import { BackupService } from "./services/backup-service";
+import { createAlarmScheduler } from "./alarm-scheduler/capacitor-alarm-scheduler";
 
 /** Shared local application services consumed by the UI. */
 export const upCore = {
-  alarms: new AlarmService(),
+  alarms: new AlarmService(createAlarmScheduler()),
   countdowns: new CountdownService(),
   missions: new MissionService(),
   settings: new SettingsService(),
