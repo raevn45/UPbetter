@@ -1,14 +1,23 @@
 # Working on UP
 
-Read `README.md`, `docs/PRODUCT_SPEC.md` and `docs/TECHNICAL_PLAN.md` before making changes. Follow the build brief in `docs/CLAUDE_BUILD_PROMPT.md`.
+Read `README.md`, `docs/PRODUCT_SPEC.md`, `docs/TECHNICAL_PLAN.md` and `docs/FRONTEND_BACKEND_CONTRACT.md` before making changes. Follow `docs/CLAUDE_BUILD_PROMPT.md`.
+
+## Team split: non-negotiable
+
+- **Claude owns the frontend only:** visual design, React UI, layout, responsive behaviour, interactions, animation, cat presentation, accessibility and frontend tests.
+- **ChatGPT owns the backend/core implementation:** domain models, business logic, local persistence, timezone calculations, alarm scheduling abstractions/native integrations, timer/countdown engines, and backend/core tests.
+- Do not independently invent or replace backend contracts. Implement the frontend against `docs/FRONTEND_BACKEND_CONTRACT.md` and coordinate any needed changes through that contract.
+- Do not create a cloud server, account system, remote database, analytics or cloud sync. “Backend” here means the local application engine and platform adapters.
+- Use typed mock adapters only when necessary to let the frontend run before the real core is integrated. Keep mocks clearly isolated and easy to replace.
+- Do not overwrite backend-owned files or make broad architecture changes without coordinating.
 
 ## Product decisions
 
 - Product name: UP.
 - The companion is an original cat character.
 - Targets: Windows, Android and iPhone.
-- Data is local-first. Do not add accounts, a backend, analytics or cloud sync to the MVP.
-- The web experience is useful for setup and foreground features, but it is not a guaranteed background alarm engine.
+- Data is local-first.
+- The web experience is useful for setup and foreground features, but is not a guaranteed background alarm engine.
 
 ## Product and design rules
 
@@ -19,24 +28,21 @@ Read `README.md`, `docs/PRODUCT_SPEC.md` and `docs/TECHNICAL_PLAN.md` before mak
 - The cat is an original companion with subtle expressive animation, not a random emoji pasted into the UI.
 - Motion must have purpose and respect reduced-motion preferences.
 - Design mobile-first, but make the Windows experience feel intentional too.
-- Prioritise a complete working vertical slice over decorative placeholders.
+- Prioritise complete, usable screens over decorative placeholders.
 
-## Engineering rules
+## Frontend engineering rules
 
 - Read the existing code before editing. Do not replace working code just to impose a preferred stack.
 - Keep components focused and typed. Avoid giant single-file components.
-- Keep domain logic separate from UI.
-- Use IANA timezone identifiers for world clocks and timezone alarms. Add DST tests.
-- Never implement a supposedly reliable alarm using only setTimeout, a browser tab, a service worker or a web notification.
-- Isolate native scheduling behind a platform adapter. Be honest in the UI about each platform's actual capability.
-- Build an accessible emergency stop for alarm missions.
-- Store user data locally first; do not add accounts or analytics without explicit product need.
-- Verify asset and code licences before copying from other repositories.
-- Add tests for important logic and run the relevant checks after changes.
-- Do not claim that a feature works on a platform until it has been tested there.
+- Use the shared types and interfaces in the frontend/backend contract.
+- Keep UI state separate from persisted domain state.
+- Every visible control must work, or be clearly marked as unavailable/not yet implemented.
+- Use accessible labels, keyboard navigation, high contrast and reduced-motion support.
+- Do not implement alarm scheduling, timezone recurrence or persistence independently in UI components.
+- Do not use setTimeout, a browser tab, a service worker or a web notification as a supposedly reliable background alarm.
 - Never claim an alarm can ring while a device is powered off.
-- If native alarm support is not ready, clearly label the scheduler as a prototype/mock. Do not fake a successful schedule.
+- Use only original or properly licensed assets.
 
 ## Working style
 
-Implement in small, coherent steps. Before adding dependencies, explain why they are needed. Prefer a complete working vertical slice over a large collection of decorative placeholders. Keep README and docs aligned with the implementation. Report exactly what works, what is mocked, and what remains unverified on each platform.
+Implement in small, coherent steps. Explain dependency additions briefly. Run frontend lint, typecheck, tests and production build. Keep the frontend compatible with the agreed contract and report which integrations are mocked pending the core implementation.
