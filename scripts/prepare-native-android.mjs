@@ -39,7 +39,7 @@ const permissions = [
 ];
 for (const permission of permissions) {
   if (!manifest.includes(`android:name="${permission}"`)) {
-    manifest = manifest.replace("<application", `<uses-permission android:name="${permission}" />\\n    <application`);
+    manifest = manifest.replace("<application", `<uses-permission android:name="${permission}" />\n    <application`);
   }
 }
 const components = `
@@ -59,17 +59,17 @@ const components = `
             android:excludeFromRecents="true" android:launchMode="singleTop" />
 `;
 if (!manifest.includes("com.up.alarm.UPAlarmReceiver")) {
-  manifest = manifest.replace("</application>", components + "\\n    </application>");
+  manifest = manifest.replace("</application>", components + "\n    </application>");
 }
 await writeFile(manifestPath, manifest);
 
 const gradlePath = path.join(root, "android/app/build.gradle");
 let gradle = await readFile(gradlePath, "utf8");
 if (!gradle.includes("coreLibraryDesugaringEnabled true")) {
-  gradle = gradle.replace(/compileOptions\\s*\\{/, match => match + "\\n        coreLibraryDesugaringEnabled true");
+  gradle = gradle.replace(/compileOptions\s*\{/, match => match + "\n        coreLibraryDesugaringEnabled true");
 }
 if (!gradle.includes("desugar_jdk_libs")) {
-  gradle = gradle.replace(/dependencies\\s*\\{/, match => match + "\\n    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'");
+  gradle = gradle.replace(/dependencies\s*\{/, match => match + "\n    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'");
 }
 await writeFile(gradlePath, gradle);
 
