@@ -194,3 +194,24 @@ export class SettingsService {
 The sound preview implementation currently synthesises short original tones with the Web Audio API. It does not yet include a large recorded sound library or native audio packaging.
 
 The current `WebAlarmScheduler` is deliberately conservative: it saves alarm data but returns `saved_only`. Native platform adapters must replace it before background alarm support can be claimed. Timer persistence stores deadlines, but background expiration alerts also require native/platform integration.
+
+
+## Frontend import point
+
+The shared core is exposed through one service container:
+
+```ts
+import { upCore } from "./core";
+
+upCore.alarms
+upCore.countdowns
+upCore.missions
+upCore.settings
+upCore.sounds
+upCore.timers
+upCore.worldClock
+upCore.backup
+upCore.time
+```
+
+Use these real local services directly from the frontend integration layer. Keep React components focused on presentation and interaction. The default alarm scheduler is currently a safe web fallback that reports `saved_only`; it must be replaced by native adapters before claiming background alarm reliability.
