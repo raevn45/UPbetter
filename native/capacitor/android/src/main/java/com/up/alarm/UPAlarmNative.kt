@@ -30,8 +30,9 @@ internal object UPAlarmScheduling {
         val trigger = PendingIntent.getBroadcast(context, id.hashCode(),
             Intent(context, UPAlarmReceiver::class.java).putExtra("alarmId", id),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val alarmLabel = record.optString("label", "Time to get up")
         val show = PendingIntent.getActivity(context, id.hashCode(),
-            Intent(context, UPAlarmActivity::class.java).putExtra("alarmId", id).putExtra("alarmLabel", label),
+            Intent(context, UPAlarmActivity::class.java).putExtra("alarmId", id).putExtra("alarmLabel", alarmLabel),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         manager.setAlarmClock(AlarmManager.AlarmClockInfo(instant.toEpochMilli(), show), trigger)
     }
@@ -100,7 +101,7 @@ internal object UPAlarmNotifications {
             manager.createNotificationChannel(channel)
         }
         val fullScreen = PendingIntent.getActivity(context, id.hashCode(),
-            Intent(context, UPAlarmActivity::class.java).putExtra("alarmId", id),
+            Intent(context, UPAlarmActivity::class.java).putExtra("alarmId", id).putExtra("alarmLabel", label),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val notification = android.app.Notification.Builder(context, CHANNEL)
             .setSmallIcon(context.applicationInfo.icon)
