@@ -97,6 +97,12 @@ export default function App() {
   }, []);
 
   useEffect(() => { void refresh(); }, [refresh]);
+  useEffect(() => {
+    const syncOnReturn = () => { if (document.visibilityState === "visible") void refresh(); };
+    window.addEventListener("focus", syncOnReturn);
+    document.addEventListener("visibilitychange", syncOnReturn);
+    return () => { window.removeEventListener("focus", syncOnReturn); document.removeEventListener("visibilitychange", syncOnReturn); };
+  }, [refresh]);
   useEffect(() => { const id = window.setInterval(() => setNow(new Date()), 1000); return () => window.clearInterval(id); }, []);
   useEffect(() => {
     if (!timerRunning || timerEnd === null) return;
