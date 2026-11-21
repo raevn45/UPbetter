@@ -16,7 +16,7 @@ The repository now contains the first local-core foundation:
 - Offline wake-up mission logic
 - Local preferences, including the cat's name and motivation style
 
-The React frontend and native Android/iOS/Windows alarm adapters are separate milestones. A saved alarm in the current web runtime is **not** a guaranteed background alarm.
+A first responsive React frontend has now been added and wired to the local core. It is an initial MVP implementation and still needs CI/build verification, browser QA and interaction polish. Native Android/iOS/Windows alarm reliability remains a separate milestone. A saved alarm in the current web runtime is **not** a guaranteed background alarm.
 
 ## Development
 
@@ -28,7 +28,7 @@ npm test
 npm run typecheck
 ```
 
-The frontend owner (Claude) will add the Vite/React application entry point and UI. Once `index.html` and the frontend entry point are present:
+The Vite/React application entry point and initial UI are now present:
 
 ```bash
 npm run dev
