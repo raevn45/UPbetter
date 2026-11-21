@@ -95,9 +95,15 @@ class UPAlarmReceiver : BroadcastReceiver() {
         val next = UPAlarmScheduling.nextWeekly(record)
         if (next != null) {
             record.put("nextOccurrence", next.toString())
+            record.put("ringing", false)
             UPAlarmStore(context).put(id, record.toString())
             UPAlarmScheduling.schedule(context, id, record)
-        } else UPAlarmStore(context).remove(id)
+        } else {
+            // Keep the one-shot record available to the full-screen activity for
+            // its selected sound and wake challenge. Stop removes it after dismissal.
+            record.put("ringing", true)
+            UPAlarmStore(context).put(id, record.toString())
+        }
     }
 }
 
