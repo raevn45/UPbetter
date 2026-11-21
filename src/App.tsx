@@ -202,8 +202,9 @@ export default function App() {
   const checkChallengePreview = () => {
     if (!challengePreview) return;
     const action = challengePreview.kind === "movement" || challengePreview.kind === "checklist";
-    const result = action ? upCore.missions.completeAction(challengePreview.id) : upCore.missions.check(challengePreview.id, challengeAnswer);
-    const passed = action ? result.completed : result.correct;
+    let passed: boolean;
+    if (action) passed = upCore.missions.completeAction(challengePreview.id).completed;
+    else passed = upCore.missions.check(challengePreview.id, challengeAnswer).correct;
     setChallengeFeedback(passed ? "Nice. That is exactly how this challenge will work." : "Not quite. Try again, or generate another preview.");
   };
   const toggleFavourite = async (sound: SoundItem) => { const r = await upCore.sounds.setFavourite(sound.id, !sound.isFavourite); if (!r.ok) setError(r.error.message); else await refresh(); };
