@@ -23,6 +23,7 @@ export default function EditorialRuntime() {
     let scrollFrame = 0;
     let revealObserver: IntersectionObserver | null = null;
     const springs = new Map<HTMLElement, { x: number; v: number; target: number; frame: number; last: number }>();
+    let pressedSpring: HTMLElement | null = null;
 
     const setRevealDelay = (element: Element) => {
       if (!(element instanceof HTMLElement)) return;
@@ -146,11 +147,19 @@ export default function EditorialRuntime() {
       event.target instanceof Element ? event.target.closest<HTMLElement>("[data-spring]") : null;
     const onPress = (event: PointerEvent) => {
       const target = springTarget(event);
-      if (target && event.button === 0) springTo(target, 0.982);
+      if (target && event.button === 0) {
+        pressedSpring = target;
+        springTo(target, 0.982);
+      }
     };
     const onRelease = (event: PointerEvent) => {
-      const target = springTarget(event);
+      const target = pressedSpring || springTarget(event);
       if (target) springTo(target, 1);
+      pressedSpring = null;
+    };
+    const onWindowBlur = () => {
+      if (pressedSpring) springTo(pressedSpring, 1);
+      pressedSpring = null;
     };
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key !== " " && event.key !== "Enter") return;
@@ -211,6 +220,7 @@ export default function EditorialRuntime() {
     document.addEventListener("pointercancel", onRelease, { passive: true });
     document.addEventListener("keydown", onKeyDown);
     document.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onWindowBlur);
 
     return () => {
       window.removeEventListener("scroll", onScroll);
@@ -221,6 +231,7 @@ export default function EditorialRuntime() {
       document.removeEventListener("pointercancel", onRelease);
       document.removeEventListener("keydown", onKeyDown);
       document.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onWindowBlur);
       if (scrollFrame) cancelAnimationFrame(scrollFrame);
       springs.forEach((state, element) => {
         if (state.frame) cancelAnimationFrame(state.frame);
