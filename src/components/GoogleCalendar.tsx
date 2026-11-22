@@ -16,7 +16,8 @@ type AlarmToSync = {
 const dayCodes = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 
 export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
+  // Public Google OAuth Web client ID. Keep the env override for deployments with their own OAuth project.
+  const clientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) || "669883233575-b8qp2bv38e14gd3ls7l9hasof46qpt0i.apps.googleusercontent.com";
   const [token, setToken] = useState("");
   const [status, setStatus] = useState(clientId ? "Not connected" : "Google sign-in is not enabled in this UP deployment yet.");
   const [accountEmail, setAccountEmail] = useState("");
