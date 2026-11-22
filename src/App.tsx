@@ -443,7 +443,7 @@ export default function App() {
     <header className="studio-nav">
       <button className="studio-brand" onClick={() => setTab("today")} aria-label="UP home"><span>u<span>p</span></span><small>TIME, REIMAGINED</small></button>
       <nav className="studio-links" aria-label="Main navigation">{nav.map(item => { const Icon = item.icon; return <button key={item.id} className={`studio-link ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)} aria-current={tab === item.id ? "page" : undefined}><Icon size={15}/><span>{item.label === "World clock" ? "World" : item.label}</span>{item.id === "alarms" && alarms.length > 0 && <i>{alarms.length}</i>}</button>; })}</nav>
-      <div className="studio-nav-end"><button className="outline-btn account-login-top" onClick={() => setTab("accounts")}><ShieldCheck size={14}/> Sign in</button><span className="studio-live"><i/> LOCAL / LIVE</span><button className="install-top-btn" onClick={()=>void installUP()}><Download size={14}/> {installPrompt ? "Install app" : "Install"}</button></div>
+      <div className="studio-nav-end"><button className="outline-btn account-login-top" onClick={() => setTab("accounts")}><ShieldCheck size={14}/> Google login</button><span className="studio-live"><i/> LOCAL / LIVE</span><button className="install-top-btn" onClick={()=>void installUP()}><Download size={14}/> {installPrompt ? "Install app" : "Install"}</button></div>
     </header>
     <main className="main-area">
       <div className="studio-date-line"><span>{localDate.toUpperCase()}</span><span className="studio-date-rule"/><span>{timeZone.replaceAll("_", " ").toUpperCase()}</span><span className="studio-date-rule"/><span>YOUR TIME, YOUR TERMS</span></div>
