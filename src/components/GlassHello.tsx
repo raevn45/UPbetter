@@ -74,7 +74,7 @@ export default function GlassHello({ label="hello" }: { label?: string }) {
     const ctx=source.getContext("2d");if(!ctx)return;
     ctx.clearRect(0,0,1400,420);ctx.fillStyle="#fff";ctx.textAlign="center";ctx.textBaseline="middle";
     ctx.font='italic 300 310px "Instrument Serif", Georgia, serif';ctx.fillText(label,700,216,1360);
-    gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,1);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,1);gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL,1);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,source);
     gl.uniform1i(gl.getUniformLocation(program,"uText"),0);
     const pointer={x:.72,y:.42};let frame=0;let running=true;const reduced=window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const move=(event:PointerEvent)=>{const rect=element.getBoundingClientRect();pointer.x=(event.clientX-rect.left)/rect.width;pointer.y=1-(event.clientY-rect.top)/rect.height;};
