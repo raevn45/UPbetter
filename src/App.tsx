@@ -6,6 +6,7 @@ import {
   Trash2, Volume2, X, Globe2, Download, Upload, Cat, Coffee, Pin
 } from "lucide-react";
 import { upCore, TimeService } from "./core";
+import { LocalNotifications } from "@capacitor/local-notifications";
 import { pickNativeAlarmSound, previewNativeAlarmSound, stopNativeAlarmSoundPreview } from "./core/alarm-scheduler/capacitor-alarm-scheduler";
 import { Temporal } from "@js-temporal/polyfill";
 import type { Alarm, AlarmWithStatus, Countdown, SavedCity, SoundItem, Weekday, UpSettings } from "./core";
@@ -140,6 +141,26 @@ export default function App() {
     }
     setInstallOpen(true);
   };
+  useEffect(() => {
+    let listener: { remove: () => Promise<void> } | undefined;
+    void LocalNotifications.addListener("localNotificationActionPerformed", action => {
+      const extra = action.notification.extra as { type?: string } | undefined;
+      if (extra?.type !== "up-streak-checkin") return;
+      const key = "up.productivity.v1";
+      try {
+        const current = JSON.parse(localStorage.getItem(key) || "[]");
+        const today = new Date();
+        const date = today.getFullYear() + "-" + String(today.getMonth()+1).padStart(2,"0") + "-" + String(today.getDate()).padStart(2,"0");
+        const next = Array.isArray(current) ? current : [];
+        next.push({ id: crypto.randomUUID(), date, label: "Completed one-hour check-in", source: "manual" });
+        localStorage.setItem(key, JSON.stringify(next));
+        window.dispatchEvent(new Event("up:streak-checkin"));
+        setNotice("Check-in confirmed. Your streak has been updated.");
+        setTab("productivity");
+      } catch { setError("UP could not save that streak check-in on this device."); }
+    }).then(value => { listener = value; });
+    return () => { void listener?.remove(); };
+  }, []);
   useEffect(() => { void refresh(); }, [refresh]);
   useEffect(() => {
     const onFocus = () => { void refresh(); };
@@ -422,7 +443,7 @@ export default function App() {
     <header className="studio-nav">
       <button className="studio-brand" onClick={() => setTab("today")} aria-label="UP home"><span>u<span>p</span></span><small>TIME, REIMAGINED</small></button>
       <nav className="studio-links" aria-label="Main navigation">{nav.map(item => { const Icon = item.icon; return <button key={item.id} className={`studio-link ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)} aria-current={tab === item.id ? "page" : undefined}><Icon size={15}/><span>{item.label === "World clock" ? "World" : item.label}</span>{item.id === "alarms" && alarms.length > 0 && <i>{alarms.length}</i>}</button>; })}</nav>
-      <div className="studio-nav-end"><span className="studio-live"><i/> LOCAL / LIVE</span><button className="install-top-btn" onClick={()=>void installUP()}><Download size={14}/> {installPrompt ? "Install app" : "Install"}</button></div>
+      <div className="studio-nav-end"><button className="outline-btn account-login-top" onClick={() => setTab("accounts")}><ShieldCheck size={14}/> Sign in</button><span className="studio-live"><i/> LOCAL / LIVE</span><button className="install-top-btn" onClick={()=>void installUP()}><Download size={14}/> {installPrompt ? "Install app" : "Install"}</button></div>
     </header>
     <main className="main-area">
       <div className="studio-date-line"><span>{localDate.toUpperCase()}</span><span className="studio-date-rule"/><span>{timeZone.replaceAll("_", " ").toUpperCase()}</span><span className="studio-date-rule"/><span>YOUR TIME, YOUR TERMS</span></div>
