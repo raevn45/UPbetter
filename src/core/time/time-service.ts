@@ -45,19 +45,19 @@ export const TimeService = {
   now(timeZone = Temporal.Now.timeZoneId()): string {
     return Temporal.Now.zonedDateTimeISO(timeZone).toString();
   },
-  formatInstant(instant: string, timeZone: string): string {
+  formatInstant(instant: string, timeZone: string, timeFormat: "12h" | "24h" = "12h"): string {
     return new Intl.DateTimeFormat(undefined, {
-      timeZone, weekday: "short", hour: "numeric", minute: "2-digit", month: "short", day: "numeric"
+      timeZone, weekday: "short", hour: "numeric", minute: "2-digit", hour12: timeFormat === "12h", month: "short", day: "numeric"
     }).format(new Date(instant));
   },
-  previewAlarm(input: AlarmTimeInput, now: Temporal.Instant = Temporal.Now.instant()) {
+  previewAlarm(input: AlarmTimeInput, now: Temporal.Instant = Temporal.Now.instant(), timeFormat: "12h" | "24h" = "12h") {
     try {
       const nextOccurrence = nextAlarmOccurrence(input, now);
       return {
         ok: true as const,
         value: {
-          targetTime: TimeService.formatInstant(nextOccurrence, input.timeZone),
-          deviceTime: TimeService.formatInstant(nextOccurrence, Temporal.Now.timeZoneId()),
+          targetTime: TimeService.formatInstant(nextOccurrence, input.timeZone, timeFormat),
+          deviceTime: TimeService.formatInstant(nextOccurrence, Temporal.Now.timeZoneId(), timeFormat),
           nextOccurrence
         }
       };
