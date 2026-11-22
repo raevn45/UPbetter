@@ -295,6 +295,7 @@ class UPAlarmActivity : Activity() {
             (getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(id.hashCode())
             val days = record?.optJSONArray("repeatDays")
             if (days == null || days.length() == 0) {
+                UPAlarmStore(this).markCompleted(id)
                 UPAlarmStore(this).remove(id)
             } else {
                 val next = UPAlarmScheduling.nextWeekly(record!!)
