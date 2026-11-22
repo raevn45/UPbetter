@@ -33,7 +33,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<PixelCatEngine | null>(null);
   const dragRef = useRef<{ id: number; x: number; y: number; left: number; top: number } | null>(null);
-  const [position, setPosition] = useState<Point>({ x: Math.max(12, window.innerWidth - 148), y: Math.max(72, window.innerHeight - 168) });
+  const [position, setPosition] = useState<Point>({ x: Math.max(12, window.innerWidth - 104), y: Math.max(72, window.innerHeight - 112) });
   const [ready, setReady] = useState(false);
   const [behavior, setBehavior] = useState("keeping you company");
   const [dragging, setDragging] = useState(false);
@@ -42,7 +42,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
 
   useEffect(() => {
     const saved = readPoint();
-    if (saved) setPosition({ x: Math.max(0, Math.min(window.innerWidth - 126, saved.x)), y: Math.max(8, Math.min(window.innerHeight - 136, saved.y)) });
+    if (saved) setPosition({ x: Math.max(0, Math.min(window.innerWidth - 88, saved.x)), y: Math.max(8, Math.min(window.innerHeight - 96, saved.y)) });
   }, []);
 
   useEffect(() => {
@@ -72,7 +72,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   useEffect(() => { engineRef.current?.setName(name); }, [name]);
   useEffect(() => { if (!cue || cue === "welcome") return; if (cue.startsWith("alarm-created")) { engineRef.current?.gift(); setBehavior("a new plan!"); } else if (cue.startsWith("mission-complete")) { engineRef.current?.greet("you did it ♥"); setBehavior("proud of that little win"); } else engineRef.current?.greet("you got this ♥"); }, [cue]);
   useEffect(() => {
-    const resize = () => setPosition(p => ({ x: Math.max(0, Math.min(window.innerWidth - (spotlight ? 190 : 126), p.x)), y: Math.max(8, Math.min(window.innerHeight - (spotlight ? 190 : 136), p.y)) }));
+    const resize = () => setPosition(p => ({ x: Math.max(0, Math.min(window.innerWidth - (spotlight ? 130 : 88), p.x)), y: Math.max(8, Math.min(window.innerHeight - (spotlight ? 130 : 96), p.y)) }));
     resize();
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
@@ -105,7 +105,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.id !== event.pointerId) return;
-    const width = spotlight ? 190 : 126, height = spotlight ? 190 : 136;
+    const width = spotlight ? 130 : 88, height = spotlight ? 130 : 96;
     const next = { x: Math.max(0, Math.min(window.innerWidth - width, drag.left + event.clientX - drag.x)), y: Math.max(0, Math.min(window.innerHeight - height, drag.top + event.clientY - drag.y)) };
     setPosition(next);
     try { localStorage.setItem("up.miso.position", JSON.stringify(next)); } catch { /* position remains live for this session */ }
