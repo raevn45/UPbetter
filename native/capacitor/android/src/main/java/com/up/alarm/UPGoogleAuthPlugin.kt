@@ -6,7 +6,6 @@ import com.getcapacitor.*
 import com.getcapacitor.annotation.CapacitorPlugin
 import com.google.android.gms.auth.api.identity.AuthorizationRequest
 import com.google.android.gms.auth.api.identity.Identity
-import com.google.android.gms.common.Scopes
 import com.google.android.gms.common.api.Scope
 import org.json.JSONObject
 import java.net.HttpURLConnection
@@ -17,9 +16,9 @@ class UPGoogleAuthPlugin : Plugin() {
     @PluginMethod
     fun authorize(call: PluginCall) {
         val scopes = listOf(
-            Scope(Scopes.OPEN_ID),
-            Scope(Scopes.EMAIL),
-            Scope(Scopes.PROFILE),
+            Scope("openid"),
+            Scope("email"),
+            Scope("profile"),
             Scope("https://www.googleapis.com/auth/calendar.events")
         )
         val request = AuthorizationRequest.builder()
