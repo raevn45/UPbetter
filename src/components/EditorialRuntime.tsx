@@ -31,6 +31,7 @@ export default function EditorialRuntime() {
       const cascading = parent?.hasAttribute("data-cascade");
       const index = cascading && parent ? Array.prototype.indexOf.call(parent.children, element) : 0;
       element.style.setProperty("--cascade-delay", Math.min(Math.max(index, 0), 8) * 42 + "ms");
+      element.style.setProperty("--cascade-lift", (12 + Math.min(Math.max(index, 0), 8) * 2.2) + "px");
     };
 
     const observeReveal = (element: Element) => {
