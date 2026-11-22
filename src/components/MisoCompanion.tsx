@@ -108,7 +108,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.id !== event.pointerId) return;
-    const width = spotlight ? 130 : 88, height = spotlight ? 130 : 96;
+    const width = spotlight ? 190 : 126, height = spotlight ? 190 : 136;
     const next = { x: Math.max(0, Math.min(window.innerWidth - width, drag.left + event.clientX - drag.x)), y: Math.max(0, Math.min(window.innerHeight - height, drag.top + event.clientY - drag.y)) };
     setPosition(next);
     try { localStorage.setItem("up.miso.position", JSON.stringify(next)); } catch { /* position remains live for this session */ }
