@@ -44,7 +44,7 @@ export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string |
   const [enabled, setEnabled] = useState(() => localStorage.getItem("up-voice-assistant-enabled") === "true");
   const [status, setStatus] = useState("OFF");
   const [hasVoice, setHasVoice] = useState(false);
-  const [recording, setRecording] = useState(false);
+  const [recording, setRecording] = useState(false);\n  const [heard, setHeard] = useState("");\n  const [lastAnswer, setLastAnswer] = useState("");\n  const lastAnswerAt = useRef(0);
   const recognition = useRef<RecognitionLike | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
   const stream = useRef<MediaStream | null>(null);
@@ -122,12 +122,12 @@ export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string |
   };
 
   return <div className="setting-row voice-assistant-setting">
-    <div><strong>Voice assistant</strong><span>Say “How much time?” while UP is open. UP checks the next enabled alarm and speaks the actual time remaining.</span><small>Microphone mode: {status}. Listening is opt-in and can be switched off here. It only stays active while the app is open and supported by the browser.</small></div>
+    <div><strong>Voice assistant</strong><span>Say “How much time?” while UP is open. UP checks the next enabled alarm and speaks the actual time remaining.</span><small>Microphone mode: {status}. Speech recognition transcribes what you say, then matches supported commands. Listening is opt-in and stays active only while UP is open in a supported browser.</small></div>
     <div className="setting-actions">
       <button className={`toggle ${enabled ? "on" : ""}`} onClick={() => setEnabled(value => !value)} aria-label={enabled ? "Turn voice assistant off" : "Turn voice assistant on"}><span/></button>
       <button className="outline-btn" onClick={() => void answer()}><Volume2 size={14}/> Test</button>
     </div>
-    <div className="voice-record-controls">
+    {heard && <small className="voice-debug-line">Heard: “{heard}”</small>}\n    {lastAnswer && <small className="voice-debug-line">UP answered: {lastAnswer}</small>}\n    <div className="voice-record-controls">
       <span>{hasVoice ? "Your recorded voice sample is saved on this device, but is not yet used for generated speech." : "Recording saves a sample only. It does not clone your voice or change the assistant's generated speech yet."}</span>
       {recording ? <button className="outline-btn" onClick={() => recorder.current?.stop()}><Square size={14}/> Stop recording</button> : <button className="outline-btn" onClick={() => void startRecording()}><Mic size={14}/> Record my voice</button>}
       {enabled ? <span><Radio size={13}/> {status}</span> : <span><MicOff size={13}/> Microphone off</span>}
