@@ -2,6 +2,7 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import App from "./App";
 import "./styles.css";
+import "./editorial.css";
 import EditorialRuntime from "./components/EditorialRuntime";
 
 if ("serviceWorker" in navigator && import.meta.env.PROD) {
