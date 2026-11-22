@@ -59,9 +59,11 @@ class UPAlarmPlugin : Plugin() {
         try {
             val soundId = call.getString("soundId") ?: throw IllegalArgumentException("Sound ID is missing.")
             val resourceName = when (soundId) {
-                "classic-twinbell" -> "up_classic_twinbell"
-                "classic-bedside" -> "up_classic_bedside"
-                "classic-buzzer" -> "up_classic_buzzer"
+                "alarm-twinbell" -> "up_alarm_twinbell"
+                "alarm-digital" -> "up_alarm_digital"
+                "alarm-buzzer" -> "up_alarm_buzzer"
+                "alarm-pulse" -> "up_alarm_pulse"
+                "alarm-rise" -> "up_alarm_rise"
                 "device-alarm" -> ""
                 else -> throw IllegalArgumentException("This sound has no native preview.")
             }
