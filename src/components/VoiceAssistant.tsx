@@ -69,7 +69,7 @@ export default function VoiceAssistant({ nextAlarmAt, nextAlarmLabel = "", alarm
 
   const answer = useCallback(async (transcript: string) => {
     const lower = transcript.toLowerCase();
-    if (/\\b(set|create|add|make)\\b.*\\balarm\\b/.test(lower)) {
+    if (/\b(set|create|add|make)\b.*\balarm\b/.test(lower)) {
       const time = parseAlarmTime(transcript);
       if (!time) { speak("Tell me a time, for example, set an alarm for 7:30 AM."); return; }
       const labelMatch = transcript.match(/(?:called|named|labelled|labeled)\\s+(.+)$/i);
@@ -78,7 +78,7 @@ export default function VoiceAssistant({ nextAlarmAt, nextAlarmLabel = "", alarm
       catch (error) { speak(error instanceof Error ? error.message : "I could not create that alarm."); }
       return;
     }
-    if (/\\b(delete|remove|cancel)\\b.*\\balarm\\b/.test(lower)) {
+    if (/\b(delete|remove|cancel)\b.*\balarm\b/.test(lower)) {
       const named = transcript.match(/(?:alarm)\\s+(?:called|named)\\s+(.+)$/i)?.[1]?.trim();
       const candidates = alarms.filter(item => item.alarm.enabled || !item.alarm.enabled);
       const target = named
