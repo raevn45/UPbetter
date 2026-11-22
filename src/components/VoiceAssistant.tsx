@@ -56,18 +56,29 @@ export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string |
 
   useEffect(() => { void loadVoice().then(blob => setHasVoice(Boolean(blob))).catch(() => setHasVoice(false)); }, []);
 
-  const answer = useCallback(async () => {
-    const alarmTime = nextAlarmAt ? new Date(nextAlarmAt).getTime() : NaN;
-    let phrase = "No enabled upcoming alarm found. Add or enable an alarm first.";
-    if (Number.isFinite(alarmTime) && alarmTime > Date.now()) {
-      const minutesLeft = Math.ceil((alarmTime - Date.now()) / 60000);
-      const hours = Math.floor(minutesLeft / 60);
-      const minutes = minutesLeft % 60;
-      phrase = hours ? "You have " + hours + " hours and " + minutes + " minutes until your next alarm." : "You have " + minutes + " minutes until your next alarm.";
-    }
-    if ("speechSynthesis" in window) {
-      window.speechSynthesis.cancel();
-      window.speechSynthesis.speak(new SpeechSynthesisUtterance(phrase));
+  const answer = useCallback(async (transcript = "How much time is left until my next alarm?") => {
+    setStatus("THINKING");
+    try {
+      const response = await fetch("/api/assistant/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: transcript,
+          context: { nextAlarmAt: nextAlarmAt ?? null, currentTime: new Date().toISOString() }
+        })
+      });
+      const payload = await response.json() as { reply?: string; error?: string };
+      if (!response.ok || !payload.reply) throw new Error(payload.error || "UP could not answer right now.");
+      setLastAnswer(payload.reply);
+      setStatus("ANSWERED");
+      if ("speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+        window.speechSynthesis.speak(new SpeechSynthesisUtterance(payload.reply));
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "UP could not answer right now.";
+      setLastAnswer(message);
+      setStatus("ASSISTANT UNAVAILABLE");
     }
   }, [nextAlarmAt]);
 
@@ -87,8 +98,13 @@ export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string |
     instance.lang = navigator.language || "en-US";
     instance.onresult = event => {
       const last = event.results[event.results.length - 1];
-      const transcript = last?.[0]?.transcript?.toLowerCase() ?? "";
-      if (/how much time|how much sleep|time is left|sleep.*left/.test(transcript)) void answer();
+      const transcript = last?.[0]?.transcript?.trim() ?? "";
+      if (!transcript || !last?.isFinal) return;
+      setHeard(transcript);
+      const now = Date.now();
+      if (now - lastAnswerAt.current < 1800) return;
+      lastAnswerAt.current = now;
+      void answer(transcript);
     };
     instance.onerror = () => setStatus("MICROPHONE PAUSED");
     instance.onend = () => {
@@ -125,15 +141,15 @@ export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string |
   };
 
   return <div className="setting-row voice-assistant-setting">
-    <div><strong>Voice assistant</strong><span>Say “How much time?” while UP is open. UP checks the next enabled alarm and speaks the actual time remaining.</span><small>Microphone mode: {status}. Speech recognition transcribes what you say, then matches supported commands. Listening is opt-in and stays active only while UP is open in a supported browser.</small></div>
+    <div><strong>Voice assistant</strong><span>Talk naturally while UP is open. Your speech is sent to UP’s assistant backend for a conversational response.</span><small>Microphone mode: {status}. Speech recognition is foreground-only in supported browsers. AI replies require the UP publisher to configure GEMINI_API_KEY. Spoken replies currently use the device voice, not a voice clone.</small></div>
     <div className="setting-actions">
       <button className={`toggle ${enabled ? "on" : ""}`} onClick={() => setEnabled(value => !value)} aria-label={enabled ? "Turn voice assistant off" : "Turn voice assistant on"}><span/></button>
-      <button className="outline-btn" onClick={() => void answer()}><Volume2 size={14}/> Test</button>
+      <button className="outline-btn" onClick={() => void answer("How much time is left until my next alarm?")}><Volume2 size={14}/> Test</button>
     </div>
     {heard && <small className="voice-debug-line">Heard: “{heard}”</small>}
     {lastAnswer && <small className="voice-debug-line">UP answered: {lastAnswer}</small>}
     <div className="voice-record-controls">
-      <span>{hasVoice ? "Your recorded voice sample is saved on this device, but is not yet used for generated speech." : "Recording saves a sample only. It does not clone your voice or change the assistant's generated speech yet."}</span>
+      <span>{hasVoice ? "Your recorded sample is stored locally only. It is not uploaded or used for voice cloning." : "Recording is sample capture only. Voice cloning requires a separately configured, consent-based synthesis provider."}</span>
       {recording ? <button className="outline-btn" onClick={() => recorder.current?.stop()}><Square size={14}/> Stop recording</button> : <button className="outline-btn" onClick={() => void startRecording()}><Mic size={14}/> Record my voice</button>}
       {enabled ? <span><Radio size={13}/> {status}</span> : <span><MicOff size={13}/> Microphone off</span>}
     </div>
