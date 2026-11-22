@@ -71,7 +71,8 @@ type InstallPromptEvent = Event & { prompt(): Promise<void>; userChoice: Promise
 export default function App() {
   const [tab, setTab] = useState<Tab>("today");
   const [moreOpen, setMoreOpen] = useState(false);
-  const [installOpen, setInstallOpen] = useState(false);\n  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
+  const [installOpen, setInstallOpen] = useState(false);
+  const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
   const [misoCue, setMisoCue] = useState("welcome");
   const [now, setNow] = useState(new Date());
   const [alarms, setAlarms] = useState<AlarmWithStatus[]>([]);
