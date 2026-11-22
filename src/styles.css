@@ -732,3 +732,21 @@ button:focus-visible{outline-color:var(--acid)}
   .ritual-marquee-track,.sound-card:hover .sound-wave i,.sound-card:hover .sound-art:before{animation:none!important}
   [data-tilt],[data-magnetic]{transform:none!important}
 }
+
+/* The in-app motion preference is separate from the OS preference. */
+.app-shell[data-reduced-motion="true"] [data-tilt],
+.app-shell[data-reduced-motion="true"] [data-magnetic]{
+  transform:none!important;translate:none!important;transition:none!important;will-change:auto!important;
+}
+.app-shell[data-reduced-motion="true"] [data-reveal],
+.app-shell[data-reduced-motion="true"] [data-reveal].is-visible{
+  opacity:1!important;transform:none!important;transition:none!important;
+}
+.app-shell[data-reduced-motion="true"] .ritual-marquee-track,
+.app-shell[data-reduced-motion="true"] .today-side-panel:before,
+.app-shell[data-reduced-motion="true"] .mission-preview-orbit,
+.app-shell[data-reduced-motion="true"] .mission-preview-orbit-inner,
+.app-shell[data-reduced-motion="true"] .mission-phase-card,
+.app-shell[data-reduced-motion="true"] .mission-phase-success .mission-build-mark{
+  animation:none!important;
+}
