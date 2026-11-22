@@ -40,7 +40,7 @@ function localTimeReply(message: string, nextAlarmAt: string | null | undefined,
 }
 
 function parseAlarmTime(text: string) {
-  const match = text.match(/(?:at|for)\s+(\d{1,2})(?::(\d{2}))?\s*(a\\.?m\\.?|p\\.?m\\.?)?/i);
+  const match = text.match(/(?:at|for)\s+(\d{1,2})(?::(\d{2}))?\s*(a\.?m\.?|p\.?m\.?)?/i);
   if (!match) return null;
   let hour = Number(match[1]);
   const minute = Number(match[2] ?? 0);
