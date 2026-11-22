@@ -253,12 +253,14 @@ export default function App() {
 
   const openNewAlarm = () => {
     setEditing(null);
+    setDeviceSoundTitle("");
     setAlarmTimeZoneSearch("");
     setAlarmForm({ label: "Wake up", hour: "07", minute: "00", repeatDays: [], timeZone, soundId: "device-alarm", volume: 1, gradualVolume: false, vibration: true, snoozeMinutes: 8, mission: null });
     setModal("alarm");
   };
   const openEditAlarm = (alarm: Alarm) => {
     setEditing(alarm);
+    setDeviceSoundTitle("");
     setAlarmTimeZoneSearch("");
     setAlarmForm({ label: alarm.label, hour: pad(alarm.hour), minute: pad(alarm.minute), repeatDays: alarm.repeatDays, timeZone: alarm.timeZone, soundId: alarm.soundId, volume: alarm.volume, gradualVolume: alarm.gradualVolume, vibration: alarm.vibration, snoozeMinutes: alarm.snoozeMinutes, mission: alarm.mission });
     setModal("alarm");
@@ -322,7 +324,12 @@ export default function App() {
   const playSound = async (id: string) => {
     if (id.startsWith("android-ringtone:")) { setNotice("This tone is played by Android at alarm time. Preview it in the system sound picker."); return; }
     if (playingSoundId === id) { upCore.sounds.stopPreview(); void stopNativeAlarmSoundPreview(); setPlayingSoundId(null); return; }
-    const r = await upCore.sounds.preview(id);
+    let nativePreview = false;
+    if (id.startsWith("classic-")) {
+      try { nativePreview = await previewNativeAlarmSound(id); }
+      catch (e) { setError(e instanceof Error ? e.message : "Could not preview this sound."); return; }
+    }
+    const r = nativePreview ? { ok: true as const, value: undefined } : await upCore.sounds.preview(id);
     if (!r.ok) setError(r.error.message);
     else { setPlayingSoundId(id); const item = sounds.find(sound => sound.id === id); window.setTimeout(() => setPlayingSoundId(current => current === id ? null : current), (item?.durationSeconds ?? 30) * 1000); const recent = await upCore.sounds.recentlyUsed(); if (recent.ok) setRecentSoundIds(recent.value); }
   };
