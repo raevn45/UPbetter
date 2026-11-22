@@ -4,6 +4,8 @@ import android.app.Activity
 import android.content.Context
 import android.media.MediaPlayer
 import android.media.AudioAttributes
+import android.media.RingtoneManager
+import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -144,6 +146,7 @@ class UPAlarmActivity : Activity() {
             else -> ""
         }
         val resourceId = if (resourceName.isNotEmpty()) resources.getIdentifier(resourceName, "raw", packageName) else 0
+        val selectedDeviceUri = soundId.removePrefix("android-ringtone:")
         player = MediaPlayer().apply {
             setAudioAttributes(AudioAttributes.Builder()
                 .setUsage(AudioAttributes.USAGE_ALARM)
@@ -151,7 +154,9 @@ class UPAlarmActivity : Activity() {
                 .build())
             setWakeMode(this@UPAlarmActivity, android.os.PowerManager.PARTIAL_WAKE_LOCK)
             isLooping = true
-            if (resourceId != 0) {
+            if (selectedDeviceUri != soundId && selectedDeviceUri.isNotBlank()) {
+                setDataSource(this@UPAlarmActivity, Uri.parse(selectedDeviceUri))
+            } else if (resourceId != 0) {
                 resources.openRawResourceFd(resourceId).use { descriptor ->
                     setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
                 }
@@ -271,6 +276,14 @@ class UPAlarmActivity : Activity() {
         val minutes = current.optInt("snoozeMinutes", 8).coerceIn(1, 60)
         val next = Instant.now().plusSeconds(minutes * 60L)
         current.put("nextOccurrence", next.toString())
+        if (!current.optBoolean("snoozed", false)) {
+            val repeatDays = current.optJSONArray("repeatDays")
+            if (repeatDays != null && repeatDays.length() > 0) {
+                current.put("repeatDaysAfterSnooze", org.json.JSONArray(repeatDays.toString()))
+                current.put("repeatDays", org.json.JSONArray())
+            }
+        }
+        current.put("snoozed", true)
         UPAlarmStore(this).put(id, current.toString())
         UPAlarmScheduling.schedule(this, id, current)
         (getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(id.hashCode())
@@ -281,7 +294,17 @@ class UPAlarmActivity : Activity() {
         alarmId?.let { id ->
             (getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(id.hashCode())
             val days = record?.optJSONArray("repeatDays")
-            if (days == null || days.length() == 0) UPAlarmStore(this).remove(id)
+            if (days == null || days.length() == 0) {
+                UPAlarmStore(this).remove(id)
+            } else {
+                val next = UPAlarmScheduling.nextWeekly(record!!)
+                if (next != null) {
+                    record!!.put("nextOccurrence", next.toString())
+                    record!!.put("ringing", false)
+                    UPAlarmStore(this).put(id, record!!.toString())
+                    UPAlarmScheduling.schedule(this, id, record!!)
+                }
+            }
         }
         finishWithoutSchedule()
     }
