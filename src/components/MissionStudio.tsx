@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Brain, Calculator, CheckCircle2, ClipboardList, Code2, Dices, Footprints, Lightbulb, RefreshCw, Sparkles, X } from "lucide-react";
 import { upCore } from "../core";
-import type { MissionConfig } from "../core/domain/types";
+import type { MissionConfig, MissionKind } from "../core/domain/types";
 import type { WakeChallenge } from "../core/services/mission-service";
 
 const choices: { kind: MissionKind; title: string; subtitle: string; detail: string; icon: typeof Brain }[] = [
