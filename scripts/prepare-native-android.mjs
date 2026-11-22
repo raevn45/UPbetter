@@ -7,7 +7,7 @@ const appMain = path.join(root, "android/app/src/main");
 const packagePath = path.join(appMain, "java/com/up/alarm");
 await mkdir(packagePath, { recursive: true });
 
-for (const file of ["UPAlarmPlugin.kt", "UPAlarmNative.kt", "UPAlarmActivity.kt"]) {
+for (const file of ["UPAlarmPlugin.kt", "UPAlarmNative.kt", "UPAlarmActivity.kt", "UPGoogleAuthPlugin.kt", "UPGoogleAuthActivity.kt"]) {
   const source = path.join(root, "native/capacitor/android/src/main/java/com/up/alarm", file);
   await writeFile(path.join(packagePath, file), await readFile(source));
 }
@@ -23,6 +23,7 @@ import com.getcapacitor.BridgeActivity
 class MainActivity : BridgeActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         registerPlugin(UPAlarmPlugin::class.java)
+        registerPlugin(UPGoogleAuthPlugin::class.java)
         super.onCreate(savedInstanceState)
     }
 }
@@ -70,6 +71,9 @@ if (!gradle.includes("coreLibraryDesugaringEnabled true")) {
 }
 if (!gradle.includes("desugar_jdk_libs")) {
   gradle = gradle.replace(/dependencies\s*\{/, match => match + "\n    coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.1.4'");
+}
+if (!gradle.includes("play-services-auth")) {
+  gradle = gradle.replace(/dependencies\s*\{/, match => match + "\n    implementation 'com.google.android.gms:play-services-auth:22.0.0'");
 }
 await writeFile(gradlePath, gradle);
 
