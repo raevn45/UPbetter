@@ -20,6 +20,8 @@ internal class UPAlarmStore(context: Context) {
     private val prefs = context.getSharedPreferences("up_native_alarms", Context.MODE_PRIVATE)
     fun put(id: String, json: String) { prefs.edit().putString(id, json).apply() }
     fun remove(id: String) { prefs.edit().remove(id).apply() }
+    fun markCompleted(id: String) { val done = prefs.getStringSet("completed_once", emptySet())?.toMutableSet() ?: mutableSetOf(); done.add(id); prefs.edit().putStringSet("completed_once", done).apply() }
+    fun consumeCompleted(): List<String> { val done = prefs.getStringSet("completed_once", emptySet())?.toList() ?: emptyList(); prefs.edit().remove("completed_once").apply(); return done }
     fun all(): Map<String, String> = prefs.all.mapNotNull { (key, value) -> if (value is String) key to value else null }.toMap()
 }
 
