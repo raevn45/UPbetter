@@ -133,7 +133,7 @@ internal object UPAlarmNotifications {
             Notification.Builder(context, CHANNEL)
                 .setSmallIcon(context.applicationInfo.icon)
                 .setContentTitle(label.ifBlank { "Time to get up" })
-                .setContentText("Your UP alarm is ringing.")
+                .setContentText("Miso is here. Time to wake up.")
                 .setCategory(Notification.CATEGORY_ALARM)
                 .setFullScreenIntent(fullScreen, true)
                 .setAutoCancel(true).build()
