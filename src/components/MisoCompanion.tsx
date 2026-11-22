@@ -49,7 +49,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
       await loadScript("/miso/cat-live.js");
       if (cancelled || !canvasRef.current || !window.PixelCatLive) return;
       const engine = window.PixelCatLive.init(canvasRef.current, {
-        name, coatIndex: 0, cycleCoatOnClick: false, butterfly: true, reducedMotion,
+        name, cycleCoatOnClick: false, butterfly: true, reducedMotion,
         onMeow: () => { setBehavior("says hello"); },
         onHearts: () => setBehavior("very pleased with you"),
         onBehavior: label => setBehavior(label || "keeping you company"),
