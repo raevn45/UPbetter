@@ -54,24 +54,14 @@ export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string |
   useEffect(() => { void loadVoice().then(blob => setHasVoice(Boolean(blob))).catch(() => setHasVoice(false)); }, []);
 
   const answer = useCallback(async () => {
-    let phrase = "No upcoming alarm.";
-    if (nextAlarmAt) {
-      const remaining = new Date(nextAlarmAt).getTime() - Date.now();
-      if (remaining > 0) {
-        const hours = Math.max(0.1, Math.round(remaining / 360000) / 10);
-        phrase = "You have " + hours + " hours of sleep left.";
-      }
+    const alarmTime = nextAlarmAt ? new Date(nextAlarmAt).getTime() : NaN;
+    let phrase = "No enabled upcoming alarm found. Add or enable an alarm first.";
+    if (Number.isFinite(alarmTime) && alarmTime > Date.now()) {
+      const minutesLeft = Math.ceil((alarmTime - Date.now()) / 60000);
+      const hours = Math.floor(minutesLeft / 60);
+      const minutes = minutesLeft % 60;
+      phrase = hours ? "You have " + hours + " hours and " + minutes + " minutes until your next alarm." : "You have " + minutes + " minutes until your next alarm.";
     }
-    try {
-      const voice = await loadVoice();
-      if (voice) {
-        if (voiceUrl.current) URL.revokeObjectURL(voiceUrl.current);
-        voiceUrl.current = URL.createObjectURL(voice);
-        const audio = new Audio(voiceUrl.current);
-        await audio.play();
-        await new Promise(resolve => { audio.onended = resolve; audio.onerror = resolve; });
-      }
-    } catch { /* The spoken time response remains available if a saved voice clip cannot play. */ }
     if ("speechSynthesis" in window) {
       window.speechSynthesis.cancel();
       window.speechSynthesis.speak(new SpeechSynthesisUtterance(phrase));
