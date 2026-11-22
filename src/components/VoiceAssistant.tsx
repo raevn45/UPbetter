@@ -81,7 +81,7 @@ export default function VoiceAssistant({ nextAlarmAt, nextAlarmLabel = "", alarm
     }
     if (/\b(delete|remove|cancel)\b.*\balarm\b/.test(lower)) {
       const named = transcript.match(/(?:alarm)\s+(?:called|named)\s+(.+)$/i)?.[1]?.trim();
-      const candidates = alarms.filter(item => item.alarm.enabled || !item.alarm.enabled);
+      const candidates = alarms;
       const target = named
         ? candidates.find(item => item.alarm.label.toLowerCase() === named.toLowerCase()) ?? candidates.find(item => item.alarm.label.toLowerCase().includes(named.toLowerCase()))
         : candidates.length === 1 ? candidates[0] : undefined;
