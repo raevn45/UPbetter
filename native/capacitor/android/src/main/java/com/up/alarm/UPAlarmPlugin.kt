@@ -52,6 +52,14 @@ class UPAlarmPlugin : Plugin() {
     }
 
     @PluginMethod
+    fun consumeCompleted(call: PluginCall) {
+        val ids = UPAlarmStore(context).consumeCompleted()
+        val array = JSArray()
+        ids.forEach { array.put(it) }
+        call.resolve(JSObject().put("alarmIds", array))
+    }
+
+    @PluginMethod
     fun capabilities(call: PluginCall) {
         val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
         val exact = Build.VERSION.SDK_INT < 31 || manager.canScheduleExactAlarms()
