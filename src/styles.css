@@ -131,3 +131,8 @@ button:active{transform:scale(.975)}
 .sound-remove{width:34px;border:1px solid #65434a;background:#2b2024;color:#c98c8d;display:grid;place-items:center}
 .sound-remove:hover{background:#4b2e34;color:#f3c5c3}
 @media(max-width:760px){.sound-import-button{align-self:flex-start}.page-heading:has(.sound-import-button){align-items:flex-start}.recent-sounds button{font-size:8px}}
+
+
+.timezone-preview{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:13px;background:#10191b;border:1px solid #526257;margin:0 0 7px}
+.timezone-preview>div{display:grid;gap:6px;min-width:0}.timezone-preview span{font:8px var(--mono);letter-spacing:.1em;color:#8c9a90}.timezone-preview strong{font:500 14px var(--serif);color:#e8d5ae;line-height:1.4}.timezone-preview p{grid-column:1/-1;font-size:9px;line-height:1.6;color:#839188;margin:3px 0 0}
+@media(max-width:520px){.timezone-preview{grid-template-columns:1fr}.timezone-preview p{grid-column:auto}}
