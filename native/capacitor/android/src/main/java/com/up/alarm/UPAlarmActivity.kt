@@ -62,6 +62,11 @@ class UPAlarmActivity : Activity() {
         setupChallenge()
     }
 
+    @Deprecated("Back navigation must not dismiss an active alarm")
+    override fun onBackPressed() {
+        feedbackText?.text = "Complete the wake-up challenge or use Emergency stop."
+    }
+
     private fun buildScreen(label: String) {
         val layout = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
