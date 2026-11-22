@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
+import { Capacitor, registerPlugin } from "@capacitor/core";
 import { CalendarDays, LogIn, LogOut, Plus } from "lucide-react";
 
 declare global {
@@ -8,6 +9,9 @@ declare global {
     } } };
   }
 }
+
+type NativeGoogleAuth = { authorize(): Promise<{ accessToken: string; email?: string }> };
+const NativeGoogleAuth = registerPlugin<NativeGoogleAuth>("UPGoogleAuth");
 
 type AlarmToSync = {
   alarm: { id: string; label: string; repeatDays: number[]; timeZone: string; enabled: boolean };
@@ -21,7 +25,6 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
   const [token, setToken] = useState("");
   const [status, setStatus] = useState(clientId ? "Not connected" : "Google sign-in is not enabled in this UP deployment yet.");
   const [accountEmail, setAccountEmail] = useState("");
-  const [youtubeChannel, setYoutubeChannel] = useState("");
   const [title, setTitle] = useState("");
   const [when, setWhen] = useState("");
   const [busy, setBusy] = useState(false);
@@ -50,18 +53,28 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     if (!clientId || !scriptReady || !window.google?.accounts?.oauth2) return;
     const client = window.google.accounts.oauth2.initTokenClient({
       client_id: clientId,
-      scope: "openid email profile https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/youtube.readonly",
       callback: response => {
         if (response.error || !response.access_token) return;
         setToken(response.access_token);
         setStatus("Google signed in.");
         void fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + response.access_token } }).then(async response => { if (response.ok) { const profile = await response.json() as { email?: string }; setAccountEmail(profile.email || ""); } }).catch(() => undefined);
-        void fetch("https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true", { headers: { Authorization: "Bearer " + response.access_token } }).then(async response => { if (response.ok) { const data = await response.json() as { items?: Array<{ snippet?: { title?: string } }> }; setYoutubeChannel(data.items?.[0]?.snippet?.title || "No YouTube channel found"); } }).catch(() => undefined);
       }
     });
     client.requestAccessToken({ prompt: "none" });
   }, [clientId, scriptReady]);
-  const connect = () => {
+  const connect = async () => {
+    if (Capacitor.getPlatform() === "android" && Capacitor.isPluginAvailable("UPGoogleAuth")) {
+      setStatus("Opening Google sign-in…");
+      try {
+        const result = await NativeGoogleAuth.authorize();
+        setToken(result.accessToken);
+        setAccountEmail(result.email || "");
+        setStatus("Google signed in.");
+      } catch (error) {
+        setStatus(error instanceof Error ? error.message : "Google sign-in was not completed.");
+      }
+      return;
+    }
     if (!clientId) {
       setStatus("Google sign-in is not enabled in this UP version yet.");
       return;
@@ -73,7 +86,6 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     }
     tokenClient.current = google.initTokenClient({
       client_id: clientId,
-      scope: "openid email profile https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/youtube.readonly",
       callback: response => {
         if (response.error || !response.access_token) {
           setStatus("Google authorization was not completed.");
@@ -82,7 +94,6 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
         setToken(response.access_token);
         void fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + response.access_token } }).then(async profileResponse => { if (!profileResponse.ok) return; const profile = await profileResponse.json() as { email?: string }; setAccountEmail(profile.email || ""); }).catch(() => undefined);
         setStatus("Google signed in.");
-        void fetch("https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true", { headers: { Authorization: "Bearer " + response.access_token } }).then(async channelResponse => { if (!channelResponse.ok) return; const data = await channelResponse.json() as { items?: Array<{ snippet?: { title?: string } }> }; setYoutubeChannel(data.items?.[0]?.snippet?.title || "No YouTube channel found"); }).catch(() => undefined);
       }
     });
     tokenClient.current.requestAccessToken({ prompt: "consent" });
@@ -159,14 +170,12 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     } finally { setBusy(false); }
   };
 
-  const disconnect = () => { setToken(""); setAccountEmail(""); setYoutubeChannel(""); setStatus("Disconnected."); };
 
   return <section className="setting-row google-calendar-setting">
     <div>
       <strong>Google login</strong>
       <span>Connect Google to let UP work with your Calendar and reminders.</span>
       <small>{token ? (accountEmail ? `Connected as ${accountEmail}.` : status) : status}</small>
-      {token && <small>{youtubeChannel ? "YouTube: " + youtubeChannel : "YouTube account access connected."}</small>}
     </div>
     <div className="setting-actions">
       {token
