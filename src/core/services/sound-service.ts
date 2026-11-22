@@ -123,23 +123,7 @@ export class SoundService {
       let source = sound?.previewUrl;
       let duration = sound?.durationSeconds ?? 30;
       if (soundId === "device-alarm") {
-        const context = new AudioContext();
-        await context.resume();
-        const oscillator = context.createOscillator();
-        const gain = context.createGain();
-        oscillator.type = "square";
-        oscillator.frequency.setValueAtTime(880, context.currentTime);
-        oscillator.frequency.setValueAtTime(660, context.currentTime + 0.42);
-        oscillator.frequency.setValueAtTime(880, context.currentTime + 0.84);
-        oscillator.frequency.setValueAtTime(660, context.currentTime + 1.26);
-        gain.gain.value = 0.18;
-        oscillator.connect(gain);
-        gain.connect(context.destination);
-        oscillator.start();
-        this.activeContext = context;
-        this.activeOscillator = oscillator;
-        this.previewTimeout = window.setTimeout(() => this.stopPreview(), 8_000);
-        return success(undefined);
+        return failure("NATIVE_ALARM_SOUND", "The device alarm tone is provided by Android or iOS. Open the native app to preview the actual system sound.");
       }
       if (!sound) {
         const db = await getDatabase();
