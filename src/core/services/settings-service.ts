@@ -6,13 +6,15 @@ export type UpSettings = {
   motivationStyle: "direct" | "warm" | "competitive" | "reflective";
   reducedMotion: boolean;
   wakeReason: string;
+  pinnedCountdownId: string | null;
 };
 
 const DEFAULTS: UpSettings = {
   catName: "Miso",
   motivationStyle: "direct",
   reducedMotion: false,
-  wakeReason: ""
+  wakeReason: "",
+  pinnedCountdownId: null
 };
 
 export class SettingsService {
