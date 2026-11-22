@@ -110,15 +110,15 @@ export default function VoiceAssistant({ nextAlarmAt, nextAlarmLabel = "", alarm
   }, [alarms, nextAlarmAt, nextAlarmLabel, onCreateAlarm, onDeleteAlarm, speak, timeFormat]);
 
   const startListening = async () => {
-    const Speech = (window as AssistantWindow).SpeechRecognition || (window as AssistantWindow).webkitSpeechRecognition;
-    if (!Speech) { setStatus("SPEECH RECOGNITION NOT SUPPORTED IN THIS APP BUILD"); return; }
-    if (!navigator.mediaDevices?.getUserMedia) { setStatus("MICROPHONE ACCESS IS NOT AVAILABLE IN THIS ENVIRONMENT"); return; }
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setStatus("MICROPHONE ACCESS IS NOT AVAILABLE IN THIS ENVIRONMENT");
+      return;
+    }
     try {
       setStatus("REQUESTING MICROPHONE ACCESS");
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       stream.getTracks().forEach(track => track.stop());
       setPermission("granted");
-      setEnabled(true);
     } catch (error) {
       const denied = error instanceof DOMException && (error.name === "NotAllowedError" || error.name === "SecurityError");
       if (denied) {
@@ -127,7 +127,14 @@ export default function VoiceAssistant({ nextAlarmAt, nextAlarmLabel = "", alarm
       } else {
         setStatus("MICROPHONE ACCESS FAILED. CHECK YOUR INPUT DEVICE AND TRY AGAIN.");
       }
+      return;
     }
+    const Speech = (window as AssistantWindow).SpeechRecognition || (window as AssistantWindow).webkitSpeechRecognition;
+    if (!Speech) {
+      setStatus("MICROPHONE PERMISSION GRANTED, BUT SPEECH RECOGNITION IS NOT SUPPORTED IN THIS APP BUILD.");
+      return;
+    }
+    setEnabled(true);
   };
 
   useEffect(() => {
