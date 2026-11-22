@@ -292,7 +292,7 @@ export default function App() {
   const soundCategories = ["All", ...Array.from(new Set(sounds.map(sound => sound.category)))];
   const filteredSounds = sounds.filter(s => (soundCategory === "All" || s.category === soundCategory) && `${s.title} ${s.category}`.toLowerCase().includes(search.toLowerCase()));
   const localDate = now.toLocaleDateString([], { weekday: "long", month: "long", day: "numeric" });
-  const alarmTimePreview = TimeService.previewAlarm({ hour: Number(alarmForm.hour), minute: Number(alarmForm.minute), repeatDays: alarmForm.repeatDays, timeZone: alarmForm.timeZone });
+  const alarmTimePreview = TimeService.previewAlarm({ hour: Number(alarmForm.hour), minute: Number(alarmForm.minute), repeatDays: alarmForm.repeatDays, timeZone: alarmForm.timeZone }, undefined, settings.timeFormat);
   const countdownMinDate = new Intl.DateTimeFormat("en-CA", { timeZone: countForm.timeZone, year: "numeric", month: "2-digit", day: "2-digit" }).format(now);
 
   const openNewAlarm = () => {
