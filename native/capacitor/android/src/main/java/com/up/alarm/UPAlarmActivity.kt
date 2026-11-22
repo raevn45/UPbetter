@@ -2,6 +2,8 @@ package com.up.alarm
 
 import android.app.Activity
 import android.content.Context
+import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
 import android.media.MediaPlayer
 import android.media.AudioAttributes
 import android.media.RingtoneManager
@@ -287,6 +289,8 @@ class UPAlarmActivity : Activity() {
         stopButton?.alpha = 1f
     }
 
+    private var ttsEngine: TextToSpeech? = null
+
     private fun stopAlarm() {
         alarmId?.let { id ->
             (getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(id.hashCode())
@@ -304,7 +308,26 @@ class UPAlarmActivity : Activity() {
                 }
             }
         }
-        finishWithoutSchedule()
+        stopAlarmAudioAndSpeakMessage()
+    }
+
+    private fun stopAlarmAudioAndSpeakMessage() {
+        handler.removeCallbacks(fade)
+        player?.stop(); player?.release(); player = null
+        (getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).cancel()
+        val message = getSharedPreferences("up_native_alarms", Context.MODE_PRIVATE).getString("wake_message", "").orEmpty().trim()
+        if (message.isBlank()) { finish(); return }
+        ttsEngine = TextToSpeech(this) { status ->
+            val engine = ttsEngine
+            if (status != TextToSpeech.SUCCESS || engine == null) { finish(); return@TextToSpeech }
+            engine.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                override fun onStart(utteranceId: String?) {}
+                override fun onDone(utteranceId: String?) { runOnUiThread { engine.shutdown(); ttsEngine = null; finish() } }
+                @Deprecated("Deprecated in Java")
+                override fun onError(utteranceId: String?) { runOnUiThread { engine.shutdown(); ttsEngine = null; finish() } }
+            })
+            engine.speak(message, TextToSpeech.QUEUE_FLUSH, null, "up-wake-message")
+        }
     }
 
     private fun finishWithoutSchedule() {
@@ -317,6 +340,7 @@ class UPAlarmActivity : Activity() {
     override fun onDestroy() {
         handler.removeCallbacks(fade)
         player?.release(); player = null
+        ttsEngine?.stop(); ttsEngine?.shutdown(); ttsEngine = null
         (getSystemService(Context.VIBRATOR_SERVICE) as Vibrator).cancel()
         super.onDestroy()
     }
