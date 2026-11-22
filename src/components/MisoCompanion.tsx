@@ -23,6 +23,7 @@ const loadScript = (src: string) => new Promise<void>((resolve, reject) => {
 });
 
 type Point = { x: number; y: number };
+const readCoat = (): number => { try { const value = Number(localStorage.getItem("up.miso.coat")); return Number.isInteger(value) && value >= 0 ? value : 0; } catch { return 0; } };
 const readPoint = (): Point | null => {
   try { const raw = localStorage.getItem("up.miso.position"); return raw ? JSON.parse(raw) as Point : null; }
   catch { return null; }
@@ -37,6 +38,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   const [behavior, setBehavior] = useState("keeping you company");
   const [dragging, setDragging] = useState(false);
   const [butterflyOn, setButterflyOn] = useState(true);
+  const [coatIndex, setCoatIndex] = useState(readCoat);
 
   useEffect(() => {
     const saved = readPoint();
@@ -50,7 +52,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
       await loadScript("/miso/cat-live.js");
       if (cancelled || !canvasRef.current || !window.PixelCatLive) return;
       const engine = window.PixelCatLive.init(canvasRef.current, {
-        name, cycleCoatOnClick: false, butterfly: true, reducedMotion,
+        name, coatIndex, cycleCoatOnClick: false, butterfly: true, reducedMotion,
         onMeow: () => { setBehavior("says hello"); },
         onHearts: () => setBehavior("very pleased with you"),
         onBehavior: label => setBehavior(label || "keeping you company"),
@@ -59,6 +61,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
       });
       engineRef.current = engine;
       engine.setName(name);
+      engine.setCoat(coatIndex);
       engine.setButterfly(true, true);
       setReady(true);
     };
@@ -104,7 +107,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
       <button type="button" title="Pet Miso" onClick={() => { engineRef.current?.greet("hello ♥"); setBehavior("happy to see you"); }}><Heart size={13}/></button>
       <button type="button" title="Give Miso a treat" onClick={() => { engineRef.current?.gift(); setBehavior("thank you for the treat!"); }}><Gift size={13}/></button>
       <button type="button" title={butterflyOn?"Hide butterfly":"Bring back butterfly"} onClick={() => { const next = !butterflyOn; setButterflyOn(next); engineRef.current?.setButterfly(next, true); setBehavior(next?"butterfly patrol":"quiet time"); }}><Sparkles size={13}/></button>
-      <button type="button" title="Change Miso’s coat" onClick={() => { engineRef.current?.nextCoat(); setBehavior("new look, same Miso"); }}><Palette size={13}/></button>
+      <button type="button" title="Change Miso’s coat" onClick={() => { const next = (coatIndex + 1) % 8; setCoatIndex(next); engineRef.current?.setCoat(next); try { localStorage.setItem("up.miso.coat", String(next)); } catch { /* optional persistence */ } setBehavior("new look, same Miso"); }}><Palette size={13}/></button>
       <button type="button" title="Move Miso to the lower corner" onClick={() => { const next = { x: Math.max(8, window.innerWidth - 142), y: Math.max(8, window.innerHeight - 152) }; setPosition(next); try { localStorage.setItem("up.miso.position", JSON.stringify(next)); } catch { /* optional persistence */ } }}><Move size={13}/></button>
     </div>
     {!ready && <span className="miso-loading">MISO IS WAKING UP</span>}
