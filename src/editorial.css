@@ -458,16 +458,25 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   --scroll-compress:0;
   --scroll-skew:0deg;
 }
-[data-curl]{
+.app-shell [data-curl]{
   transform:perspective(1100px)
     rotateX(var(--tilt-x,0deg))
     rotateY(var(--tilt-y,0deg))
     skewY(var(--scroll-skew,0deg))
     scaleX(calc(1 - var(--scroll-compress,0)));
   transform-origin:center;
+  translate:0 var(--cascade-lift,0px);
   will-change:transform;
-  transition:transform 180ms cubic-bezier(.2,.7,.2,1);
+  transition:transform 180ms cubic-bezier(.2,.7,.2,1),translate 650ms cubic-bezier(.2,.7,.2,1);
 }
+.app-shell [data-curl].is-visible{translate:0 0}
+.app-shell [data-reveal]:not([data-curl]){
+  transform:none;
+  translate:0 var(--cascade-lift,12px);
+  transition:opacity 650ms ease,translate 650ms cubic-bezier(.2,.7,.2,1);
+  transition-delay:var(--cascade-delay,0ms);
+}
+.app-shell [data-reveal]:not([data-curl]).is-visible{translate:0 0}
 [data-spring]{
   scale:var(--spring-scale,1);
   transform-origin:center;
@@ -480,9 +489,9 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   transition-delay:var(--cascade-delay,0ms);
 }
 @media(prefers-reduced-motion:reduce){
-  [data-curl]{transform:none!important;transition:none!important;will-change:auto}
+  .app-shell [data-curl]{transform:none!important;translate:0 0!important;transition:none!important;will-change:auto}
   [data-spring]{scale:1!important;will-change:auto}
-  [data-reveal]{transition-delay:0ms!important}
+  .app-shell [data-reveal]{translate:0 0!important;transition-delay:0ms!important}
 }
 
 
