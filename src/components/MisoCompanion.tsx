@@ -3,7 +3,7 @@ import { Heart, Sparkles, Gift, Palette } from "lucide-react";
 
 type PixelCatEngine = {
   destroy(): void; setName(name: string): void; setButterfly(on: boolean, soon?: boolean): void;
-  greet(message?: string): void; gift(): void; climb(direction: number): void; type(): void;
+  greet(message?: string): void; gift(): void; climb(direction: number): void; type(): void; walk(duration?: number): void;
   setCoat(index: number): void; nextCoat(): void;
 };
 type PixelCatApi = { init(canvas: HTMLCanvasElement, options?: {
@@ -33,16 +33,17 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<PixelCatEngine | null>(null);
   const dragRef = useRef<{ id: number; x: number; y: number; left: number; top: number } | null>(null);
-  const [position, setPosition] = useState<Point>({ x: Math.max(12, window.innerWidth - 104), y: Math.max(72, window.innerHeight - 112) });
+  const [position, setPosition] = useState<Point>({ x: Math.max(12, window.innerWidth - 138), y: Math.max(72, window.innerHeight - 148) });
   const [ready, setReady] = useState(false);
   const [behavior, setBehavior] = useState("keeping you company");
   const [dragging, setDragging] = useState(false);
+  const [walking, setWalking] = useState(false);
   const [butterflyOn, setButterflyOn] = useState(true);
   const [coatIndex, setCoatIndex] = useState(readCoat);
 
   useEffect(() => {
     const saved = readPoint();
-    if (saved) setPosition({ x: Math.max(0, Math.min(window.innerWidth - 88, saved.x)), y: Math.max(8, Math.min(window.innerHeight - 96, saved.y)) });
+    if (saved) setPosition({ x: Math.max(0, Math.min(window.innerWidth - 126, saved.x)), y: Math.max(8, Math.min(window.innerHeight - 136, saved.y)) });
   }, []);
 
   useEffect(() => {
@@ -72,7 +73,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   useEffect(() => { engineRef.current?.setName(name); }, [name]);
   useEffect(() => { if (!cue || cue === "welcome") return; if (cue.startsWith("alarm-created")) { engineRef.current?.gift(); setBehavior("a new plan!"); } else if (cue.startsWith("mission-complete")) { engineRef.current?.greet("you did it ♥"); setBehavior("proud of that little win"); } else engineRef.current?.greet("you got this ♥"); }, [cue]);
   useEffect(() => {
-    const resize = () => setPosition(p => ({ x: Math.max(0, Math.min(window.innerWidth - (spotlight ? 130 : 88), p.x)), y: Math.max(8, Math.min(window.innerHeight - (spotlight ? 130 : 96), p.y)) }));
+    const resize = () => setPosition(p => ({ x: Math.max(0, Math.min(window.innerWidth - (spotlight ? 190 : 126), p.x)), y: Math.max(8, Math.min(window.innerHeight - (spotlight ? 190 : 136), p.y)) }));
     resize();
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
@@ -82,15 +83,17 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
     if (reducedMotion) return;
     const roam = () => {
       if (dragRef.current || document.hidden) return;
-      const width = spotlight ? 130 : 88;
-      const height = spotlight ? 130 : 96;
+      const width = spotlight ? 190 : 126;
+      const height = spotlight ? 190 : 136;
       const next = {
         x: Math.max(8, Math.round(Math.random() * Math.max(8, window.innerWidth - width - 8))),
         y: Math.max(8, Math.round(Math.random() * Math.max(8, window.innerHeight - height - 8)))
       };
+      setWalking(true);
+      engineRef.current?.walk(3600);
       setPosition(next);
       try { localStorage.setItem("up.miso.position", JSON.stringify(next)); } catch { /* session-only movement */ }
-      engineRef.current?.greet();
+      window.setTimeout(() => setWalking(false), 3700);
     };
     const id = window.setInterval(roam, 14000);
     return () => window.clearInterval(id);
@@ -115,7 +118,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
     dragRef.current = null; setDragging(false);
   };
 
-  return <div className={`miso-companion ${spotlight ? "miso-companion--spotlight" : ""} ${dragging ? "is-dragging" : ""}`}
+  return <div className={`miso-companion ${spotlight ? "miso-companion--spotlight" : ""} ${dragging ? "is-dragging" : ""} ${walking ? "is-walking" : ""}`}
     style={{ left: position.x, top: position.y }}
     onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={finishDrag} onPointerCancel={finishDrag}
     aria-label={`${name}, your roaming pixel cat companion`}>
