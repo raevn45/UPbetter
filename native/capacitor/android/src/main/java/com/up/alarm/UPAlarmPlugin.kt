@@ -8,6 +8,8 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.app.Activity
 import android.media.RingtoneManager
+import android.media.MediaPlayer
+import android.media.AudioAttributes
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -17,6 +19,7 @@ import com.getcapacitor.annotation.Permission
 
 @CapacitorPlugin(name = "UPAlarm", permissions = [Permission(alias = "notifications", strings = [Manifest.permission.POST_NOTIFICATIONS])])
 class UPAlarmPlugin : Plugin() {
+    private var soundPreviewPlayer: MediaPlayer? = null
     @PluginMethod
     fun pickAlarmSound(call: PluginCall) {
         val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
@@ -49,6 +52,47 @@ class UPAlarmPlugin : Plugin() {
             put("uri", uri.toString())
             put("title", title)
         })
+    }
+
+    @PluginMethod
+    fun previewSound(call: PluginCall) {
+        try {
+            val soundId = call.getString("soundId") ?: throw IllegalArgumentException("Sound ID is missing.")
+            val resourceName = when (soundId) {
+                "classic-twinbell" -> "up_classic_twinbell"
+                "classic-bedside" -> "up_classic_bedside"
+                "classic-buzzer" -> "up_classic_buzzer"
+                else -> throw IllegalArgumentException("This sound has no native preview.")
+            }
+            val resourceId = context.resources.getIdentifier(resourceName, "raw", context.packageName)
+            if (resourceId == 0) throw IllegalStateException("The selected sound is not bundled in this build.")
+            stopPreviewPlayer()
+            val player = MediaPlayer()
+            player.setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
+            context.resources.openRawResourceFd(resourceId).use { descriptor ->
+                player.setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+            }
+            player.setOnCompletionListener { stopPreviewPlayer() }
+            player.prepare()
+            player.start()
+            soundPreviewPlayer = player
+            call.resolve()
+        } catch (error: Exception) { call.reject(error.message ?: "Could not preview this sound.") }
+    }
+
+    @PluginMethod
+    fun stopSoundPreview(call: PluginCall) {
+        stopPreviewPlayer()
+        call.resolve()
+    }
+
+    private fun stopPreviewPlayer() {
+        soundPreviewPlayer?.let { player ->
+            try { if (player.isPlaying) player.stop() } catch (_: Exception) {}
+            player.release()
+        }
+        soundPreviewPlayer = null
     }
 
     @PluginMethod
