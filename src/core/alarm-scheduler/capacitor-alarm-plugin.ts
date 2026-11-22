@@ -10,4 +10,5 @@ export interface NativeAlarmPlugin {
   consumeCompleted(): Promise<{ alarmIds: string[] }>;
   previewSound(options: { soundId: string }): Promise<void>;
   stopSoundPreview(): Promise<void>;
+  setWakeMessage(options: { message: string }): Promise<void>;
 }
