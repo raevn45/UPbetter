@@ -20,6 +20,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
   const [token, setToken] = useState("");
   const [status, setStatus] = useState(clientId ? "Not connected" : "Google connection is being set up for UP.");
   const [accountEmail, setAccountEmail] = useState("");
+  const [youtubeChannel, setYoutubeChannel] = useState("");
   const [title, setTitle] = useState("");
   const [when, setWhen] = useState("");
   const [busy, setBusy] = useState(false);
@@ -56,7 +57,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     }
     tokenClient.current = google.initTokenClient({
       client_id: clientId,
-      scope: "openid email profile https://www.googleapis.com/auth/calendar.events",
+      scope: "openid email profile https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/youtube.readonly",
       callback: response => {
         if (response.error || !response.access_token) {
           setStatus("Google authorization was not completed.");
@@ -65,6 +66,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
         setToken(response.access_token);
         void fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + response.access_token } }).then(async profileResponse => { if (!profileResponse.ok) return; const profile = await profileResponse.json() as { email?: string }; setAccountEmail(profile.email || ""); }).catch(() => undefined);
         setStatus("Google account connected.");
+        void fetch("https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true", { headers: { Authorization: "Bearer " + response.access_token } }).then(async channelResponse => { if (!channelResponse.ok) return; const data = await channelResponse.json() as { items?: Array<{ snippet?: { title?: string } }> }; setYoutubeChannel(data.items?.[0]?.snippet?.title || "No YouTube channel found"); }).catch(() => undefined);
       }
     });
     tokenClient.current.requestAccessToken({ prompt: "consent" });
@@ -141,13 +143,14 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     } finally { setBusy(false); }
   };
 
-  const disconnect = () => { setToken(""); setAccountEmail(""); setStatus("Disconnected."); };
+  const disconnect = () => { setToken(""); setAccountEmail(""); setYoutubeChannel(""); setStatus("Disconnected."); };
 
   return <section className="setting-row google-calendar-setting">
     <div>
       <strong>Google account</strong>
       <span>Connect Google to let UP work with your Calendar and reminders.</span>
       <small>{token ? (accountEmail ? `Connected as ${accountEmail}.` : status) : status}</small>
+      {token && <small>{youtubeChannel ? "YouTube: " + youtubeChannel : "YouTube account access connected."}</small>}
     </div>
     <div className="setting-actions">
       {token
