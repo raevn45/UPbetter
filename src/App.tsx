@@ -11,18 +11,6 @@ import MisoCompanion from "./components/MisoCompanion";
 import MissionStudio from "./components/MissionStudio";
 import ProductShowcase from "./components/ProductShowcase";
 
-type PixelCatEngine = { destroy(): void; setName(name: string): void; setButterfly(on: boolean, soon?: boolean): void; greet(message?: string): void; gift(): void; climb(direction: number): void; type(): void; setCoat(index: number): void; nextCoat(): void };
-type PixelCatApi = { init(canvas: HTMLCanvasElement, options?: { name?: string; coatIndex?: number; cycleCoatOnClick?: boolean; butterfly?: boolean; onMeow?: () => void; onHearts?: (x: number, y: number) => void; onBehavior?: (label: string) => void; onPurrStart?: () => void; onPurrStop?: () => void }): PixelCatEngine };
-
-const ensureMisoScript = (src: string) => new Promise<void>((resolve, reject) => {
-  const existing = Array.from(document.querySelectorAll<HTMLScriptElement>("script[data-up-pet]")).find(script => script.dataset.upPet === src);
-  if (existing?.dataset.loaded === "true") { resolve(); return; }
-  const script = existing ?? document.createElement("script");
-  script.addEventListener("load", () => { script.dataset.loaded = "true"; resolve(); }, { once: true });
-  script.addEventListener("error", () => reject(new Error("Could not load Miso's animation engine.")), { once: true });
-  if (!existing) { script.src = src; script.async = false; script.dataset.upPet = src; document.head.append(script); }
-});
-
 interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: "accepted" | "dismissed"; platform: string }>;
@@ -138,7 +126,7 @@ export default function App() {
 
   const openNewAlarm = () => {
     setEditing(null);
-    setAlarmForm({ label: "Wake up", hour: "07", minute: "00", repeatDays: [], timeZone, soundId: "soft-bells", volume: 0.75, gradualVolume: true, vibration: true, snoozeMinutes: 8, mission: null });
+    setAlarmForm({ label: "Wake up", hour: "07", minute: "00", repeatDays: [], timeZone, soundId: "rain-soft", volume: 0.75, gradualVolume: true, vibration: true, snoozeMinutes: 8, mission: null });
     setModal("alarm");
   };
   const openEditAlarm = (alarm: Alarm) => {
