@@ -6,7 +6,7 @@ import {
   Trash2, Volume2, X, Globe2, Download, Upload, Cat, Coffee, Pin
 } from "lucide-react";
 import { upCore, TimeService } from "./core";
-import { pickNativeAlarmSound } from "./core/alarm-scheduler/capacitor-alarm-scheduler";
+import { pickNativeAlarmSound, previewNativeAlarmSound, stopNativeAlarmSoundPreview } from "./core/alarm-scheduler/capacitor-alarm-scheduler";
 import { Temporal } from "@js-temporal/polyfill";
 import type { Alarm, AlarmWithStatus, Countdown, SavedCity, SoundItem, Weekday, UpSettings } from "./core";
 import MisoCompanion from "./components/MisoCompanion";
@@ -321,7 +321,7 @@ export default function App() {
   };
   const playSound = async (id: string) => {
     if (id.startsWith("android-ringtone:")) { setNotice("This tone is played by Android at alarm time. Preview it in the system sound picker."); return; }
-    if (playingSoundId === id) { upCore.sounds.stopPreview(); setPlayingSoundId(null); return; }
+    if (playingSoundId === id) { upCore.sounds.stopPreview(); void stopNativeAlarmSoundPreview(); setPlayingSoundId(null); return; }
     const r = await upCore.sounds.preview(id);
     if (!r.ok) setError(r.error.message);
     else { setPlayingSoundId(id); const item = sounds.find(sound => sound.id === id); window.setTimeout(() => setPlayingSoundId(current => current === id ? null : current), (item?.durationSeconds ?? 30) * 1000); const recent = await upCore.sounds.recentlyUsed(); if (recent.ok) setRecentSoundIds(recent.value); }
