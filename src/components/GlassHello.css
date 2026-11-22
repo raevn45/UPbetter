@@ -1,0 +1,9 @@
+.glass-hello-wrap{position:relative;width:min(100%,760px);height:clamp(155px,24vw,290px);margin:10px 0 14px;isolation:isolate;overflow:visible;cursor:crosshair}
+.glass-hello-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:2;filter:drop-shadow(0 14px 12px rgba(40,45,43,.12))}
+.glass-hello-fallback{position:absolute;inset:0;display:grid;place-items:center;font:italic 300 clamp(90px,17vw,230px)/.9 'Instrument Serif',Georgia,serif;letter-spacing:-.075em;color:rgba(255,255,255,.55);text-shadow:1px 1px 0 rgba(80,90,90,.24),-1px -1px 0 rgba(255,255,255,.8)}
+.glass-hello-canvas:not([data-fallback=true])+.glass-hello-fallback{opacity:0}
+.glass-flare{position:absolute;z-index:3;left:72%;top:43%;width:2px;height:2px;pointer-events:none;opacity:.72}
+.glass-flare::before,.glass-flare::after{content:"";position:absolute;left:50%;top:50%;background:linear-gradient(transparent,rgba(255,255,255,.95),transparent);transform:translate(-50%,-50%);filter:drop-shadow(0 0 5px rgba(255,255,255,.9))}
+.glass-flare::before{width:1px;height:100px;box-shadow:0 0 18px 4px rgba(255,255,255,.3)}
+.glass-flare::after{width:90px;height:1px;transform:translate(-50%,-50%) rotate(90deg);box-shadow:0 0 18px 4px rgba(255,255,255,.3)}
+@media(max-width:760px){.glass-hello-wrap{height:145px;margin:12px 0}.glass-flare{display:none}}
