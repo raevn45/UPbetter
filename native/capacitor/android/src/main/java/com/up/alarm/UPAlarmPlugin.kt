@@ -95,6 +95,44 @@ class UPAlarmPlugin : Plugin() {
     }
 
     @PluginMethod
+    fun scheduleTimer(call: PluginCall) {
+        try {
+            val id = call.getString("timerId") ?: throw IllegalArgumentException("Timer ID is missing.")
+            val label = call.getString("label") ?: "UP timer"
+            val endsAt = call.getString("endsAt") ?: throw IllegalArgumentException("Timer end time is missing.")
+            val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            if (Build.VERSION.SDK_INT >= 31 && !manager.canScheduleExactAlarms()) {
+                call.resolve(result("permission_required", "Allow Alarms & reminders access to use native timers.")); return
+            }
+            if (Build.VERSION.SDK_INT >= 33 && context.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                call.resolve(result("permission_required", "Enable notifications for UP to use native timers.")); return
+            }
+            if (Build.VERSION.SDK_INT >= 34 && !(context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).canUseFullScreenIntent()) {
+                call.resolve(result("permission_required", "Allow full-screen alarms for UP to use native timers.")); return
+            }
+            val record = org.json.JSONObject()
+                .put("id", id).put("label", label).put("soundId", "device-alarm")
+                .put("repeatDays", org.json.JSONArray()).put("timeZone", java.time.ZoneId.systemDefault().id)
+                .put("nextOccurrence", endsAt).put("volume", 1.0).put("gradualVolume", false)
+                .put("vibration", true).put("snoozeMinutes", 5)
+            UPAlarmStore(context).put(id, record.toString())
+            UPAlarmScheduling.schedule(context, id, record)
+            call.resolve(result("scheduled", "Timer scheduled with Android AlarmManager."))
+        } catch (error: Exception) {
+            call.resolve(result("failed", error.message ?: "Could not schedule native timer."))
+        }
+    }
+
+    @PluginMethod
+    fun cancelTimer(call: PluginCall) {
+        val id = call.getString("timerId")
+        if (id.isNullOrBlank()) { call.reject("Timer ID is required."); return }
+        UPAlarmScheduling.cancel(context, id)
+        UPAlarmStore(context).remove(id)
+        call.resolve()
+    }
+
+    @PluginMethod
     fun test(call: PluginCall) {
         try {
             val id = "up-native-test"
