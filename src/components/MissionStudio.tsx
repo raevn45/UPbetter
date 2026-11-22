@@ -19,6 +19,7 @@ export default function MissionStudio({ value, onChange, onComplete }: { value: 
   const [preview, setPreview] = useState<WakeChallenge | null>(null);
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState("");
+  const [phase, setPhase] = useState<"notice" | "question" | "build" | "repeat">("notice");
   const selected = choices.find(item => item.kind === value?.kind);
 
   const makePreview = () => {
@@ -26,13 +27,21 @@ export default function MissionStudio({ value, onChange, onComplete }: { value: 
     setPreview(upCore.missions.create(value));
     setAnswer("");
     setFeedback("");
+    setPhase("notice");
+  };
+  const repeatPreview = () => {
+    if (!value) return;
+    setPreview(upCore.missions.create(value));
+    setAnswer("");
+    setFeedback("");
+    setPhase("question");
   };
   const check = () => {
     if (!preview) return;
     const action = preview.kind === "movement" || preview.kind === "checklist";
     const result = action ? upCore.missions.completeAction(preview.id).completed : upCore.missions.check(preview.id, answer).correct;
     setFeedback(result ? "Completed. This is how the wake-up check will feel." : "Not quite yet. Try again or make a fresh example.");
-    if (result) onComplete?.();
+    if (result) { setPhase("build"); onComplete?.(); }
   };
 
   return <section className="mission-studio">
@@ -51,13 +60,39 @@ export default function MissionStudio({ value, onChange, onComplete }: { value: 
     {preview && <div className="mission-preview-overlay" role="dialog" aria-modal="true" aria-label="Wake-up challenge preview">
       <div className="mission-preview-window">
         <div className="mission-preview-top"><span className="eyebrow">UP / MISSION SIMULATOR</span><button type="button" className="mission-close" onClick={() => setPreview(null)} aria-label="Close preview"><X size={18}/></button></div>
-        <div className="mission-preview-orbit"><div className="mission-preview-orbit-inner"><Sparkles size={26}/></div></div>
-        <span className="mission-preview-label">{choices.find(c => c.kind === preview.kind)?.title ?? "Wake-up check"} · {preview.difficulty}</span>
-        <h3>{preview.prompt}</h3>
-        <p>{preview.hint}</p>
-        {preview.kind === "movement" || preview.kind === "checklist" ? <button type="button" className="mission-preview-submit" onClick={check}>I'm ready</button> : <form onSubmit={e => { e.preventDefault(); check(); }}><input autoFocus value={answer} onChange={e => setAnswer(e.target.value)} placeholder="Enter your answer" aria-label="Your answer"/><button type="submit" className="mission-preview-submit">Check answer</button></form>}
-        {feedback && <div className={`mission-preview-feedback ${feedback.startsWith("Completed") ? "success" : ""}`}>{feedback}</div>}
-        <div className="mission-preview-footer"><button type="button" onClick={makePreview}><RefreshCw size={14}/> New example</button><span>Preview only · your alarm gets a fresh challenge</span></div>
+        <div className="mission-sequence" aria-label="Preview sequence">
+          {(["notice", "question", "build", "repeat"] as const).map((step, index) => <span key={step} className={phase === step ? "active" : (["notice", "question", "build", "repeat"].indexOf(phase) > index ? "complete" : "")}>{String(index + 1).padStart(2, "0")} / {step.toUpperCase()}</span>)}
+        </div>
+        {phase === "notice" && <div className="mission-phase-card">
+          <span className="mission-preview-label">01 / NOTICE</span>
+          <div className="mission-preview-orbit"><div className="mission-preview-orbit-inner"><Sparkles size={26}/></div></div>
+          <h3>A small check. A clearer start.</h3>
+          <p>This is a preview of the wake-up challenge. Your real alarm will generate a fresh one. You can always snooze or stop the alarm.</p>
+          <button type="button" className="mission-preview-submit" onClick={() => setPhase("question")}>Show me the challenge <span>↗</span></button>
+        </div>}
+        {phase === "question" && <div className="mission-phase-card">
+          <div className="mission-preview-orbit"><div className="mission-preview-orbit-inner"><Sparkles size={26}/></div></div>
+          <span className="mission-preview-label">{choices.find(c => c.kind === preview.kind)?.title ?? "Wake-up check"} · {preview.difficulty}</span>
+          <h3>{preview.prompt}</h3>
+          <p>{preview.hint}</p>
+          {preview.kind === "movement" || preview.kind === "checklist" ? <button type="button" className="mission-preview-submit" onClick={check}>I'm ready</button> : <form onSubmit={e => { e.preventDefault(); check(); }}><input autoFocus value={answer} onChange={e => setAnswer(e.target.value)} placeholder="Enter your answer" aria-label="Your answer"/><button type="submit" className="mission-preview-submit">Check answer</button></form>}
+          {feedback && <div className="mission-preview-feedback">{feedback}</div>}
+        </div>}
+        {phase === "build" && <div className="mission-phase-card mission-phase-success">
+          <span className="mission-preview-label">03 / BUILD</span>
+          <div className="mission-build-mark"><CheckCircle2 size={34}/></div>
+          <h3>That's one small win.</h3>
+          <p>The point isn't a perfect morning. It's a repeatable first step. This is the feeling the challenge is designed to create.</p>
+          <button type="button" className="mission-preview-submit" onClick={() => setPhase("repeat")}>Keep the rhythm going <span>↗</span></button>
+        </div>}
+        {phase === "repeat" && <div className="mission-phase-card">
+          <span className="mission-preview-label">04 / REPEAT</span>
+          <div className="mission-preview-orbit"><div className="mission-preview-orbit-inner"><RefreshCw size={25}/></div></div>
+          <h3>Make it a pattern.</h3>
+          <p>Try another example, or close the preview and save this mission to your alarm.</p>
+          <button type="button" className="mission-preview-submit" onClick={repeatPreview}>Run another example <RefreshCw size={14}/></button>
+        </div>}
+        <div className="mission-preview-footer"><span>Preview only · your alarm gets a fresh challenge</span><button type="button" onClick={makePreview}>Restart sequence <RefreshCw size={14}/></button></div>
       </div>
     </div>}
   </section>;
