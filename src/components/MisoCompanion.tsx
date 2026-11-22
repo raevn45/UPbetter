@@ -36,6 +36,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   const [ready, setReady] = useState(false);
   const [behavior, setBehavior] = useState("keeping you company");
   const [dragging, setDragging] = useState(false);
+  const [butterflyOn, setButterflyOn] = useState(true);
 
   useEffect(() => {
     const saved = readPoint();
@@ -102,7 +103,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
     <div className="miso-float-tools">
       <button type="button" title="Pet Miso" onClick={() => { engineRef.current?.greet("hello ♥"); setBehavior("happy to see you"); }}><Heart size={13}/></button>
       <button type="button" title="Give Miso a treat" onClick={() => { engineRef.current?.gift(); setBehavior("thank you for the treat!"); }}><Gift size={13}/></button>
-      <button type="button" title="Toggle butterfly" onClick={() => { engineRef.current?.setButterfly(true, true); setBehavior("butterfly patrol"); }}><Sparkles size={13}/></button>
+      <button type="button" title={butterflyOn?"Hide butterfly":"Bring back butterfly"} onClick={() => { const next = !butterflyOn; setButterflyOn(next); engineRef.current?.setButterfly(next, true); setBehavior(next?"butterfly patrol":"quiet time"); }}><Sparkles size={13}/></button>
       <button type="button" title="Change Miso’s coat" onClick={() => { engineRef.current?.nextCoat(); setBehavior("new look, same Miso"); }}><Palette size={13}/></button>
       <button type="button" title="Move Miso to the lower corner" onClick={() => { const next = { x: Math.max(8, window.innerWidth - 142), y: Math.max(8, window.innerHeight - 152) }; setPosition(next); try { localStorage.setItem("up.miso.position", JSON.stringify(next)); } catch { /* optional persistence */ } }}><Move size={13}/></button>
     </div>
