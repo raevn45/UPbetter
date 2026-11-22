@@ -38,11 +38,11 @@ This file is the source-of-truth feature inventory. "Implemented" means code exi
 - Data remains on the device for the existing local-first features.
 
 ### Voice assistant (first implementation)
-- Enable/disable toggle.
-- Foreground browser speech recognition for supported browsers.
-- Recognises sleep-time questions and speaks the remaining time using device text-to-speech.
-- No voice sample recording is active. Voice cloning is not implemented.
-- Not a cloned voice; not a guaranteed screen-locked/background assistant.
+- Explicit microphone permission request after the user chooses Enable microphone.
+- Foreground speech recognition in supported browsers.
+- Answers next-alarm questions and supports voice creation and deletion of named alarms; deletion requires confirmation.
+- Replies use the device text-to-speech voice. Voice cloning and own-voice modulation are out of scope.
+- Screen-locked/background listening is not supported by this browser implementation.
 
 ### Productivity
 - Local daily activity log, current and best streak, and a 12-week contribution grid.
