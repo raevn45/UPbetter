@@ -13,6 +13,7 @@ type RecognitionConstructor = new () => RecognitionLike;
 type AssistantWindow = Window & { SpeechRecognition?: RecognitionConstructor; webkitSpeechRecognition?: RecognitionConstructor };
 type VoiceAssistantProps = {
   nextAlarmAt?: string | null;
+  nextAlarmLabel?: string;
   alarms: AlarmWithStatus[];
   onCreateAlarm: (input: { label: string; hour: number; minute: number; repeatDays: Weekday[] }) => Promise<string>;
   onDeleteAlarm: (id: string) => Promise<string>;
@@ -39,7 +40,7 @@ function localTimeReply(message: string, nextAlarmAt: string | null | undefined,
 }
 
 function parseAlarmTime(text: string) {
-  const match = text.match(/(?:at|for)\\s+(\\d{1,2})(?::(\\d{2}))?\\s*(a\\.?m\\.?|p\\.?m\\.?)?/i);
+  const match = text.match(/(?:at|for)\s+(\d{1,2})(?::(\d{2}))?\s*(a\\.?m\\.?|p\\.?m\\.?)?/i);
   if (!match) return null;
   let hour = Number(match[1]);
   const minute = Number(match[2] ?? 0);
@@ -72,14 +73,14 @@ export default function VoiceAssistant({ nextAlarmAt, nextAlarmLabel = "", alarm
     if (/\b(set|create|add|make)\b.*\balarm\b/.test(lower)) {
       const time = parseAlarmTime(transcript);
       if (!time) { speak("Tell me a time, for example, set an alarm for 7:30 AM."); return; }
-      const labelMatch = transcript.match(/(?:called|named|labelled|labeled)\\s+(.+)$/i);
+      const labelMatch = transcript.match(/(?:called|named|labelled|labeled)\s+(.+)$/i);
       const label = labelMatch?.[1]?.trim() || "Voice alarm";
       try { speak(await onCreateAlarm({ ...time, label, repeatDays: [] })); }
       catch (error) { speak(error instanceof Error ? error.message : "I could not create that alarm."); }
       return;
     }
     if (/\b(delete|remove|cancel)\b.*\balarm\b/.test(lower)) {
-      const named = transcript.match(/(?:alarm)\\s+(?:called|named)\\s+(.+)$/i)?.[1]?.trim();
+      const named = transcript.match(/(?:alarm)\s+(?:called|named)\s+(.+)$/i)?.[1]?.trim();
       const candidates = alarms.filter(item => item.alarm.enabled || !item.alarm.enabled);
       const target = named
         ? candidates.find(item => item.alarm.label.toLowerCase() === named.toLowerCase()) ?? candidates.find(item => item.alarm.label.toLowerCase().includes(named.toLowerCase()))
