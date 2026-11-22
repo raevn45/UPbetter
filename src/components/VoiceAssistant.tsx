@@ -21,7 +21,7 @@ type VoiceAssistantProps = {
 };
 
 function localTimeReply(message: string, nextAlarmAt: string | null | undefined, nextAlarmLabel: string, timeFormat: "12h" | "24h") {
-  if (!/(time|long|much|left|until|next alarm|alarm)/i.test(message)) return null;
+  if (!(/\\balarm\\b/i.test(message) && /\\b(when|what time|how long|how much|time left|until|next)\\b/i.test(message))) return null;
   if (!nextAlarmAt) return "You do not have an upcoming alarm set in UP yet.";
   const target = new Date(nextAlarmAt);
   if (!Number.isFinite(target.getTime())) return "I could not read your next alarm time. Please check your Alarms page.";
@@ -147,7 +147,13 @@ export default function VoiceAssistant({ nextAlarmAt, nextAlarmLabel = "", alarm
       lastAnswerAt.current = Date.now();
       void answer(transcript);
     };
-    instance.onerror = () => setStatus("MICROPHONE PAUSED");
+    instance.onerror = event => {
+      if (event?.error === "not-allowed" || event?.error === "service-not-allowed") {
+        setPermission("denied");
+        setStatus("MICROPHONE PERMISSION DENIED. ENABLE IT IN DEVICE SETTINGS.");
+        setEnabled(false);
+      } else setStatus("MICROPHONE PAUSED");
+    };
     instance.onend = () => {
       if (enabled && document.visibilityState === "visible") {
         setStatus("RECONNECTING");
