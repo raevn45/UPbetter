@@ -15,8 +15,8 @@ This file is the source-of-truth feature inventory. "Implemented" means code exi
 
 ### Sound
 - Bundled alarm tones: Twin Bell, Digital Beeps, Classic Buzzer, Pulse Alarm and Rising Alarm.
-- Spotify account authorisation using OAuth Authorization Code with PKCE; access token is held in memory for the current app session.
-- Apple Music account authorisation using MusicKit JS; requires the publisher's Apple Music developer token.
+- Spotify account authorisation is deferred by request; the connection screen is hidden.
+- Apple Music account authorisation is deferred by request; the connection screen is hidden.
 - Ambient sound library, favourites, recent sounds and local custom-audio import.
 - Web audio previews and Android native sound preview/playback paths.
 - Imported custom audio is not yet supported as native alarm playback on every platform.
@@ -41,7 +41,7 @@ This file is the source-of-truth feature inventory. "Implemented" means code exi
 - Enable/disable toggle.
 - Foreground browser speech recognition for supported browsers.
 - Recognises sleep-time questions and speaks the remaining time using device text-to-speech.
-- Optional recorded greeting in the user's own voice, played before the generated device-voice answer.
+- No voice sample recording is active. Voice cloning is not implemented.
 - Not a cloned voice; not a guaranteed screen-locked/background assistant.
 
 ### Productivity
@@ -70,7 +70,7 @@ This file is the source-of-truth feature inventory. "Implemented" means code exi
 - Never ask users to paste provider passwords or private secrets into chat. Configure publisher-owned developer credentials in the appropriate dashboards and deployment environment.
 
 ### Productivity and privacy
-- Activity check-ins are manual. The proposed one-hour reminder and tap-to-confirm streak flow is not implemented yet.
+- One-hour check-in reminder is available in the native app; tapping its notification records the streak check-in. Browser-only builds cannot guarantee a notification while closed.
 - Consider optional encrypted cross-device sync only after a separate privacy/security design.
 
 ## Permissions policy
