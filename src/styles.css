@@ -156,3 +156,12 @@ button:active{transform:scale(.975)}
 
 
 .alarm-sound-choice{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.alarm-sound-choice .field-input{min-width:0;margin:0}.alarm-sound-choice .outline-btn{padding:10px 12px;font-size:9px;white-space:nowrap}
+
+
+.sound-categories{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 18px}.sound-categories button{background:#172426;border:1px solid #3a4b42;color:#9eaaa1;border-radius:2px;padding:8px 12px;font:9px var(--mono);letter-spacing:.04em}.sound-categories button:hover{border-color:#c49a5588;color:var(--ivory);transform:translateY(-2px)}.sound-categories button.selected{background:#294b3a;border-color:var(--ochre);color:#f2efe6}
+.day-picker button{border-radius:2px;transition:background .2s,border-color .2s,color .2s,transform .2s}.day-picker button:hover{border-color:var(--ochre);transform:translateY(-2px)}.day-picker button.selected{background:var(--ochre);color:#17201d}
+.preset{border-radius:2px}.preset:hover{border-color:#c49a55;background:#243a32;transform:translateY(-2px)}
+.favourite-btn:hover{background:#392b2b;color:#e5a3a2;transform:scale(1.08)}
+.install-option{border-radius:2px}.install-option:hover{transform:translateX(4px)}
+.nav-item{border-radius:2px}.nav-item:hover{transform:translateX(3px)}
+@media(max-width:760px){.sound-categories{gap:5px}.sound-categories button{padding:7px 9px;font-size:8px}}
