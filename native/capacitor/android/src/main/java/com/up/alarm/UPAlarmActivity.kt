@@ -184,7 +184,8 @@ class UPAlarmActivity : Activity() {
     private fun nextChallenge(kind: String, difficulty: String) {
         answerInput?.setText("")
         val scale = when (difficulty) { "hard" -> 80; "medium" -> 30; else -> 10 }
-        when (kind) {
+        val actualKind = if (kind == "random") listOf("math", "memory", "sequence", "typing", "logic", "checklist", "movement").random() else kind
+        when (actualKind) {
             "movement" -> {
                 currentAnswer = "complete"
                 challengeText?.text = "Take a comfortable moment to stand, stretch gently, or simply sit upright. Tap complete when you're ready."
