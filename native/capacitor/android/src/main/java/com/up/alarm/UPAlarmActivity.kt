@@ -3,6 +3,7 @@ package com.up.alarm
 import android.app.Activity
 import android.content.Context
 import android.media.MediaPlayer
+import android.media.AudioAttributes
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
