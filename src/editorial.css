@@ -354,7 +354,6 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .page-content .parallel-timer strong,.page-content .parallel-timer span{color:#292821}
 .page-content .setting-row strong{color:#24231f}
 .page-content .setting-row span,.page-content .setting-row small{color:#55534c}
-.page-content .mission-studio,.page-content .mission-studio *{color:inherit}
 .page-content input::placeholder{color:#77746b;opacity:1}
 .page-content select,.page-content input,.page-content textarea{color:#24231f}
 .page-content button:not(.primary-btn):not(.sound-play):not(.studio-link){text-shadow:none}
