@@ -658,3 +658,18 @@ body{background-attachment:fixed}
   .page-content .today-side-panel{border-radius:24px}
   .alarm-row{border-radius:18px}
 }
+
+/* The in-app Reduce Motion preference follows the OS accessibility setting. */
+.app-shell[data-reduced-motion="true"] [data-curl],
+.app-shell[data-reduced-motion="true"] [data-spring]{
+  transform:none!important;
+  translate:0 0!important;
+  scale:1!important;
+  transition:none!important;
+  will-change:auto!important;
+}
+.app-shell[data-reduced-motion="true"] [data-reveal]{
+  opacity:1!important;
+  translate:0 0!important;
+  transition:none!important;
+}
