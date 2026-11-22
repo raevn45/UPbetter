@@ -440,7 +440,7 @@
     options = options || {};
     if (typeof buildSprite !== 'function' || typeof composeSit !== 'function' || typeof PATTERNS === 'undefined') {
       console.error('[cat-live] cat-sprite.js globals missing - load cat-sprite.js before cat-live.js');
-      return { start() {}, stop() {}, setCoat() {}, nextCoat() {}, destroy() {}, type() {}, climb() {}, setButterfly() {}, setName() {}, _debug() {} };
+      return { start() {}, stop() {}, setCoat() {}, nextCoat() {}, destroy() {}, type() {}, climb() {}, walk() {}, setButterfly() {}, setName() {}, _debug() {} };
     }
 
     const ctx = canvas.getContext('2d');
