@@ -25,6 +25,7 @@ class UPAlarmActivity : Activity() {
     private var record: JSONObject? = null
     private var alarmId: String? = null
     private var currentAnswer = ""
+    private var activeChallengeKind = "random"
     private var completedRounds = 0
     private var totalRounds = 0
     private var challengeText: TextView? = null
@@ -195,7 +196,8 @@ class UPAlarmActivity : Activity() {
     private fun setupChallenge() {
         val mission = record?.optJSONObject("mission")
         val kind = mission?.optString("kind", "none") ?: "none"
-        val requiredKind = if (kind == "none" || kind.isBlank()) "random" else kind
+        val requiredKind = if (kind == "none" || kind.isBlank() || kind == "movement" || kind == "checklist") "random" else kind
+        activeChallengeKind = requiredKind
         totalRounds = mission?.optInt("rounds", 3)?.coerceIn(3, 5) ?: 3
         completedRounds = 0
         nextChallenge(requiredKind, mission?.optString("difficulty", "hard") ?: "hard")
