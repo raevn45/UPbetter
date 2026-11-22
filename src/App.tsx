@@ -174,7 +174,7 @@ export default function App() {
       const input = { label: alarmForm.label.trim() || "Alarm", enabled: true, hour: Number(alarmForm.hour), minute: Number(alarmForm.minute), repeatDays: alarmForm.repeatDays, timeZone: alarmForm.timeZone, soundId: alarmForm.soundId, volume: alarmForm.volume, gradualVolume: alarmForm.gradualVolume, vibration: alarmForm.vibration, snoozeMinutes: alarmForm.snoozeMinutes, mission: alarmForm.mission };
       const r = editing ? await upCore.alarms.update(editing.id, input) : await upCore.alarms.create(input);
       const saved = resultValue(r);
-      setModal(null); await refresh(); setMisoCue("alarm-created");
+      setModal(null); await refresh(); setMisoCue(`alarm-created-${Date.now()}`);
       setNotice(saved.scheduleState === "scheduled" ? "Alarm saved and scheduled on this device." : "Alarm saved in UP. Native background scheduling isn't active in this web build.");
     } catch (e) { setError(e instanceof Error ? e.message : "Could not save alarm."); }
   };
