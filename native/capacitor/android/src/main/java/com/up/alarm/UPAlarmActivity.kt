@@ -67,7 +67,7 @@ class UPAlarmActivity : Activity() {
             setBackgroundColor(android.graphics.Color.rgb(16, 25, 27))
         }
         layout.addView(TextView(this).apply {
-            text = "UP  /  TIME TO WAKE"
+            text = "GOOD MORNING  ✦"
             textSize = 12f; setTextColor(android.graphics.Color.rgb(196, 154, 85))
             gravity = Gravity.CENTER
         })
@@ -151,6 +151,11 @@ class UPAlarmActivity : Activity() {
             }
         }
         player?.isLooping = true
+        player?.setAudioAttributes(AudioAttributes.Builder()
+            .setUsage(AudioAttributes.USAGE_ALARM)
+            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+            .build())
+        player?.setWakeMode(this, android.os.PowerManager.PARTIAL_WAKE_LOCK)
         val target = (record?.optDouble("volume", 0.8)?.toFloat() ?: 0.8f).coerceIn(0f, 1f)
         if (record?.optBoolean("gradualVolume", true) == true) {
             player?.setVolume(0.05f, 0.05f); player?.start(); handler.post(fade)
@@ -263,6 +268,7 @@ class UPAlarmActivity : Activity() {
         current.put("nextOccurrence", next.toString())
         UPAlarmStore(this).put(id, current.toString())
         UPAlarmScheduling.schedule(this, id, current)
+        (getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(id.hashCode())
         finishWithoutSchedule()
     }
 
