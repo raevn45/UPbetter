@@ -332,7 +332,7 @@ export default function App() {
     if ((id.startsWith("classic-") || id === "device-alarm") && !nativePreview) { setNotice("This is a native alarm sound. Preview it in the Android app or choose an alarm tone from your device."); return; }
     const r = nativePreview ? { ok: true as const, value: undefined } : await upCore.sounds.preview(id);
     if (!r.ok) setError(r.error.message);
-    else { setPlayingSoundId(id); const item = sounds.find(sound => sound.id === id); window.setTimeout(() => setPlayingSoundId(current => current === id ? null : current), (item?.durationSeconds ?? 30) * 1000); const recent = await upCore.sounds.recentlyUsed(); if (recent.ok) setRecentSoundIds(recent.value); }
+    else { setPlayingSoundId(id); const item = sounds.find(sound => sound.id === id); window.setTimeout(() => { setPlayingSoundId(current => current === id ? null : current); if (id.startsWith("classic-") || id === "device-alarm") void stopNativeAlarmSoundPreview(); }, (item?.durationSeconds ?? 30) * 1000); const recent = await upCore.sounds.recentlyUsed(); if (recent.ok) setRecentSoundIds(recent.value); }
   };
   const importSound = async (file?: File) => {
     if (!file) return;
