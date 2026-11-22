@@ -216,12 +216,12 @@ body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;bac
  linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),
  linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);
  background-size:auto,48px 48px,48px 48px}
-body:after{content:"";position:fixed;inset:0;z-index:10;pointer-events:none;opacity:.11;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.24'/%3E%3C/svg%3E");mix-blend-mode:soft-light}
+body:after{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.11;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 180 180' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.92' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.24'/%3E%3C/svg%3E");mix-blend-mode:soft-light}
 button,input,select{font:inherit}button{cursor:pointer}
 button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid var(--acid);outline-offset:4px}
 button{transition:transform .22s cubic-bezier(.2,.8,.2,1),background .22s,border-color .22s,color .22s,box-shadow .22s}
 button:active{transform:scale(.975)}
-.app-shell{isolation:isolate;min-height:100vh;background:transparent}
+.app-shell{position:relative;z-index:1;isolation:isolate;min-height:100vh;background:transparent}
 .sidebar{width:218px;position:fixed;inset:0 auto 0 0;z-index:5;display:flex;flex-direction:column;padding:25px 15px 18px;background:#090a09;border-right:1px solid #ffffff29;box-shadow:none}
 .brand{display:flex;flex-direction:column;align-items:flex-start;text-align:left;background:transparent;border:0;border-bottom:1px solid #ffffff33;color:var(--ivory);padding:0 9px 27px;margin-bottom:29px}
 .brand-mark{font:clamp(65px,7vw,82px)/.78 'Archivo Black',sans-serif;letter-spacing:-.12em;color:var(--ivory);text-transform:uppercase}
