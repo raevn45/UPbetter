@@ -19,6 +19,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
   const [token, setToken] = useState("");
   const [status, setStatus] = useState("Not connected");
+  const [accountEmail, setAccountEmail] = useState("");
   const [title, setTitle] = useState("");
   const [when, setWhen] = useState("");
   const [busy, setBusy] = useState(false);
@@ -55,14 +56,15 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     }
     tokenClient.current = google.initTokenClient({
       client_id: clientId,
-      scope: "https://www.googleapis.com/auth/calendar.events",
+      scope: "openid email profile https://www.googleapis.com/auth/calendar.events",
       callback: response => {
         if (response.error || !response.access_token) {
           setStatus("Google authorization was not completed.");
           return;
         }
         setToken(response.access_token);
-        setStatus("Connected for this session.");
+        void fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + response.access_token } }).then(async profileResponse => { if (!profileResponse.ok) return; const profile = await profileResponse.json() as { email?: string }; setAccountEmail(profile.email || ""); }).catch(() => undefined);
+        setStatus("Google account connected.");
       }
     });
     tokenClient.current.requestAccessToken({ prompt: "consent" });
@@ -139,18 +141,18 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     } finally { setBusy(false); }
   };
 
-  const disconnect = () => { setToken(""); setStatus("Disconnected."); };
+  const disconnect = () => { setToken(""); setAccountEmail(""); setStatus("Disconnected."); };
 
   return <section className="setting-row google-calendar-setting">
     <div>
-      <strong>Google Calendar</strong>
-      <span>Connect your Google account, sync UP alarms and create Calendar reminders.</span>
-      <small>{status} Google access is requested only when you connect. The session token stays in memory. The app publisher must configure its OAuth client ID once.</small>
+      <strong>Google account</strong>
+      <span>Connect Google to let UP work with your Calendar and reminders.</span>
+      <small>{token ? (accountEmail ? `Connected as ${accountEmail}.` : status) : status}</small>
     </div>
     <div className="setting-actions">
       {token
         ? <button className="outline-btn" onClick={disconnect}><LogOut size={14}/> Disconnect</button>
-        : <button className="outline-btn" onClick={connect}><LogIn size={14}/> Sign in with Google</button>}
+        : <button className="outline-btn" onClick={connect}><LogIn size={14}/> Connect Google</button>}
     </div>
     {token && <>
       <div className="google-sync-alarm">
