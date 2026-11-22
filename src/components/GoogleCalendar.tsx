@@ -53,6 +53,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     if (!clientId || !scriptReady || !window.google?.accounts?.oauth2) return;
     const client = window.google.accounts.oauth2.initTokenClient({
       client_id: clientId,
+      scope: "openid email profile https://www.googleapis.com/auth/calendar.events",
       callback: response => {
         if (response.error || !response.access_token) return;
         setToken(response.access_token);
@@ -98,6 +99,8 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     });
     tokenClient.current.requestAccessToken({ prompt: "consent" });
   };
+
+  const disconnect = () => { setToken(""); setAccountEmail(""); setStatus("Disconnected."); };
 
   const syncAlarms = async () => {
     if (!token) return;
