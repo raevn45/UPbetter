@@ -573,3 +573,51 @@ button:active{transform:scale(.975)}
   [data-tilt],[data-magnetic]{transform:none!important;translate:none!important;will-change:auto}
   .ritual-marquee-track,.today-side-panel:before,.mission-preview-orbit,.mission-preview-orbit-inner{animation:none!important}
 }
+
+
+/* Approved UP palette: petrol, forest, burgundy, ochre, ivory */
+:root{
+  --ink:#10191b;--panel:#172326;--panel2:#1c2b2d;--ivory:#f2efe6;
+  --muted:#a7b0aa;--line:rgba(242,239,230,.16);--acid:#c49a55;
+  --signal:#642f3d;--metal:#aeb4a9;--petrol:#173d43;--forest:#294b3a;
+  --burgundy:#642f3d;--ochre:#c49a55;
+  color:var(--ivory);background:var(--ink);
+}
+html,body{background:var(--ink);color:var(--ivory)}
+body:before{background:
+ radial-gradient(520px circle at var(--pointer-x) var(--pointer-y),rgba(196,154,85,.075),transparent 72%),
+ linear-gradient(rgba(242,239,230,.018) 1px,transparent 1px),
+ linear-gradient(90deg,rgba(242,239,230,.018) 1px,transparent 1px);
+ background-size:auto,48px 48px,48px 48px}
+.today-hero{background:var(--panel);box-shadow:12px 12px 0 var(--ochre)}
+.today-hero:before{background:
+ linear-gradient(115deg,transparent 0 57%,#f2efe60a 57% 57.2%,transparent 57.2%),
+ radial-gradient(circle at 78% 50%,#c49a5510,transparent 30%)}
+.today-side-panel{background:var(--petrol);color:var(--ivory)}
+.today-side-panel:before{border-color:#f2efe655;box-shadow:0 0 0 22px #f2efe60a,0 0 0 45px #f2efe608,0 0 0 68px #f2efe606}
+.today-side-panel:after{color:#f2efe677}
+.today-side-panel:hover{background:var(--forest)}
+.today-side-head{color:var(--ivory)}
+.today-side-head .eyebrow{color:#e2d4b8}
+.today-side-head .live-dot{background:var(--ochre);box-shadow:0 0 0 3px #c49a5520}
+.today-side-time{color:var(--ivory)}
+.today-side-meta{color:#d1d8cf}
+.today-side-wave i{background:var(--ochre)}
+.primary-btn{color:#10191b}
+.primary-btn:hover{color:var(--ochre)}
+.ritual-card,.sound-card,.city-card,.countdown-card,.next-card,.quick-tile{background-color:var(--panel)}
+.ritual-card:hover,.sound-card:hover,.city-card:hover,.countdown-card:hover{background-color:#1b302d}
+.capability-banner{background:#c49a5510}
+.toast{background:#172326}
+.modal,.mission-preview-window{background:#172326}
+.mission-choice{background:#10191b!important}
+.mission-choice:hover{background:#173d4318!important}
+.world-local{background:var(--ochre);color:#10191b}
+.world-local .eyebrow,.world-local div>span:last-child{color:#344238}
+.ritual-sticker{background:var(--ochre);color:#10191b}
+.mission-preview-orbit-inner{background:var(--ochre)!important;color:#10191b!important}
+[data-reveal]{opacity:0;transform:translateY(18px);transition:opacity .55s ease,transform .65s cubic-bezier(.2,.8,.2,1)}
+[data-reveal].is-visible{opacity:1;transform:translateY(0)}
+.today-hero[data-reveal]{transform:translateY(18px) scale(.99)}
+.today-hero[data-reveal].is-visible{transform:translateY(0) scale(1)}
+@media(prefers-reduced-motion:reduce){[data-reveal],[data-reveal].is-visible{opacity:1;transform:none;transition:none}}
