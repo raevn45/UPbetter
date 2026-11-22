@@ -18,16 +18,16 @@ Native builds are not the same as device verification. Physical Android and iPho
 
 ## Deploy the web app to Vercel
 
-1. Import `raevn45/alarm` in Vercel.
+1. Import `raevn45/UPbetter` in Vercel.
 2. Keep the project root as `.`. The checked-in `vercel.json` sets the Vite build command (`npm run build`) and output folder (`dist`).
-3. No environment variables or separate backend deployment are required for the current local-first MVP.
+3. The core local-first app works without cloud credentials. To enable the conversational Gemini endpoint, add `GEMINI_API_KEY` in Vercel Project Settings → Environment Variables. Never put this key in frontend code or commit it to Git.
 4. Deploy. Vercel serves the website over HTTPS; the web app can be installed from a supported browser and has an offline app-shell cache.
 
 **Important:** web data is stored in that browser/device's IndexedDB. It does not automatically sync between your laptop and phone. A web alarm is not a reliable background alarm after the browser is closed or the device is suspended.
 
 ## Native build downloads
 
-Every push to `main` runs [Native app builds](https://github.com/raevn45/alarm/actions/workflows/native-build.yml).
+Every push to `main` runs [Native app builds](https://github.com/raevn45/UPbetter/actions/workflows/native-build.yml).
 
 - **Android:** download the `UP-android-debug-apk` artifact from a successful run. It is a debug APK for testing, not a Play Store release.
 - **iOS:** download `UP-ios-simulator-build` for simulator QA. This is not an installable signed iPhone IPA. An Apple signing setup and a physical-device build are still needed for distribution.
@@ -38,20 +38,41 @@ For local native development, follow [native bridge build and test notes](native
 
 ## Development
 
-Requirements: Node.js 20+ and npm.
+Requirements: **Node.js 22 LTS**, npm, Git, and Visual Studio Code.
+
+### Get the code
 
 ```bash
+git clone https://github.com/raevn45/UPbetter.git
+cd UPbetter
 npm install
-npm test
-npm run typecheck
 ```
 
-The Vite/React application entry point and initial UI are now present:
+Open the project folder in VS Code:
+
+```bash
+code .
+```
+
+If the `code` command is not available, open VS Code and choose **File → Open Folder…**, then select the `UPbetter` folder.
+
+### Run and check the app
 
 ```bash
 npm run dev
+```
+
+Open the local URL printed by Vite (normally `http://localhost:5173`). Changes to React and CSS files refresh in the browser as you save them.
+
+Before committing changes, run:
+
+```bash
+npm test
+npm run typecheck
 npm run build
 ```
+
+`npm run dev` starts the Vite frontend. The `/api/assistant/chat` serverless endpoint is provided by Vercel, so to test that endpoint locally use the Vercel CLI (`npx vercel dev`) and configure `GEMINI_API_KEY` in the local Vercel environment. Alarm creation, deletion and time-to-next-alarm commands are handled locally by the app.
 
 ## Team ownership
 
@@ -64,13 +85,12 @@ There is no cloud server, account, remote database, analytics or sync in the MVP
 ## Product direction
 
 ### The feel
-Atmospheric editorial design with confident typography, thoughtful motion and a restrained palette:
-- Ink: `#10191B`
-- Deep petrol: `#173D43`
-- Forest: `#294B3A`
-- Burgundy: `#642F3D`
-- Warm ochre: `#C49A55`
-- Soft ivory: `#F2EFE6`
+Haoqi-inspired editorial design: warm paper, deep black typography, a restrained vermilion accent, serif-led display type, quiet mono metadata, measured whitespace and purposeful motion:
+- Warm paper: `#F4F1E8`
+- Deep ink: `#191916`
+- Oxidised vermilion: `#C45B42`
+- Muted sage: `#879080`
+- Pale stone: `#E7E2D7`
 
 Avoid generic dashboard layouts, purple-blue gradient blobs, excessive glassmorphism and filler motivational quotes. The cat is an original character, not an emoji, and must never shame the user for missing an alarm.
 
