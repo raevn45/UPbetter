@@ -63,8 +63,9 @@ Each alarm supports:
 - Vibration where supported
 - Snooze configuration
 - Mission type and difficulty
-- Optional motivational line / personal voice recording
+- Optional personal message to yourself, displayed on the Today screen or read using the device voice
 - Optional briefing before or after dismissal
+- No voice cloning or own-voice modulation feature
 
 Timezone flow:
 1. Choose a city or timezone.
