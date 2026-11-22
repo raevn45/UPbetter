@@ -15,6 +15,8 @@ This file is the source-of-truth feature inventory. "Implemented" means code exi
 
 ### Sound
 - Bundled alarm tones: Twin Bell, Digital Beeps, Classic Buzzer, Pulse Alarm and Rising Alarm.
+- Spotify account authorisation using OAuth Authorization Code with PKCE; access token is held in memory for the current app session.
+- Apple Music account authorisation using MusicKit JS; requires the publisher's Apple Music developer token.
 - Ambient sound library, favourites, recent sounds and local custom-audio import.
 - Web audio previews and Android native sound preview/playback paths.
 - Imported custom audio is not yet supported as native alarm playback on every platform.
@@ -61,10 +63,11 @@ This file is the source-of-truth feature inventory. "Implemented" means code exi
 - Add privacy controls to delete the recording and disable recognition.
 
 ### Music providers
-- Spotify: OAuth sign-in, provider permissions and playback integration. Playback availability depends on Spotify account/device/API rules; Premium may be required for some playback paths.
-- Apple Music: MusicKit developer token, user authorisation and subscription-aware playback.
-- YouTube: supported embedded/player route and policy-compliant playback. Do not promise background YouTube Music playback where the platform/API does not allow it.
-- Never ask users to paste provider secrets into chat. Configure client IDs/tokens in the appropriate developer dashboards and secure deployment environment.
+- Spotify and Apple Music account authorisation screens are implemented. Configure `VITE_SPOTIFY_CLIENT_ID`, the matching Spotify redirect URI (`VITE_SPOTIFY_REDIRECT_URI`, optional if using the current app URL), and `VITE_APPLE_MUSIC_DEVELOPER_TOKEN` in the deployment environment. Add the exact redirect URI to the Spotify developer dashboard.
+- Spotify playback, device selection and native alarm audio hand-off are not implemented yet. Some Spotify playback paths require Premium and an eligible active device.
+- Apple Music playback and native alarm audio hand-off are not implemented yet. MusicKit requires an eligible subscription.
+- YouTube account connection and its supported embedded/player route remain outstanding. Do not promise background YouTube Music playback where the platform/API does not allow it.
+- Never ask users to paste provider passwords or private secrets into chat. Configure publisher-owned developer credentials in the appropriate dashboards and deployment environment.
 
 ### Productivity and privacy
 - Activity check-ins are manual. The proposed one-hour reminder and tap-to-confirm streak flow is not implemented yet.
