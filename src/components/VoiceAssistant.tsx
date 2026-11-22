@@ -19,7 +19,7 @@ type VoiceAssistantProps = {
   timeFormat: "12h" | "24h";
 };
 
-function localTimeReply(message: string, nextAlarmAt?: string | null) {
+function localTimeReply(message: string, nextAlarmAt: string | null | undefined, nextAlarmLabel: string, timeFormat: "12h" | "24h") {
   if (!/(time|long|much|left|until|next alarm|alarm)/i.test(message)) return null;
   if (!nextAlarmAt) return "You do not have an upcoming alarm set in UP yet.";
   const target = new Date(nextAlarmAt);
@@ -34,7 +34,8 @@ function localTimeReply(message: string, nextAlarmAt?: string | null) {
   if (days) parts.push(days + (days === 1 ? " day" : " days"));
   if (hours) parts.push(hours + (hours === 1 ? " hour" : " hours"));
   if (minutes || !parts.length) parts.push(minutes + (minutes === 1 ? " minute" : " minutes"));
-  return "Your next alarm is in " + parts.join(" and ") + ".";
+  const at = target.toLocaleTimeString([], { hour: "numeric", minute: "2-digit", hour12: timeFormat === "12h" });
+  return `Your next alarm${nextAlarmLabel ? `, ${nextAlarmLabel},` : ""} is at ${at}, in ${parts.join(" and ")}.`;
 }
 
 function parseAlarmTime(text: string) {
@@ -49,7 +50,7 @@ function parseAlarmTime(text: string) {
   return { hour, minute };
 }
 
-export default function VoiceAssistant({ nextAlarmAt, alarms, onCreateAlarm, onDeleteAlarm, timeFormat }: VoiceAssistantProps) {
+export default function VoiceAssistant({ nextAlarmAt, nextAlarmLabel = "", alarms, onCreateAlarm, onDeleteAlarm, timeFormat }: VoiceAssistantProps) {
   const [enabled, setEnabled] = useState(false);
   const [status, setStatus] = useState("OFF");
   const [heard, setHeard] = useState("");
@@ -68,7 +69,7 @@ export default function VoiceAssistant({ nextAlarmAt, alarms, onCreateAlarm, onD
 
   const answer = useCallback(async (transcript: string) => {
     const lower = transcript.toLowerCase();
-    if (/(set|create|add|make) (?:an? )?alarm/.test(lower)) {
+    if (/\\b(set|create|add|make)\\b.*\\balarm\\b/.test(lower)) {
       const time = parseAlarmTime(transcript);
       if (!time) { speak("Tell me a time, for example, set an alarm for 7:30 AM."); return; }
       const labelMatch = transcript.match(/(?:called|named|labelled|labeled)\\s+(.+)$/i);
@@ -77,7 +78,7 @@ export default function VoiceAssistant({ nextAlarmAt, alarms, onCreateAlarm, onD
       catch (error) { speak(error instanceof Error ? error.message : "I could not create that alarm."); }
       return;
     }
-    if (/(delete|remove|cancel) (?:the )?(?:my )?alarm/.test(lower)) {
+    if (/\\b(delete|remove|cancel)\\b.*\\balarm\\b/.test(lower)) {
       const named = transcript.match(/(?:alarm)\\s+(?:called|named)\\s+(.+)$/i)?.[1]?.trim();
       const candidates = alarms.filter(item => item.alarm.enabled || !item.alarm.enabled);
       const target = named
@@ -89,7 +90,7 @@ export default function VoiceAssistant({ nextAlarmAt, alarms, onCreateAlarm, onD
       catch (error) { speak(error instanceof Error ? error.message : "I could not delete that alarm."); }
       return;
     }
-    const localReply = localTimeReply(transcript, nextAlarmAt);
+    const localReply = localTimeReply(transcript, nextAlarmAt, nextAlarmLabel, timeFormat);
     if (localReply) { speak(localReply); return; }
     setStatus("THINKING");
     try {
@@ -105,7 +106,7 @@ export default function VoiceAssistant({ nextAlarmAt, alarms, onCreateAlarm, onD
       speak(error instanceof Error ? error.message : "UP could not answer right now.");
       setStatus("ASSISTANT UNAVAILABLE");
     }
-  }, [alarms, nextAlarmAt, onCreateAlarm, onDeleteAlarm, speak]);
+  }, [alarms, nextAlarmAt, nextAlarmLabel, onCreateAlarm, onDeleteAlarm, speak, timeFormat]);
 
   const startListening = async () => {
     if (!navigator.mediaDevices?.getUserMedia) { setStatus("MICROPHONE NOT AVAILABLE IN THIS ENVIRONMENT"); return; }
