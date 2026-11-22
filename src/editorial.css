@@ -133,3 +133,21 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
 .mobile-more-menu{transform-origin:bottom right;animation:editorial-menu-in .24s cubic-bezier(.2,.8,.2,1) both}
 @keyframes editorial-menu-in{from{opacity:0;clip-path:inset(100% 0 0 100%)}to{opacity:1;clip-path:inset(0 0 0 0)}}
 @media(prefers-reduced-motion:reduce){.sound-art{transform:none!important;transition:none!important}.mobile-more-menu{animation:none}}
+
+
+/* Final motion pass: true negative-to-positive development and shared scroll velocity. */
+.sound-art{
+  transform:scaleX(calc(1 - var(--scroll-compress, 0))) skewX(var(--scroll-skew, 0deg));
+  transform-origin:center;
+  will-change:transform,filter;
+  transition:filter .8s cubic-bezier(.2,.7,.2,1),transform .12s ease-out;
+}
+.sound-card[data-reveal]:not(.is-visible) .sound-art{
+  filter:grayscale(1) invert(1) contrast(1.35) brightness(.88);
+}
+.sound-card[data-reveal].is-visible .sound-art{
+  filter:grayscale(0) invert(0) contrast(1) brightness(1);
+}
+@media(prefers-reduced-motion:reduce){
+  .sound-art{transform:none!important;transition:none!important;will-change:auto}
+}
