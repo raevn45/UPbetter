@@ -1347,6 +1347,15 @@
       lastKeyAt = now(); typeUntil = lastKeyAt + 480; heat = Math.min(1, heat + 0.11);
       autoState = null; nextAuto = lastKeyAt + 6000; kick();
     }
+    function walk(duration) {
+      const t = now();
+      asleep = false; drowse = 0;
+      autoState = 'ZOOMIES'; autoUntil = t + Math.max(900, Math.min(6000, duration || 3200));
+      travelTX = clamp(restX + (Math.random() - 0.5) * cssW * 0.5, travelMinX, travelMaxX);
+      nextAuto = autoUntil + 2500;
+      flickT0 = t;
+      kick();
+    }
     function climb(dir) {
       climbDir = dir < 0 ? -1 : 1; climbUntil = now() + 1000; paperLen = Math.min(60, paperLen + 26);
       climbY = clamp(climbY + (climbDir < 0 ? 20 : -20), -cssH * 0.16, cssH * 0.32);   // travel up/down the rope
@@ -1390,7 +1399,7 @@
       if (rect) for (let h = 0; h < 4; h++) onHearts(rect.left + footX + (Math.random() * 40 - 20), rect.top + (footY - SH * 0.7 * scale));
       kick();
     }
-    return { start, stop, setCoat, nextCoat, destroy, type, climb, setButterfly, greet, gift,
+    return { start, stop, setCoat, nextCoat, destroy, type, climb, walk, setButterfly, greet, gift,
       setName: (n) => { catName = typeof n === 'string' ? n : ''; },
       _debug: () => ({ zone: rect ? zoneAt(curX - rect.left, curY - rect.top) : null, gesture: gesture(), name: catName,
         footX, restX, travelTX, bfx: bf.x, bfy: bf.y, present: bf.present, mode: bf.mode, stalkUntil, state: resolveState(now()) }) };
