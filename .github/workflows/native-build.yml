@@ -7,6 +7,10 @@ on:
     branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: native-build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   android:
     name: Android debug APK
