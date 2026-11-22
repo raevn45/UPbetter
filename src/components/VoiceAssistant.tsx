@@ -11,6 +11,24 @@ type RecognitionLike = {
 type RecognitionConstructor = new () => RecognitionLike;
 type AssistantWindow = Window & { SpeechRecognition?: RecognitionConstructor; webkitSpeechRecognition?: RecognitionConstructor };
 
+function localTimeReply(message: string, nextAlarmAt?: string | null) {
+  if (!/(time|long|much|left|until|next alarm|alarm)/i.test(message)) return null;
+  if (!nextAlarmAt) return "You do not have an upcoming alarm set in UP yet.";
+  const target = new Date(nextAlarmAt);
+  if (!Number.isFinite(target.getTime())) return "I could not read your next alarm time. Please check your Alarms page.";
+  const remaining = target.getTime() - Date.now();
+  if (remaining <= 0) return "Your next alarm time has passed. Check your Alarms page for the next one.";
+  const totalMinutes = Math.ceil(remaining / 60000);
+  const days = Math.floor(totalMinutes / 1440);
+  const hours = Math.floor((totalMinutes % 1440) / 60);
+  const minutes = totalMinutes % 60;
+  const parts: string[] = [];
+  if (days) parts.push(days + (days === 1 ? " day" : " days"));
+  if (hours) parts.push(hours + (hours === 1 ? " hour" : " hours"));
+  if (minutes || !parts.length) parts.push(minutes + (minutes === 1 ? " minute" : " minutes"));
+  return "Your next alarm is in " + parts.join(" and ") + ".";
+}
+
 export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string | null }) {
   const [enabled, setEnabled] = useState(() => localStorage.getItem("up-voice-assistant-enabled") === "true");
   const [status, setStatus] = useState("OFF");
