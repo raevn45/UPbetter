@@ -29,7 +29,9 @@ export default function GoogleCalendar({ alarms, onAccountChange }: { alarms: Al
   const [when, setWhen] = useState("");
   const [busy, setBusy] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
-  const tokenClient = useRef<{ requestAccessToken(options?: { prompt?: string }): void } | null>(null);\n\n  useEffect(() => { onAccountChange?.(token && accountEmail ? accountEmail : ""); }, [token, accountEmail, onAccountChange]);
+  const tokenClient = useRef<{ requestAccessToken(options?: { prompt?: string }): void } | null>(null);
+
+  useEffect(() => { onAccountChange?.(token && accountEmail ? accountEmail : ""); }, [token, accountEmail, onAccountChange]);
 
   useEffect(() => {
     if (!clientId) return;
