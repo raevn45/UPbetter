@@ -20,7 +20,7 @@ export class MissionService {
 
   create(config: MissionConfig): WakeChallenge {
     const id = randomId();
-    const available: MissionKind[] = ["math", "memory", "sequence", "typing", "logic", "checklist", "movement"];
+    const available: MissionKind[] = ["math", "memory", "sequence", "typing", "logic"];
     const kind = config.kind === "random" ? available[Math.floor(Math.random() * available.length)]! : config.kind;
     const challenge = this.build(id, kind, config.difficulty);
     this.answers.set(id, challenge.answer);
@@ -47,13 +47,15 @@ export class MissionService {
   } {
     const scale = difficulty === "easy" ? 10 : difficulty === "medium" ? 30 : 100;
     if (kind === "math") {
-      const a = 2 + Math.floor(Math.random() * scale);
-      const b = 1 + Math.floor(Math.random() * scale);
-      const subtract = Math.random() > 0.5;
+      const multiply = difficulty === "hard" && Math.random() > 0.45;
+      const a = multiply ? 3 + Math.floor(Math.random() * 10) : 12 + Math.floor(Math.random() * scale);
+      const b = multiply ? 3 + Math.floor(Math.random() * 10) : 8 + Math.floor(Math.random() * scale);
+      const subtract = !multiply && Math.random() > 0.5;
       const left = subtract ? Math.max(a, b) : a;
       const right = subtract ? Math.min(a, b) : b;
-      const answer = subtract ? left - right : left + right;
-      return { prompt: `Quick one: ${left} ${subtract ? "−" : "+"} ${right} = ?`, hint: "Take it one step at a time.", answer: { accepted: [String(answer)] } };
+      const answer = multiply ? a * b : subtract ? left - right : left + right;
+      const operator = multiply ? "×" : subtract ? "−" : "+";
+      return { prompt: `Solve: ${left} ${operator} ${right} = ?`, hint: "Work it out carefully before entering the answer.", answer: { accepted: [String(answer)] } };
     }
     if (kind === "sequence" || kind === "logic") {
       const start = 1 + Math.floor(Math.random() * 8);
