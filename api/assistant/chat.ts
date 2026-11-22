@@ -9,7 +9,7 @@ type ChatBody = {
 export default async function handler(req: Request, res: Response) {
   if (req.method !== "POST") return res.status(405).json({ error: "Use POST." });
   const key = process.env.GEMINI_API_KEY;
-  if (!key) return res.status(503).json({ error: "UP's assistant is not configured yet. The app publisher must add GEMINI_API_KEY to the server environment." });
+  if (!key) return res.status(503).json({ error: "UP’s conversational assistant is temporarily unavailable. Time-until-alarm questions still work locally." });
 
   let body: ChatBody;
   try {
