@@ -621,3 +621,19 @@ body:before{background:
 .today-hero[data-reveal]{transform:translateY(18px) scale(.99)}
 .today-hero[data-reveal].is-visible{transform:translateY(0) scale(1)}
 @media(prefers-reduced-motion:reduce){[data-reveal],[data-reveal].is-visible{opacity:1;transform:none;transition:none}}
+
+
+/* Four-beat mission preview: NOTICE → QUESTION → BUILD → REPEAT */
+.mission-sequence{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:5px;margin:19px 0 10px}
+.mission-sequence span{padding:9px 5px;border-top:1px solid #ffffff35;color:#89948a;font:7px var(--mono);letter-spacing:.08em;text-align:center;transition:color .2s,border-color .2s,background .2s}
+.mission-sequence span.active{border-color:var(--ochre);background:#c49a5512;color:var(--ochre)}
+.mission-sequence span.complete{border-color:#294b3a;color:#b8c9b2}
+.mission-phase-card{position:relative;min-height:360px;display:flex;flex-direction:column;align-items:flex-start;justify-content:center;padding:16px 0 22px;animation:missionArrive .35s cubic-bezier(.2,.8,.2,1) both}
+.mission-phase-card h3{max-width:480px;margin:17px 0 10px;color:var(--ivory);font:600 clamp(30px,5vw,48px)/.98 'Space Grotesk',sans-serif;letter-spacing:-.06em}
+.mission-phase-card p{max-width:460px;color:#a5ab9e;font:10px/1.8 var(--mono)}
+.mission-phase-card form{display:flex;flex-wrap:wrap;gap:10px;width:100%;margin-top:24px}
+.mission-phase-card form input{flex:1;min-width:180px;padding:14px;border:1px solid #ffffff59;background:#10191b;color:var(--ivory);font:11px var(--mono)}
+.mission-build-mark{display:grid;place-items:center;width:76px;height:76px;margin:28px 0 12px;border:1px solid var(--ochre);color:var(--ochre);box-shadow:8px 8px 0 #c49a5528}
+.mission-phase-success .mission-build-mark{animation:missionCore 1.8s ease-in-out infinite alternate}
+@media(max-width:600px){.mission-sequence span{font-size:6px;padding-inline:2px}.mission-phase-card{min-height:300px}.mission-preview-window{padding:22px!important}}
+@media(prefers-reduced-motion:reduce){.mission-phase-card,.mission-phase-success .mission-build-mark{animation:none!important}}
