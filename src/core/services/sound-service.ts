@@ -2,6 +2,7 @@ import { failure, success, type Result, type SoundItem } from "../domain/types";
 import { getDatabase } from "../storage/database";
 
 type LibrarySound = Omit<SoundItem, "isFavourite">;
+type CustomSoundRecord = { id: string; title: string; category: "Custom"; durationSeconds: number; source: "user"; attribution: string; blob: Blob };
 
 const SOUND_LIBRARY: LibrarySound[] = [
   { id: "rain-soft", title: "Rain on the Window", category: "Rain", durationSeconds: 8, source: "bundled", previewUrl: "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.1.0-preview/rain-soft.wav", attribution: "CC0 1.0 · barkenov · Freesound 640655" },
@@ -31,21 +32,24 @@ const SOUND_LIBRARY: LibrarySound[] = [
 export class SoundService {
   private activeAudio: HTMLAudioElement | null = null;
   private previewTimeout: number | null = null;
+  private activeObjectUrl: string | null = null;
 
   async list(): Promise<Result<SoundItem[]>> {
     try {
       const db = await getDatabase();
       const favourites = (await db.get("settings", "sound-favourites") as string[] | undefined) ?? [];
-      return success(SOUND_LIBRARY.map(sound => ({ ...sound, isFavourite: favourites.includes(sound.id) })));
+      const custom = (await db.get("settings", "custom-sounds") as CustomSoundRecord[] | undefined) ?? [];
+      return success([...SOUND_LIBRARY, ...custom.map(({ blob: _blob, ...sound }) => sound)].map(sound => ({ ...sound, isFavourite: favourites.includes(sound.id) })));
     } catch (e) {
       return failure("SOUND_LIST_FAILED", e instanceof Error ? e.message : "Could not load sounds.");
     }
   }
 
   async setFavourite(soundId: string, favourite: boolean): Promise<Result<void>> {
-    if (!SOUND_LIBRARY.some(sound => sound.id === soundId)) return failure("SOUND_NOT_FOUND", "That sound is not available.");
     try {
       const db = await getDatabase();
+      const available = [...SOUND_LIBRARY.map(sound => sound.id), ...(((await db.get("settings", "custom-sounds") as CustomSoundRecord[] | undefined) ?? []).map(sound => sound.id))];
+      if (!available.includes(soundId)) return failure("SOUND_NOT_FOUND", "That sound is not available.");
       const favourites = new Set((await db.get("settings", "sound-favourites") as string[] | undefined) ?? []);
       favourite ? favourites.add(soundId) : favourites.delete(soundId);
       await db.put("settings", [...favourites], "sound-favourites");
@@ -65,19 +69,70 @@ export class SoundService {
     }
   }
 
+  async importCustom(file: File): Promise<Result<SoundItem>> {
+    if (!file.type.startsWith("audio/")) return failure("INVALID_AUDIO", "Choose an audio file.");
+    if (file.size > 20 * 1024 * 1024) return failure("AUDIO_TOO_LARGE", "Custom sounds must be 20 MB or smaller.");
+    try {
+      const db = await getDatabase();
+      const custom = (await db.get("settings", "custom-sounds") as CustomSoundRecord[] | undefined) ?? [];
+      const title = file.name.replace(/\\.[^.]+$/, "").slice(0, 48) || "My sound";
+      const record: CustomSoundRecord = { id: `custom-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`, title, category: "Custom", durationSeconds: 30, source: "user", attribution: "Imported from your device", blob: file };
+      await db.put("settings", [...custom, record], "custom-sounds");
+      return success({ id: record.id, title: record.title, category: record.category, durationSeconds: record.durationSeconds, source: record.source, attribution: record.attribution, isFavourite: false });
+    } catch (e) {
+      return failure("CUSTOM_SOUND_IMPORT_FAILED", e instanceof Error ? e.message : "Could not import that audio file.");
+    }
+  }
+
+  async removeCustom(soundId: string): Promise<Result<void>> {
+    try {
+      const db = await getDatabase();
+      const custom = (await db.get("settings", "custom-sounds") as CustomSoundRecord[] | undefined) ?? [];
+      await db.put("settings", custom.filter(sound => sound.id !== soundId), "custom-sounds");
+      const favourites = (await db.get("settings", "sound-favourites") as string[] | undefined) ?? [];
+      await db.put("settings", favourites.filter(id => id !== soundId), "sound-favourites");
+      return success(undefined);
+    } catch (e) {
+      return failure("CUSTOM_SOUND_REMOVE_FAILED", e instanceof Error ? e.message : "Could not remove that sound.");
+    }
+  }
+
+  async recentlyUsed(): Promise<Result<string[]>> {
+    try {
+      const db = await getDatabase();
+      return success((await db.get("settings", "sound-recent") as string[] | undefined) ?? []);
+    } catch (e) {
+      return failure("SOUND_RECENT_FAILED", e instanceof Error ? e.message : "Could not load recent sounds.");
+    }
+  }
+
   async preview(soundId: string): Promise<Result<void>> {
     const sound = SOUND_LIBRARY.find(item => item.id === soundId);
-    if (!sound?.previewUrl) return failure("SOUND_NOT_FOUND", "That sound is not available.");
     if (typeof Audio === "undefined") return failure("AUDIO_UNAVAILABLE", "Audio preview is unavailable in this environment.");
     try {
       this.stopPreview();
-      const audio = new Audio(sound.previewUrl);
+      let source = sound?.previewUrl;
+      let duration = sound?.durationSeconds ?? 30;
+      if (!sound) {
+        const db = await getDatabase();
+        const custom = (await db.get("settings", "custom-sounds") as CustomSoundRecord[] | undefined) ?? [];
+        const record = custom.find(item => item.id === soundId);
+        if (!record) return failure("SOUND_NOT_FOUND", "That sound is not available.");
+        source = URL.createObjectURL(record.blob);
+        this.activeObjectUrl = source;
+        duration = record.durationSeconds;
+      }
+      if (!source) return failure("SOUND_NOT_FOUND", "That sound is not available.");
+      const audio = new Audio(source);
       audio.preload = "auto";
       audio.loop = true;
       audio.volume = 0.78;
       this.activeAudio = audio;
       await audio.play();
-      this.previewTimeout = window.setTimeout(() => this.stopPreview(), sound.durationSeconds * 1000);
+      this.previewTimeout = window.setTimeout(() => this.stopPreview(), duration * 1000);
+      const db = await getDatabase();
+      const recent = (await db.get("settings", "sound-recent") as string[] | undefined) ?? [];
+      await db.put("settings", [soundId, ...recent.filter(id => id !== soundId)].slice(0, 8), "sound-recent");
       return success(undefined);
     } catch (e) {
       this.stopPreview();
