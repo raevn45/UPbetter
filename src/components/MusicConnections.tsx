@@ -22,8 +22,8 @@ export default function MusicConnections() {
   const spotifyRedirect = (import.meta.env.VITE_SPOTIFY_REDIRECT_URI as string | undefined) || (window.location.origin + window.location.pathname);
   const appleDeveloperToken = import.meta.env.VITE_APPLE_MUSIC_DEVELOPER_TOKEN as string | undefined;
   const [spotifyToken, setSpotifyToken] = useState("");
-  const [spotifyStatus, setSpotifyStatus] = useState("Not connected");
-  const [appleStatus, setAppleStatus] = useState("Not connected");
+  const [spotifyStatus, setSpotifyStatus] = useState(spotifyClientId ? "Not connected" : "Spotify connection is being set up for UP.");
+  const [appleStatus, setAppleStatus] = useState(appleDeveloperToken ? "Not connected" : "Apple Music connection is being set up for UP.");
   const [appleReady, setAppleReady] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -70,7 +70,7 @@ export default function MusicConnections() {
   }, [appleDeveloperToken]);
 
   const connectSpotify = async () => {
-    if (!spotifyClientId) { setSpotifyStatus("UP needs its publisher Spotify Client ID configured."); return; }
+    if (!spotifyClientId) { setSpotifyStatus("Spotify connection is not ready yet. You do not need to enter or configure anything."); return; }
     try {
       const verifierBytes = crypto.getRandomValues(new Uint8Array(64));
       const verifier = b64url(verifierBytes);
@@ -93,7 +93,7 @@ export default function MusicConnections() {
 
   const disconnectSpotify = () => { setSpotifyToken(""); setSpotifyStatus("Disconnected."); };
   const connectApple = async () => {
-    if (!appleDeveloperToken) { setAppleStatus("UP needs its publisher Apple Music developer token configured."); return; }
+    if (!appleDeveloperToken) { setAppleStatus("Apple Music connection is not ready yet. You do not need to enter or configure anything."); return; }
     if (!window.MusicKit || !appleReady) { setAppleStatus("Apple Music authorisation is still loading."); return; }
     setBusy(true);
     try {
