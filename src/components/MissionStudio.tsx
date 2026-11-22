@@ -38,7 +38,7 @@ export default function MissionStudio({ value, onChange, onComplete }: { value: 
   return <section className="mission-studio">
     <div className="mission-studio-head"><div><span className="eyebrow">WAKE-UP CHALLENGE</span><h3>Give your brain a gentle nudge.</h3><p>Pick the kind of check you want. Preview a real example before saving.</p></div><span className="mission-count">{value ? "01 SELECTED" : "OPTIONAL"}</span></div>
     <div className="mission-choice-grid">
-      {choices.map(choice => { const Icon = choice.icon; const active = value?.kind === choice.kind; return <button type="button" key={choice.kind} className={`mission-choice ${active ? "is-selected" : ""}`} onClick={() => { onChange(active ? null : { kind: choice.kind, difficulty: value?.difficulty ?? "easy", rounds: value?.rounds ?? 1 }); setPreview(null); }}>
+      {choices.map(choice => { const Icon = choice.icon; const active = value?.kind === choice.kind; return <button type="button" key={choice.kind} className={`mission-choice ${active ? "is-selected" : ""}`} data-tilt onClick={() => { onChange(active ? null : { kind: choice.kind, difficulty: value?.difficulty ?? "easy", rounds: value?.rounds ?? 1 }); setPreview(null); }}>
         <span className="mission-choice-icon"><Icon size={18}/></span><span className="mission-choice-copy"><strong>{choice.title}</strong><small>{choice.subtitle}</small></span><span className="mission-choice-check">{active ? <CheckCircle2 size={17}/> : "+"}</span>
       </button>; })}
     </div>
