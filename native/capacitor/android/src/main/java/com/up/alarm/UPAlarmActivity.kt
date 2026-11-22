@@ -204,7 +204,7 @@ class UPAlarmActivity : Activity() {
     private fun nextChallenge(kind: String, difficulty: String) {
         answerInput?.setText("")
         val scale = when (difficulty) { "hard" -> 80; "medium" -> 30; else -> 10 }
-        val actualKind = if (kind == "random") listOf("math", "memory", "sequence", "typing", "logic", "checklist", "movement").random() else kind
+        val actualKind = if (kind == "random") listOf("math", "memory", "sequence", "typing", "logic").random() else kind
         when (actualKind) {
             "movement" -> {
                 currentAnswer = "complete"
@@ -235,13 +235,16 @@ class UPAlarmActivity : Activity() {
                 answerInput?.visibility = android.view.View.VISIBLE
             }
             else -> {
-                val a = Random.nextInt(2, scale + 2)
-                val b = Random.nextInt(1, scale + 1)
-                val subtract = Random.nextBoolean()
+                val multiply = difficulty == "hard" && Random.nextBoolean()
+                val a = if (multiply) Random.nextInt(3, 13) else Random.nextInt(12, scale + 2)
+                val b = if (multiply) Random.nextInt(3, 13) else Random.nextInt(8, scale + 1)
+                val subtract = !multiply && Random.nextBoolean()
                 val left = if (subtract) maxOf(a, b) else a
                 val right = if (subtract) minOf(a, b) else b
-                currentAnswer = (if (subtract) left - right else left + right).toString()
-                challengeText?.text = "Quick one: $left ${if (subtract) "−" else "+"} $right = ?"
+                val answer = if (multiply) a * b else if (subtract) left - right else left + right
+                currentAnswer = answer.toString()
+                val operator = if (multiply) "×" else if (subtract) "−" else "+"
+                challengeText?.text = "Solve: $left $operator $right = ?"
                 answerInput?.visibility = android.view.View.VISIBLE
             }
         }
