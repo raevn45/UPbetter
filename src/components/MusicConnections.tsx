@@ -14,10 +14,7 @@ type MusicKitInstance = {
   unauthorize(): Promise<void>;
   isAuthorized: boolean;
 };
-const spotifyScopes = [
-  "user-read-private", "user-read-email", "user-read-playback-state",
-  "user-modify-playback-state", "streaming", "playlist-read-private"
-].join(" ");
+const spotifyScopes = ["user-read-private", "user-read-email"].join(" ");
 const b64url = (bytes: Uint8Array) => btoa(String.fromCharCode(...bytes)).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/g, "");
 
 export default function MusicConnections() {
@@ -115,13 +112,13 @@ export default function MusicConnections() {
 
   return <section className="music-connections">
     <div className="setting-row music-provider-row">
-      <div><strong><Music2 size={16}/> Spotify</strong><span>Authorise UP to access your Spotify account and supported playback controls.</span><small>{spotifyStatus} {spotifyToken ? "Access is held in memory and ends when this app session is cleared." : "Requires the UP publisher's Spotify Client ID and an approved redirect URI."}</small></div>
+      <div><strong><Music2 size={16}/> Spotify</strong><span>Connect your Spotify account. Spotify will ask you to approve UP.</span><small>{spotifyStatus} {spotifyToken ? "Access is held in memory and ends when this app session is cleared." : "Requires the UP publisher's Spotify Client ID and an approved redirect URI."}</small></div>
       {spotifyToken ? <button className="outline-btn" onClick={disconnectSpotify}><LogOut size={14}/> Disconnect</button> : <button className="outline-btn" onClick={() => void connectSpotify()}><LogIn size={14}/> Connect Spotify</button>}
     </div>
     <div className="setting-row music-provider-row">
-      <div><strong><Apple size={16}/> Apple Music</strong><span>Connect with Apple Music using MusicKit and your Apple Music subscription.</span><small>{appleStatus} {appleDeveloperToken ? "The developer token is supplied by UP." : "Requires the UP publisher's Apple Music developer token and MusicKit setup."}</small></div>
+      <div><strong><Apple size={16}/> Apple Music</strong><span>Connect your Apple Music account. Apple will ask you to approve access.</span><small>{appleStatus} {appleDeveloperToken ? "The developer token is supplied by UP." : "Requires the UP publisher's Apple Music developer token and MusicKit setup."}</small></div>
       {appleStatus.startsWith("Connected") ? <button className="outline-btn" onClick={() => void disconnectApple()}><LogOut size={14}/> Disconnect</button> : <button className="outline-btn" disabled={busy} onClick={() => void connectApple()}><Link2 size={14}/> {busy ? "Connecting…" : "Connect Apple Music"}</button>}
     </div>
-    <p className="fine-print">Connecting an account does not yet make its tracks available as native alarm audio. Playback, device selection and native alarm hand-off are separate integrations; Spotify playback may require Premium and Apple Music requires an eligible subscription.</p>
+    <p className="fine-print">UP only asks for the access needed to connect your account. You can disconnect at any time.</p>
   </section>;
 }
