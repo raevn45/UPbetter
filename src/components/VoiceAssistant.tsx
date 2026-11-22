@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MicOff, Radio, Volume2 } from "lucide-react";
+import { Mic, MicOff, Radio, Volume2 } from "lucide-react";
+import type { AlarmWithStatus, Weekday } from "../core";
 
 type RecognitionResult = { [index: number]: { transcript: string }; isFinal: boolean };
 type RecognitionLike = {
@@ -10,6 +11,13 @@ type RecognitionLike = {
 };
 type RecognitionConstructor = new () => RecognitionLike;
 type AssistantWindow = Window & { SpeechRecognition?: RecognitionConstructor; webkitSpeechRecognition?: RecognitionConstructor };
+type VoiceAssistantProps = {
+  nextAlarmAt?: string | null;
+  alarms: AlarmWithStatus[];
+  onCreateAlarm: (input: { label: string; hour: number; minute: number; repeatDays: Weekday[] }) => Promise<string>;
+  onDeleteAlarm: (id: string) => Promise<string>;
+  timeFormat: "12h" | "24h";
+};
 
 function localTimeReply(message: string, nextAlarmAt?: string | null) {
   if (!/(time|long|much|left|until|next alarm|alarm)/i.test(message)) return null;
@@ -29,58 +37,101 @@ function localTimeReply(message: string, nextAlarmAt?: string | null) {
   return "Your next alarm is in " + parts.join(" and ") + ".";
 }
 
-export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string | null }) {
-  const [enabled, setEnabled] = useState(() => localStorage.getItem("up-voice-assistant-enabled") === "true");
+function parseAlarmTime(text: string) {
+  const match = text.match(/(?:at|for)\\s+(\\d{1,2})(?::(\\d{2}))?\\s*(a\\.?m\\.?|p\\.?m\\.?)?/i);
+  if (!match) return null;
+  let hour = Number(match[1]);
+  const minute = Number(match[2] ?? 0);
+  const period = (match[3] ?? "").replaceAll(".", "").toLowerCase();
+  if (minute > 59 || hour > 23 || hour < 0 || (period && (hour < 1 || hour > 12))) return null;
+  if (period === "pm" && hour !== 12) hour += 12;
+  if (period === "am" && hour === 12) hour = 0;
+  return { hour, minute };
+}
+
+export default function VoiceAssistant({ nextAlarmAt, alarms, onCreateAlarm, onDeleteAlarm, timeFormat }: VoiceAssistantProps) {
+  const [enabled, setEnabled] = useState(false);
   const [status, setStatus] = useState("OFF");
   const [heard, setHeard] = useState("");
   const [lastAnswer, setLastAnswer] = useState("");
+  const [permission, setPermission] = useState<"unknown" | "granted" | "denied">("unknown");
   const lastAnswerAt = useRef(0);
   const recognition = useRef<RecognitionLike | null>(null);
 
+  const speak = useCallback((message: string) => {
+    setLastAnswer(message);
+    if ("speechSynthesis" in window) {
+      window.speechSynthesis.cancel();
+      window.speechSynthesis.speak(new SpeechSynthesisUtterance(message));
+    }
+  }, []);
 
-  const answer = useCallback(async (transcript = "How much time is left until my next alarm?") => {
-    const localReply = localTimeReply(transcript, nextAlarmAt);
-    if (localReply) {
-      setLastAnswer(localReply);
-      setStatus("ANSWERED");
-      if ("speechSynthesis" in window) { window.speechSynthesis.cancel(); window.speechSynthesis.speak(new SpeechSynthesisUtterance(localReply)); }
+  const answer = useCallback(async (transcript: string) => {
+    const lower = transcript.toLowerCase();
+    if (/(set|create|add|make) (?:an? )?alarm/.test(lower)) {
+      const time = parseAlarmTime(transcript);
+      if (!time) { speak("Tell me a time, for example, set an alarm for 7:30 AM."); return; }
+      const labelMatch = transcript.match(/(?:called|named|labelled|labeled)\\s+(.+)$/i);
+      const label = labelMatch?.[1]?.trim() || "Voice alarm";
+      try { speak(await onCreateAlarm({ ...time, label, repeatDays: [] })); }
+      catch (error) { speak(error instanceof Error ? error.message : "I could not create that alarm."); }
       return;
     }
+    if (/(delete|remove|cancel) (?:the )?(?:my )?alarm/.test(lower)) {
+      const named = transcript.match(/(?:alarm)\\s+(?:called|named)\\s+(.+)$/i)?.[1]?.trim();
+      const candidates = alarms.filter(item => item.alarm.enabled || !item.alarm.enabled);
+      const target = named
+        ? candidates.find(item => item.alarm.label.toLowerCase() === named.toLowerCase()) ?? candidates.find(item => item.alarm.label.toLowerCase().includes(named.toLowerCase()))
+        : candidates.length === 1 ? candidates[0] : undefined;
+      if (!target) { speak(named ? "I could not find an alarm with that name." : "Which alarm should I delete? Say, delete alarm called Gym."); return; }
+      if (!window.confirm("Delete the " + target.alarm.label + " alarm?")) { speak("Okay. I left that alarm unchanged."); return; }
+      try { speak(await onDeleteAlarm(target.alarm.id)); }
+      catch (error) { speak(error instanceof Error ? error.message : "I could not delete that alarm."); }
+      return;
+    }
+    const localReply = localTimeReply(transcript, nextAlarmAt);
+    if (localReply) { speak(localReply); return; }
     setStatus("THINKING");
     try {
       const response = await fetch("/api/assistant/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          message: transcript,
-          context: { nextAlarmAt: nextAlarmAt ?? null, currentTime: new Date().toISOString() }
-        })
+        method: "POST", headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: transcript, context: { nextAlarmAt: nextAlarmAt ?? null, alarms: alarms.map(item => ({ label: item.alarm.label, enabled: item.alarm.enabled, hour: item.alarm.hour, minute: item.alarm.minute })), currentTime: new Date().toISOString() })
       });
       const payload = await response.json() as { reply?: string; error?: string };
       if (!response.ok || !payload.reply) throw new Error(payload.error || "UP could not answer right now.");
-      setLastAnswer(payload.reply);
+      speak(payload.reply);
       setStatus("ANSWERED");
-      if ("speechSynthesis" in window) {
-        window.speechSynthesis.cancel();
-        window.speechSynthesis.speak(new SpeechSynthesisUtterance(payload.reply));
-      }
     } catch (error) {
-      const message = error instanceof Error ? error.message : "UP could not answer right now.";
-      setLastAnswer(message);
+      speak(error instanceof Error ? error.message : "UP could not answer right now.");
       setStatus("ASSISTANT UNAVAILABLE");
     }
-  }, [nextAlarmAt]);
+  }, [alarms, nextAlarmAt, onCreateAlarm, onDeleteAlarm, speak]);
+
+  const startListening = async () => {
+    if (!navigator.mediaDevices?.getUserMedia) { setStatus("MICROPHONE NOT AVAILABLE IN THIS ENVIRONMENT"); return; }
+    try {
+      setStatus("REQUESTING MICROPHONE ACCESS");
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+      setPermission("granted");
+      const Speech = (window as AssistantWindow).SpeechRecognition || (window as AssistantWindow).webkitSpeechRecognition;
+      if (!Speech) { setStatus("SPEECH RECOGNITION NOT SUPPORTED HERE"); return; }
+      setEnabled(true);
+    } catch {
+      setPermission("denied");
+      setStatus("MICROPHONE PERMISSION DENIED. ENABLE IT IN DEVICE SETTINGS.");
+    }
+  };
 
   useEffect(() => {
-    localStorage.setItem("up-voice-assistant-enabled", String(enabled));
     if (!enabled) {
       recognition.current?.stop();
       recognition.current = null;
-      setStatus("OFF");
+      if (status !== "OFF") setStatus("OFF");
       return;
     }
     const Speech = (window as AssistantWindow).SpeechRecognition || (window as AssistantWindow).webkitSpeechRecognition;
-    if (!Speech) { setStatus("NOT SUPPORTED IN THIS BROWSER"); return; }
+    if (!Speech) { setStatus("SPEECH RECOGNITION NOT SUPPORTED HERE"); return; }
     const instance = new Speech();
     instance.continuous = true;
     instance.interimResults = false;
@@ -90,32 +141,33 @@ export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string |
       const transcript = last?.[0]?.transcript?.trim() ?? "";
       if (!transcript || !last?.isFinal) return;
       setHeard(transcript);
-      const now = Date.now();
-      if (now - lastAnswerAt.current < 1800) return;
-      lastAnswerAt.current = now;
+      if (Date.now() - lastAnswerAt.current < 1800) return;
+      lastAnswerAt.current = Date.now();
       void answer(transcript);
     };
     instance.onerror = () => setStatus("MICROPHONE PAUSED");
     instance.onend = () => {
-      if (localStorage.getItem("up-voice-assistant-enabled") === "true") {
-        setStatus("LISTENING");
-        try { instance.start(); } catch { /* Browser may still be transitioning. */ }
+      if (enabled && document.visibilityState === "visible") {
+        setStatus("RECONNECTING");
+        try { instance.start(); } catch { /* Browser is still transitioning. */ }
       }
     };
     recognition.current = instance;
     try { instance.start(); setStatus("LISTENING"); }
-    catch { setStatus("ALLOW MICROPHONE ACCESS"); }
+    catch { setStatus("MICROPHONE COULD NOT START"); }
     return () => { instance.onend = null; instance.stop(); recognition.current = null; };
   }, [enabled, answer]);
 
   return <div className="setting-row voice-assistant-setting">
-    <div><strong>Voice assistant</strong><span>Ask UP about your next alarm by voice while the app is open.</span><small>Microphone mode: {status}. Listening works while this page is open in supported browsers. UP answers time-until-alarm questions locally; open-ended AI chat is temporarily unavailable. Spoken replies use your device voice.</small></div>
+    <div><strong>Voice assistant</strong><span>Talk to UP to check, create, and remove alarms. Listening runs only while UP is open.</span><small>Microphone permission: {permission === "granted" ? "Granted" : permission === "denied" ? "Blocked" : "Not requested"} · {status}. Spoken replies use your device's speech voice. UP does not clone or store your voice.</small></div>
     <div className="setting-actions">
-      <button className={`toggle ${enabled ? "on" : ""}`} onClick={() => setEnabled(value => !value)} aria-label={enabled ? "Turn voice assistant off" : "Turn voice assistant on"}><span/></button>
-      <button className="outline-btn" onClick={() => void answer("How much time is left until my next alarm?")}><Volume2 size={14}/> Try a time check</button>
+      {enabled
+        ? <button className="outline-btn" onClick={() => setEnabled(false)}><MicOff size={14}/> Stop listening</button>
+        : <button className="primary-btn" onClick={() => void startListening()}><Mic size={14}/> Enable microphone</button>}
+      <button className="outline-btn" onClick={() => void answer("How much time is left until my next alarm?")}><Volume2 size={14}/> Test voice reply</button>
     </div>
     {heard && <small className="voice-debug-line">Heard: “{heard}”</small>}
-    {lastAnswer && <small className="voice-debug-line">UP answered: {lastAnswer}</small>}
-    <div className="voice-record-controls"><span>{enabled ? <><Radio size={13}/> {status}</> : <><MicOff size={13}/> Microphone off</>}</span><span>Voice cloning is not active. UP does not record or upload a voice sample.</span></div>
+    {lastAnswer && <small className="voice-debug-line">UP: {lastAnswer}</small>}
+    <div className="voice-record-controls"><span>{enabled ? <><Radio size={13}/> LISTENING</> : <><MicOff size={13}/> MICROPHONE OFF</>}</span><span>Try: “Set an alarm for 7:30 AM called Gym” or “Delete alarm called Gym”.</span></div>
   </div>;
 }
