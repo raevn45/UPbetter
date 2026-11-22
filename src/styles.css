@@ -750,3 +750,12 @@ button:focus-visible{outline-color:var(--acid)}
 .app-shell[data-reduced-motion="true"] .mission-phase-success .mission-build-mark{
   animation:none!important;
 }
+
+.mobile-more-menu{display:none}
+@media(max-width:760px){
+  .mobile-more-menu{position:fixed;right:12px;bottom:calc(72px + env(safe-area-inset-bottom));z-index:16;display:grid;min-width:190px;padding:7px;border:1px solid #c49a5566;background:#172326;box-shadow:7px 7px 0 #0008}
+  .mobile-more-menu button{display:flex;align-items:center;gap:12px;width:100%;padding:13px 12px;border:0;border-bottom:1px solid #ffffff18;background:transparent;color:var(--ivory);font:10px var(--mono);text-align:left}
+  .mobile-more-menu button:last-child{border-bottom:0}
+  .mobile-more-menu button:hover,.mobile-more-menu button:focus-visible{background:#c49a5518;color:var(--ochre)}
+  .mobile-more-menu button span{flex:1}
+}
