@@ -74,6 +74,9 @@ if (!gradle.includes("desugar_jdk_libs")) {
 await writeFile(gradlePath, gradle);
 
 const sounds = [
+  ["up_classic_twinbell", "https://raw.githubusercontent.com/gretzke/open-alarm/main/OpenAlarm/Resources/Ringtones/ringtone_classic_twinbell.caf"],
+  ["up_classic_bedside", "https://raw.githubusercontent.com/gretzke/open-alarm/main/OpenAlarm/Resources/Ringtones/ringtone_classic_bedsideclock.caf"],
+  ["up_classic_buzzer", "https://raw.githubusercontent.com/gretzke/open-alarm/main/OpenAlarm/Resources/Ringtones/ringtone_classic_digitalalarm.caf"],
   ["up_rain_soft", "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.1.0-preview/rain-soft.wav"],
   ["up_rain_heavy", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-heavy.wav"],
   ["up_rain_tin_roof", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-tin-roof.wav"],
