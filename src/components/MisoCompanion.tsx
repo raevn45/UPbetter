@@ -69,6 +69,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   useEffect(() => { if (!cue || cue === "welcome") return; if (cue === "alarm-created") { engineRef.current?.gift(); setBehavior("a new plan!"); } else engineRef.current?.greet("you got this ♥"); }, [cue]);
   useEffect(() => {
     const resize = () => setPosition(p => ({ x: Math.max(0, Math.min(window.innerWidth - (spotlight ? 190 : 126), p.x)), y: Math.max(8, Math.min(window.innerHeight - (spotlight ? 190 : 136), p.y)) }));
+    resize();
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
   }, [spotlight]);
@@ -102,7 +103,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
       <button type="button" title="Pet Miso" onClick={() => { engineRef.current?.greet("hello ♥"); setBehavior("happy to see you"); }}><Heart size={13}/></button>
       <button type="button" title="Give Miso a treat" onClick={() => { engineRef.current?.gift(); setBehavior("thank you for the treat!"); }}><Gift size={13}/></button>
       <button type="button" title="Toggle butterfly" onClick={() => { engineRef.current?.setButterfly(true, true); setBehavior("butterfly patrol"); }}><Sparkles size={13}/></button>
-      <button type="button" title="Move Miso to the lower corner" onClick={() => setPosition({ x: Math.max(8, window.innerWidth - 142), y: Math.max(8, window.innerHeight - 152) })}><Move size={13}/></button>
+      <button type="button" title="Move Miso to the lower corner" onClick={() => { const next = { x: Math.max(8, window.innerWidth - 142), y: Math.max(8, window.innerHeight - 152) }; setPosition(next); try { localStorage.setItem("up.miso.position", JSON.stringify(next)); } catch { /* optional persistence */ } }}><Move size={13}/></button>
     </div>
     {!ready && <span className="miso-loading">MISO IS WAKING UP</span>}
   </div>;
