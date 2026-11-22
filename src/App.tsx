@@ -325,10 +325,11 @@ export default function App() {
     if (id.startsWith("android-ringtone:")) { setNotice("This tone is played by Android at alarm time. Preview it in the system sound picker."); return; }
     if (playingSoundId === id) { upCore.sounds.stopPreview(); void stopNativeAlarmSoundPreview(); setPlayingSoundId(null); return; }
     let nativePreview = false;
-    if (id.startsWith("classic-")) {
+    if (id.startsWith("classic-") || id === "device-alarm") {
       try { nativePreview = await previewNativeAlarmSound(id); }
       catch (e) { setError(e instanceof Error ? e.message : "Could not preview this sound."); return; }
     }
+    if ((id.startsWith("classic-") || id === "device-alarm") && !nativePreview) { setNotice("This is a native alarm sound. Preview it in the Android app or choose an alarm tone from your device."); return; }
     const r = nativePreview ? { ok: true as const, value: undefined } : await upCore.sounds.preview(id);
     if (!r.ok) setError(r.error.message);
     else { setPlayingSoundId(id); const item = sounds.find(sound => sound.id === id); window.setTimeout(() => setPlayingSoundId(current => current === id ? null : current), (item?.durationSeconds ?? 30) * 1000); const recent = await upCore.sounds.recentlyUsed(); if (recent.ok) setRecentSoundIds(recent.value); }
