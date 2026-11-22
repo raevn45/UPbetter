@@ -165,3 +165,6 @@ button:active{transform:scale(.975)}
 .install-option{border-radius:2px}.install-option:hover{transform:translateX(4px)}
 .nav-item{border-radius:2px}.nav-item:hover{transform:translateX(3px)}
 @media(max-width:760px){.sound-categories{gap:5px}.sound-categories button{padding:7px 9px;font-size:8px}}
+
+
+.timer-label-input select{background:#10191b;border:1px solid #43534a;padding:10px;color:var(--ivory);font-size:10px;min-width:0}
