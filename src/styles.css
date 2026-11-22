@@ -136,3 +136,12 @@ button:active{transform:scale(.975)}
 .timezone-preview{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:13px;background:#10191b;border:1px solid #526257;margin:0 0 7px}
 .timezone-preview>div{display:grid;gap:6px;min-width:0}.timezone-preview span{font:8px var(--mono);letter-spacing:.1em;color:#8c9a90}.timezone-preview strong{font:500 14px var(--serif);color:#e8d5ae;line-height:1.4}.timezone-preview p{grid-column:1/-1;font-size:9px;line-height:1.6;color:#839188;margin:3px 0 0}
 @media(max-width:520px){.timezone-preview{grid-template-columns:1fr}.timezone-preview p{grid-column:auto}}
+
+
+.timer-label-input{grid-column:1/-1;display:grid;gap:6px;margin:3px 0 7px}.timer-label-input label{font:8px var(--mono);letter-spacing:.1em;color:#8d9b91;text-transform:uppercase}.timer-label-input input{background:#10191b;border:1px solid #43534a;padding:10px;color:var(--ivory);font-size:11px}
+.add-parallel-timer{grid-column:1/-1;width:100%}
+.parallel-timers{grid-column:1/-1;display:grid;gap:8px;margin-top:14px;padding-top:15px;border-top:1px solid var(--line)}
+.parallel-timers>small{font-size:9px;color:#829087}
+.parallel-timer{display:flex;align-items:center;gap:8px;padding:10px;background:#192729;border:1px solid var(--line)}
+.parallel-timer>div{display:grid;gap:4px;flex:1;min-width:0}.parallel-timer strong{font-size:10px;color:#e9e4d7}.parallel-timer span{font:8px var(--mono);color:#91a096}
+.parallel-timer button{background:transparent;border:1px solid #536157;color:#c8d0c7;padding:7px 9px;font-size:8px}.parallel-timer button:hover{border-color:var(--ochre);color:var(--ochre)}
