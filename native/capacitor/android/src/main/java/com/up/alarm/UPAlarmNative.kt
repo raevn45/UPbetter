@@ -91,17 +91,25 @@ class UPAlarmReceiver : BroadcastReceiver() {
         val id = intent.getStringExtra("alarmId") ?: return
         val raw = UPAlarmStore(context).all()[id] ?: return
         val record = JSONObject(raw)
-        val next = UPAlarmScheduling.nextWeekly(record)
-        if (next != null) {
-            record.put("nextOccurrence", next.toString())
-            record.put("ringing", false)
-            UPAlarmStore(context).put(id, record.toString())
-            UPAlarmScheduling.schedule(context, id, record)
-        } else {
-            // Keep the one-shot record available to the full-screen activity for
-            // its selected sound and wake challenge. Stop removes it after dismissal.
+        if (record.optBoolean("snoozed", false)) {
+            val savedDays = record.optJSONArray("repeatDaysAfterSnooze")
+            if (savedDays != null) record.put("repeatDays", savedDays)
+            record.remove("repeatDaysAfterSnooze")
+            record.put("snoozed", false)
             record.put("ringing", true)
             UPAlarmStore(context).put(id, record.toString())
+        } else {
+            val next = UPAlarmScheduling.nextWeekly(record)
+            if (next != null) {
+                record.put("nextOccurrence", next.toString())
+                record.put("ringing", false)
+                UPAlarmStore(context).put(id, record.toString())
+                UPAlarmScheduling.schedule(context, id, record)
+            } else {
+                // Keep one-shot records available to the ringing Activity until dismissal.
+                record.put("ringing", true)
+                UPAlarmStore(context).put(id, record.toString())
+            }
         }
         UPAlarmNotifications.show(context, id, record.optString("label", "UP alarm"))
     }
