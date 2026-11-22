@@ -18,7 +18,6 @@ import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.TextView
 import org.json.JSONObject
-import java.time.Instant
 import kotlin.random.Random
 
 class UPAlarmActivity : Activity() {
@@ -106,10 +105,6 @@ class UPAlarmActivity : Activity() {
             setOnClickListener { stopAlarm() }
         }
         layout.addView(stopButton)
-        layout.addView(Button(this).apply {
-            text = "Snooze"
-            setOnClickListener { snoozeAlarm() }
-        })
         layout.addView(Button(this).apply {
             text = "Emergency stop"
             contentDescription = "Stop the alarm immediately without completing a wake-up challenge"
@@ -200,13 +195,10 @@ class UPAlarmActivity : Activity() {
     private fun setupChallenge() {
         val mission = record?.optJSONObject("mission")
         val kind = mission?.optString("kind", "none") ?: "none"
-        if (kind == "none" || kind.isBlank()) {
-            enableStop("No wake-up challenge selected. You can stop the alarm.")
-            return
-        }
-        totalRounds = mission?.optInt("rounds", 1)?.coerceIn(1, 5) ?: 1
+        val requiredKind = if (kind == "none" || kind.isBlank()) "random" else kind
+        totalRounds = mission?.optInt("rounds", 3)?.coerceIn(3, 5) ?: 3
         completedRounds = 0
-        nextChallenge(kind, mission?.optString("difficulty", "easy") ?: "easy")
+        nextChallenge(requiredKind, mission?.optString("difficulty", "hard") ?: "hard")
     }
 
     private fun nextChallenge(kind: String, difficulty: String) {
@@ -259,7 +251,7 @@ class UPAlarmActivity : Activity() {
     private fun checkChallenge() {
         val input = if (answerInput?.visibility == android.view.View.GONE) "complete" else answerInput?.text?.toString()?.trim().orEmpty()
         if (!input.equals(currentAnswer, ignoreCase = true)) {
-            feedbackText?.text = "Not quite. Try again, or snooze if you need a little more time."
+            feedbackText?.text = "Not quite. The alarm will keep ringing. Try again."
             return
         }
         completedRounds++
@@ -281,26 +273,6 @@ class UPAlarmActivity : Activity() {
         answerInput?.visibility = android.view.View.GONE
         stopButton?.isEnabled = true
         stopButton?.alpha = 1f
-    }
-
-    private fun snoozeAlarm() {
-        val id = alarmId ?: return finishWithoutSchedule()
-        val current = record ?: return finishWithoutSchedule()
-        val minutes = current.optInt("snoozeMinutes", 8).coerceIn(1, 60)
-        val next = Instant.now().plusSeconds(minutes * 60L)
-        current.put("nextOccurrence", next.toString())
-        if (!current.optBoolean("snoozed", false)) {
-            val repeatDays = current.optJSONArray("repeatDays")
-            if (repeatDays != null && repeatDays.length() > 0) {
-                current.put("repeatDaysAfterSnooze", org.json.JSONArray(repeatDays.toString()))
-                current.put("repeatDays", org.json.JSONArray())
-            }
-        }
-        current.put("snoozed", true)
-        UPAlarmStore(this).put(id, current.toString())
-        UPAlarmScheduling.schedule(this, id, current)
-        (getSystemService(Context.NOTIFICATION_SERVICE) as android.app.NotificationManager).cancel(id.hashCode())
-        finishWithoutSchedule()
     }
 
     private fun stopAlarm() {
