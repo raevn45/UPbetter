@@ -15,4 +15,11 @@ describe("MissionService", () => {
     const challenge = missions.create({ kind: "movement", difficulty: "easy", rounds: 1 });
     expect(missions.check(challenge.id, "complete").correct).toBe(true);
   });
+
+  it("resolves Surprise Me into a real challenge type", () => {
+    const missions = new MissionService();
+    const challenge = missions.create({ kind: "random", difficulty: "easy", rounds: 1 });
+    expect(["math", "memory", "sequence", "typing", "logic", "checklist", "movement"]).toContain(challenge.kind);
+    expect(challenge.kind).not.toBe("random");
+  });
 });
