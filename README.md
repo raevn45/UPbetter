@@ -80,7 +80,7 @@ npm run build
 - **ChatGPT:** local core/backend. Domain models, persistence, services, timezone/DST calculations, missions, timers and native alarm integrations.
 - **Shared integration contract:** [docs/FRONTEND_BACKEND_CONTRACT.md](docs/FRONTEND_BACKEND_CONTRACT.md).
 
-There is no cloud server, account, remote database, analytics or sync in the MVP. “Backend” means the local application engine.
+UP has no remote database, analytics or cross-device sync in the MVP. One optional Vercel serverless function proxies conversational requests to Gemini when `GEMINI_API_KEY` is configured. Alarm data and preferences remain local to each device.
 
 ## Product direction
 
