@@ -478,3 +478,77 @@ button:active{transform:scale(.965)}
 @media(prefers-reduced-motion:reduce){
  *,*:before,*:after{animation-duration:.01ms!important;animation-iteration-count:1!important;scroll-behavior:auto!important;transition-duration:.01ms!important}
 }
+
+
+/* Daily launchpad */
+.ritual-deck{margin-top:55px;position:relative}
+.ritual-deck-heading{display:flex;justify-content:space-between;align-items:end;gap:20px;margin-bottom:19px}
+.ritual-deck-heading h2{font:500 clamp(31px,4vw,43px)/1.05 var(--serif);letter-spacing:-.045em;margin:8px 0 7px;color:#fff3e8}
+.ritual-deck-heading p{margin:0;color:#b8accb;font-size:12px}
+.ritual-sticker{background:#ffe18d;color:#332039;border-radius:3px;padding:10px 13px;font:800 8px var(--mono);letter-spacing:.12em;transform:rotate(3deg);box-shadow:4px 5px 0 #ff8eaa55;white-space:nowrap}
+.ritual-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.ritual-card{min-height:245px;position:relative;overflow:hidden;text-align:left;padding:20px;border:1px solid #ffffff2b;border-radius:20px;color:#fff7ed;display:flex;flex-direction:column;align-items:flex-start;box-shadow:0 14px 35px #08061640;transition:transform .3s cubic-bezier(.2,.8,.2,1),box-shadow .3s,border-color .3s}
+.ritual-card:before{content:"";position:absolute;width:190px;height:190px;border:1px solid #ffffff28;border-radius:50%;right:-85px;top:-95px;box-shadow:0 0 0 18px #ffffff08,0 0 0 38px #ffffff06;transition:transform .5s}
+.ritual-card:after{content:"✦";position:absolute;right:23px;top:22px;color:#fff9;font-size:19px;animation:upTwinkle 4s ease-in-out infinite}
+.ritual-card:hover{transform:translateY(-8px) rotate(-.5deg);box-shadow:0 24px 50px #08061670;border-color:#ffffff70}
+.ritual-card:hover:before{transform:scale(1.25) rotate(25deg)}
+.ritual-focus{background:radial-gradient(circle at 85% 10%,#ffcf7055,transparent 38%),linear-gradient(145deg,#60406a,#332b58 70%,#263653)}
+.ritual-reset{background:radial-gradient(circle at 85% 10%,#8be9d855,transparent 38%),linear-gradient(145deg,#245e60,#24445a 70%,#272d50)}
+.ritual-future{background:radial-gradient(circle at 85% 10%,#ff9bb955,transparent 38%),linear-gradient(145deg,#773f61,#49314f 70%,#2d2948)}
+.ritual-index{font:9px var(--mono);letter-spacing:.17em;color:#ffffffb9}
+.ritual-symbol{width:48px;height:48px;border:1px solid #ffffff5c;background:#ffffff18;backdrop-filter:blur(8px);border-radius:15px;display:grid;place-items:center;margin:24px 0 15px;color:#fff4ce;box-shadow:inset 0 1px #ffffff55}
+.ritual-card strong{font:500 23px/1.1 var(--serif);max-width:230px;position:relative}
+.ritual-card small{font-size:10px;line-height:1.65;color:#ffffffc4;margin-top:9px;max-width:245px;position:relative}
+.ritual-link{display:flex;align-items:center;gap:7px;margin-top:auto;padding-top:19px;font-size:10px;font-weight:800;color:#fff4c9;position:relative}
+.ritual-link svg{transition:transform .2s}.ritual-card:hover .ritual-link svg{transform:translate(3px,-3px)}
+.ritual-marquee{margin-top:18px;border-top:1px solid #c7a7ff35;border-bottom:1px solid #c7a7ff35;display:flex;align-items:center;justify-content:space-around;gap:12px;overflow:hidden;padding:12px 5px;color:#b8a9cf;font:8px var(--mono);letter-spacing:.16em;white-space:nowrap}
+.ritual-marquee i{font-style:normal;color:#ffcf70;font-size:14px}
+@media(max-width:760px){.ritual-deck{margin-top:39px}.ritual-deck-heading{align-items:flex-start;flex-direction:column}.ritual-sticker{align-self:flex-start}.ritual-grid{grid-template-columns:1fr}.ritual-card{min-height:205px}.ritual-marquee{justify-content:flex-start}.ritual-marquee span:nth-of-type(2){display:none}}
+/* Mission studio and preview: treat this as a playful mini-game, not a settings form */
+.mission-studio{border:1px solid #c7a7ff55!important;border-radius:22px!important;padding:22px!important;background:radial-gradient(ellipse at 100% 0%,#b89cff22,transparent 38%),linear-gradient(145deg,#251c3c,#1a2637)!important;box-shadow:0 14px 38px #08061640}
+.mission-studio-head h3{font:500 29px/1.1 var(--serif)!important;color:#fff1e7}
+.mission-studio-head p{font-size:11px!important;color:#b9adca!important}
+.mission-count{border:1px solid #ffcf7066!important;border-radius:999px!important;color:#ffdc91!important;background:#ffcf7012}
+.mission-choice-grid{gap:10px!important}
+.mission-choice{border:1px solid #b89cff3b!important;border-radius:14px!important;background:linear-gradient(120deg,#ffffff0b,#ffffff04)!important;padding:13px!important;position:relative;overflow:hidden}
+.mission-choice:after{content:"";position:absolute;inset:0;background:linear-gradient(110deg,#b89cff12,#ff8eaa12);opacity:0;transition:opacity .2s}
+.mission-choice:hover{border-color:#ff9dbb!important;background:#ffffff12!important;transform:translateY(-3px)!important}
+.mission-choice:hover:after,.mission-choice.is-selected:after{opacity:1}
+.mission-choice.is-selected{border-color:#ffcf70!important;background:linear-gradient(110deg,#ffcf7022,#ff8eaa17)!important;box-shadow:inset 3px 0 #ffcf70,0 8px 22px #ffcf7012!important}
+.mission-choice-icon{width:40px!important;height:40px!important;border-radius:12px!important;background:linear-gradient(145deg,#b89cff44,#ff8eaa30)!important;color:#ffe4a1!important;position:relative;z-index:1}
+.mission-choice-copy,.mission-choice-check{position:relative;z-index:1}
+.mission-choice-copy strong{font-size:11px!important;color:#fff3e9}
+.mission-choice-copy small{font-size:9px!important;color:#b6a9c9!important}
+.mission-choice-check{color:#ffcf70!important}
+.mission-config{border-color:#ffffff20!important}
+.mission-selected-copy strong{font-size:24px!important;color:#fff0e4}
+.mission-selected-copy p{font-size:10px!important;color:#b6a9c9!important}
+.mission-config-controls label{color:#c3b5d7!important}
+.mission-config-controls select{border:1px solid #b89cff55!important;border-radius:9px!important;background:#17152a!important;color:#fff!important;padding:9px!important}
+.mission-preview-button{border:1px solid #ffcf7088!important;border-radius:999px!important;background:linear-gradient(100deg,#ffcf7026,#ff8eaa22)!important;color:#ffe5ac!important;padding:14px 18px!important;font-weight:800!important}
+.mission-preview-button:hover{background:linear-gradient(100deg,#ffcf7044,#ff8eaa35)!important;transform:translateY(-2px)}
+.mission-none{color:#b6a9c9!important}
+.mission-preview-overlay{background:#090616e8!important;backdrop-filter:blur(20px)!important}
+.mission-preview-window{width:min(560px,100%)!important;min-height:500px;border:1px solid #d3b1ff77!important;border-radius:30px!important;padding:clamp(24px,5vw,42px)!important;background:
+ radial-gradient(circle at 90% 9%,#ff8eaa30,transparent 29%),
+ radial-gradient(circle at 8% 85%,#8cf0c620,transparent 35%),
+ linear-gradient(145deg,#30234d,#1a2037 72%)!important;
+ box-shadow:0 45px 130px #000b,0 0 65px #b89cff20!important;text-align:left!important}
+.mission-preview-window:before{content:"";position:absolute;inset:12px;border:1px solid #ffffff14;border-radius:22px;pointer-events:none}
+.mission-preview-top,.mission-preview-label,.mission-preview-window h3,.mission-preview-window>p,.mission-preview-window form,.mission-preview-window>.mission-preview-submit,.mission-preview-feedback,.mission-preview-footer{position:relative;z-index:1}
+.mission-close{border:1px solid #ffffff35!important;border-radius:50%!important;background:#ffffff0d!important;color:#fff!important;width:36px!important;height:36px!important}
+.mission-preview-orbit{width:112px!important;height:112px!important;border:1px solid #ffcf7077!important;margin:34px 0 22px!important;box-shadow:0 0 0 12px #ffcf700c,0 0 0 26px #b89cff0a,0 0 38px #ffcf7022}
+.mission-preview-orbit-inner{width:72px!important;height:72px!important;background:linear-gradient(135deg,#ffcf70,#ff8eaa)!important;color:#2a1b35!important;box-shadow:0 10px 28px #ff8eaa44}
+.mission-preview-label{display:inline-flex!important;padding:7px 11px!important;border-radius:999px!important;background:#b89cff20!important;border:1px solid #b89cff55!important;color:#e1d0ff!important;font-size:9px!important}
+.mission-preview-window h3{font:500 clamp(28px,5vw,39px)/1.12 var(--serif)!important;color:#fff5e9!important;margin:18px 0 10px!important;max-width:430px}
+.mission-preview-window>p{font-size:12px!important;color:#c6bad7!important;line-height:1.8!important;max-width:430px}
+.mission-preview-window form{margin-top:27px!important;gap:10px!important}
+.mission-preview-window input{background:#14152b!important;border:1px solid #b89cff66!important;border-radius:13px!important;color:#fff!important;padding:14px 15px!important;font-size:12px!important}
+.mission-preview-window input:focus{outline:0!important;border-color:#ff9dbb!important;box-shadow:0 0 0 4px #ff9dbb20}
+.mission-preview-submit{border:0!important;border-radius:999px!important;background:linear-gradient(110deg,#ffcf70,#ff8eaa)!important;color:#29162e!important;padding:14px 20px!important;font-size:11px!important;font-weight:900!important;box-shadow:0 9px 24px #ff8eaa2d}
+.mission-preview-submit:hover{transform:translateY(-2px)!important;box-shadow:0 14px 30px #ff8eaa44!important}
+.mission-preview-feedback{border-radius:13px!important;background:#653b4c!important;color:#ffe0e9!important;padding:13px 15px!important;font-size:11px!important}
+.mission-preview-feedback.success{background:#24594b!important;color:#d8fff0!important}
+.mission-preview-footer{border-color:#ffffff24!important;color:#aa9ebd!important;font-size:8px!important}
+.mission-preview-footer button{color:#ffdb91!important;font-weight:800!important}
+@media(max-width:760px){.mission-studio{padding:15px!important}.mission-studio-head{flex-direction:column}.mission-choice-grid{grid-template-columns:1fr 1fr!important}.mission-choice{padding:10px!important}.mission-choice-icon{width:34px!important;height:34px!important}.mission-preview-window{min-height:0!important;border-radius:22px!important}.mission-preview-window form{flex-direction:column!important}.mission-preview-footer{flex-direction:column!important;align-items:flex-start!important}}
