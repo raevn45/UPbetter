@@ -19,19 +19,20 @@ type AlarmToSync = {
 };
 const dayCodes = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 
-export default function GoogleCalendar({ alarms, onAccountChange }: { alarms: AlarmToSync[]; onAccountChange?: (email: string) => void }) {
+export default function GoogleCalendar({ alarms, onAccountChange }: { alarms: AlarmToSync[]; onAccountChange?: (account: { email: string; picture?: string } | null) => void }) {
   // Public Google OAuth Web client ID. Keep the env override for deployments with their own OAuth project.
   const clientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) || "669883233575-b8qp2bv38e14gd3ls7l9hasof46qpt0i.apps.googleusercontent.com";
   const [token, setToken] = useState("");
   const [status, setStatus] = useState(clientId ? "Not connected" : "Google sign-in is not enabled in this UP deployment yet.");
   const [accountEmail, setAccountEmail] = useState("");
+  const [accountPicture, setAccountPicture] = useState("");
   const [title, setTitle] = useState("");
   const [when, setWhen] = useState("");
   const [busy, setBusy] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
   const tokenClient = useRef<{ requestAccessToken(options?: { prompt?: string }): void } | null>(null);
 
-  useEffect(() => { onAccountChange?.(token && accountEmail ? accountEmail : ""); }, [token, accountEmail, onAccountChange]);
+  useEffect(() => { onAccountChange?.(token && accountEmail ? { email: accountEmail, picture: accountPicture || undefined } : null); }, [token, accountEmail, accountPicture, onAccountChange]);
 
   useEffect(() => {
     if (!clientId) return;
@@ -60,7 +61,7 @@ export default function GoogleCalendar({ alarms, onAccountChange }: { alarms: Al
         if (response.error || !response.access_token) return;
         setToken(response.access_token);
         setStatus("Google signed in.");
-        void fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + response.access_token } }).then(async response => { if (response.ok) { const profile = await response.json() as { email?: string }; setAccountEmail(profile.email || ""); } }).catch(() => undefined);
+        void fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + response.access_token } }).then(async response => { if (response.ok) { const profile = await response.json() as { email?: string; picture?: string }; setAccountEmail(profile.email || ""); setAccountPicture(profile.picture || ""); } }).catch(() => undefined);
       }
     });
     client.requestAccessToken({ prompt: "none" });
@@ -96,14 +97,14 @@ export default function GoogleCalendar({ alarms, onAccountChange }: { alarms: Al
           return;
         }
         setToken(response.access_token);
-        void fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + response.access_token } }).then(async profileResponse => { if (!profileResponse.ok) return; const profile = await profileResponse.json() as { email?: string }; setAccountEmail(profile.email || ""); }).catch(() => undefined);
+        void fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + response.access_token } }).then(async profileResponse => { if (!profileResponse.ok) return; const profile = await profileResponse.json() as { email?: string; picture?: string }; setAccountEmail(profile.email || ""); setAccountPicture(profile.picture || ""); }).catch(() => undefined);
         setStatus("Google signed in.");
       }
     });
     tokenClient.current.requestAccessToken({ prompt: "consent" });
   };
 
-  const disconnect = () => { setToken(""); setAccountEmail(""); setStatus("Disconnected."); };
+  const disconnect = () => { setToken(""); setAccountEmail(""); setAccountPicture(""); setStatus("Disconnected."); };
 
   const syncAlarms = async () => {
     if (!token) return;
@@ -127,7 +128,7 @@ export default function GoogleCalendar({ alarms, onAccountChange }: { alarms: Al
         if (byDay.length) body.recurrence = ["RRULE:FREQ=WEEKLY;BYDAY=" + byDay.join(",")];
         const lookupUrl = "https://www.googleapis.com/calendar/v3/calendars/primary/events?privateExtendedProperty=" + encodeURIComponent("upAlarmId=" + item.alarm.id) + "&singleEvents=false";
         const lookup = await fetch(lookupUrl, { headers: { Authorization: "Bearer " + token } });
-        if (lookup.status === 401) { setToken(""); setStatus("Google session expired. Sign in again."); return; }
+        if (lookup.status === 401) { setToken(""); setAccountEmail(""); setAccountPicture(""); setStatus("Google session expired. Sign in again."); return; }
         if (!lookup.ok) throw new Error("Google Calendar could not check existing UP reminders.");
         const existing = await lookup.json() as { items?: Array<{ id: string }> };
         const eventId = existing.items?.[0]?.id;
