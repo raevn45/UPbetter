@@ -449,3 +449,41 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   }
   .mobile-more-menu button svg:last-child{color:var(--accent)}
 }
+
+
+/* Shared motion field: scroll curl, overdamped interaction scale and cascaded reveals. */
+:root{
+  --u-curl-strength:0;
+  --scroll-velocity:0;
+  --scroll-compress:0;
+  --scroll-skew:0deg;
+}
+[data-curl]{
+  transform:perspective(1100px)
+    rotateX(var(--tilt-x,0deg))
+    rotateY(var(--tilt-y,0deg))
+    skewY(calc(var(--scroll-skew,0deg) * .55))
+    scaleX(calc(1 - var(--scroll-compress,0)));
+  transform-origin:center;
+  will-change:transform;
+  transition:transform 180ms cubic-bezier(.2,.7,.2,1);
+}
+[data-spring]{
+  scale:var(--spring-scale,1);
+  transform-origin:center;
+  will-change:scale;
+}
+[data-cascade] > [data-reveal]{
+  transition-delay:var(--cascade-delay,0ms);
+}
+[data-reveal]{
+  transition-delay:var(--cascade-delay,0ms);
+}
+@media(hover:none){
+  [data-curl]{transform:none;will-change:auto}
+}
+@media(prefers-reduced-motion:reduce){
+  [data-curl]{transform:none!important;transition:none!important;will-change:auto}
+  [data-spring]{scale:1!important;will-change:auto}
+  [data-reveal]{transition-delay:0ms!important}
+}
