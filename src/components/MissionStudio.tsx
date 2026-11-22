@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Brain, Calculator, CheckCircle2, ClipboardList, Code2, Dices, Footprints, Lightbulb, RefreshCw, Sparkles, X } from "lucide-react";
+import { Brain, Calculator, CheckCircle2, Code2, Dices, Lightbulb, RefreshCw, Sparkles, X } from "lucide-react";
 import { upCore } from "../core";
 import type { MissionConfig, MissionKind } from "../core/domain/types";
 import type { WakeChallenge } from "../core/services/mission-service";
@@ -10,9 +10,7 @@ const choices: { kind: MissionKind; title: string; subtitle: string; detail: str
   { kind: "sequence", title: "Sequence", subtitle: "Spot what comes next", detail: "Find the pattern and complete the number run.", icon: RefreshCw },
   { kind: "logic", title: "Logic", subtitle: "A little reasoning", detail: "Work out the next step in a simple pattern.", icon: Lightbulb },
   { kind: "typing", title: "Typing", subtitle: "Put the words in", detail: "Type a short phrase to finish the check.", icon: Code2 },
-  { kind: "checklist", title: "Morning reset", subtitle: "A few gentle steps", detail: "Complete a small, flexible get-ready checklist.", icon: ClipboardList },
-  { kind: "movement", title: "Gentle movement", subtitle: "Move if it suits you", detail: "A comfortable movement prompt, with no forced exercise.", icon: Footprints },
-  { kind: "random", title: "Surprise me", subtitle: "Keep it unpredictable", detail: "A quick surprise check. You can always snooze instead.", icon: Dices }
+  { kind: "random", title: "Surprise me", subtitle: "Keep it unpredictable", detail: "A randomly selected cognitive challenge.", icon: Dices }
 ];
 
 export default function MissionStudio({ value, onChange, onComplete }: { value: MissionConfig | null; onChange: (next: MissionConfig | null) => void; onComplete?: () => void }) {
