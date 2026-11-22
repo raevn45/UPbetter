@@ -124,6 +124,38 @@ export class SoundService {
       this.stopPreview();
       let source = sound?.previewUrl;
       let duration = sound?.durationSeconds ?? 30;
+      if (soundId.startsWith("alarm-")) {
+        const context = new AudioContext();
+        this.activeContext = context;
+        const master = context.createGain();
+        master.gain.value = 0.32;
+        master.connect(context.destination);
+        const patterns: Record<string, number[][]> = {
+          "alarm-twinbell": [[880,280,180],[660,280,180],[880,280,180],[660,280,750]],
+          "alarm-digital": [[1320,180,120],[990,180,120],[1320,180,120],[990,180,750]],
+          "alarm-buzzer": [[480,620,120],[480,620,120],[480,620,750]],
+          "alarm-pulse": [[740,120,120],[740,120,120],[740,120,480],[1040,240,600]],
+          "alarm-rise": [[520,350,80],[660,350,80],[820,350,80],[1040,550,550]]
+        };
+        let cursor = context.currentTime + 0.05;
+        for (let repeat = 0; repeat < 5; repeat++) {
+          for (const [frequency, durationMs, gapMs] of patterns[soundId] ?? patterns["alarm-twinbell"]!) {
+            const oscillator = context.createOscillator();
+            const gain = context.createGain();
+            oscillator.type = soundId === "alarm-buzzer" ? "square" : "sine";
+            oscillator.frequency.setValueAtTime(frequency, cursor);
+            gain.gain.setValueAtTime(0.0001, cursor);
+            gain.gain.linearRampToValueAtTime(0.85, cursor + 0.015);
+            gain.gain.setValueAtTime(0.85, cursor + durationMs / 1000 - 0.02);
+            gain.gain.linearRampToValueAtTime(0.0001, cursor + durationMs / 1000);
+            oscillator.connect(gain); gain.connect(master);
+            oscillator.start(cursor); oscillator.stop(cursor + durationMs / 1000);
+            cursor += (durationMs + gapMs) / 1000;
+          }
+        }
+        this.previewTimeout = window.setTimeout(() => this.stopPreview(), duration * 1000);
+        return success(undefined);
+      }
       if (soundId === "device-alarm") {
         return failure("NATIVE_ALARM_SOUND", "The device alarm tone is provided by Android or iOS. Open the native app to preview the actual system sound.");
       }
