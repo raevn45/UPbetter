@@ -106,6 +106,14 @@ class UPAlarmPlugin : Plugin() {
     }
 
     @PluginMethod
+    fun setWakeMessage(call: PluginCall) {
+        val message = call.getString("message") ?: ""
+        context.getSharedPreferences("up_native_alarms", Context.MODE_PRIVATE)
+            .edit().putString("wake_message", message.take(500)).apply()
+        call.resolve()
+    }
+
+    @PluginMethod
     fun consumeCompleted(call: PluginCall) {
         val ids = UPAlarmStore(context).consumeCompleted()
         val array = JSArray()
