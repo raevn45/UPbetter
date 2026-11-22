@@ -137,9 +137,10 @@ class UPAlarmPlugin : Plugin() {
         try {
             val id = "up-native-test"
             val record = org.json.JSONObject().put("id", id).put("label", "UP test alarm")
-                .put("soundId", "rain-soft").put("repeatDays", org.json.JSONArray())
+                .put("soundId", "device-alarm").put("repeatDays", org.json.JSONArray())
                 .put("timeZone", java.time.ZoneId.systemDefault().id)
                 .put("nextOccurrence", java.time.Instant.now().plusSeconds(60).toString())
+                .put("volume", 1.0).put("gradualVolume", false).put("vibration", true)
             UPAlarmStore(context).put(id, record.toString())
             UPAlarmScheduling.schedule(context, id, record)
             call.resolve()
