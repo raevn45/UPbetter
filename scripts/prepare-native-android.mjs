@@ -34,6 +34,7 @@ let manifest = await readFile(manifestPath, "utf8");
 const permissions = [
   "android.permission.SCHEDULE_EXACT_ALARM",
   "android.permission.POST_NOTIFICATIONS",
+  "android.permission.RECORD_AUDIO",
   "android.permission.VIBRATE",
   "android.permission.RECEIVE_BOOT_COMPLETED",
   "android.permission.USE_FULL_SCREEN_INTENT"
