@@ -48,6 +48,12 @@ export class CapacitorAlarmScheduler implements AlarmScheduler {
 export const createAlarmScheduler = (): AlarmScheduler => new CapacitorAlarmScheduler();
 
 
+export async function setNativeWakeMessage(message: string) {
+  if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === "android") {
+    await NativeUPAlarm.setWakeMessage({ message });
+  }
+}
+
 export async function pickNativeAlarmSound(existingUri?: string) {
   if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== "android") {
     return { supported: false as const, cancelled: true as const };
