@@ -76,7 +76,7 @@ export default function App() {
   const [moreOpen, setMoreOpen] = useState(false);
   const [installOpen, setInstallOpen] = useState(false);
   const [installPrompt, setInstallPrompt] = useState<InstallPromptEvent | null>(null);
-  const [googleAccountEmail, setGoogleAccountEmail] = useState("");
+  const [googleAccount, setGoogleAccount] = useState<{ email: string; picture?: string } | null>(null);
   const [misoCue, setMisoCue] = useState("welcome");
   const [now, setNow] = useState(new Date());
   const [alarms, setAlarms] = useState<AlarmWithStatus[]>([]);
@@ -469,13 +469,13 @@ export default function App() {
     <header className="studio-nav">
       <button className="studio-brand" onClick={() => setTab("today")} aria-label="UP home"><span>u<span>p</span></span><small>TIME, REIMAGINED</small></button>
       <nav className="studio-links" aria-label="Main navigation">{nav.map(item => { const Icon = item.icon; return <button key={item.id} className={`studio-link ${tab === item.id ? "active" : ""}`} onClick={() => setTab(item.id)} aria-current={tab === item.id ? "page" : undefined}><Icon size={15}/><span>{item.label === "World clock" ? "World" : item.label}</span>{item.id === "alarms" && alarms.length > 0 && <i>{alarms.length}</i>}</button>; })}</nav>
-      <div className="studio-nav-end">{googleAccountEmail ? <button className="google-account-chip" onClick={() => setTab("accounts")} aria-label={`Google account ${googleAccountEmail}`}><span className="google-account-avatar">{googleAccountEmail.slice(0,1).toUpperCase()}</span><span className="google-account-copy"><strong>Signed in</strong><small>{googleAccountEmail}</small></span><ChevronDown size={13}/></button> : <button className="account-entry" onClick={() => setTab("accounts")}><ShieldCheck size={14}/> Accounts</button>}<span className="studio-live"><i/> LOCAL / LIVE</span>{!Capacitor.isNativePlatform() && !window.matchMedia("(display-mode: standalone)").matches && !(navigator as Navigator & { standalone?: boolean }).standalone && <button className="install-top-btn" onClick={()=>void installUP()}><Download size={14}/> {installPrompt ? "Install app" : "Install"}</button>}</div>
+      <div className="studio-nav-end">{googleAccount?.email ? <button className="google-account-chip" onClick={() => setTab("accounts")} aria-label={`Google account ${googleAccount.email}`}>{googleAccount.picture ? <img className="google-account-avatar" src={googleAccount.picture} alt=""/> : <span className="google-account-avatar">{googleAccount.email.slice(0,1).toUpperCase()}</span>}<span className="google-account-copy"><strong>Signed in</strong><small>{googleAccount.email}</small></span><ChevronDown size={13}/></button> : <button className="account-entry" onClick={() => setTab("accounts")}><ShieldCheck size={14}/> Accounts</button>}<span className="studio-live"><i/> LOCAL / LIVE</span>{!Capacitor.isNativePlatform() && !window.matchMedia("(display-mode: standalone)").matches && !(navigator as Navigator & { standalone?: boolean }).standalone && <button className="install-top-btn" onClick={()=>void installUP()}><Download size={14}/> {installPrompt ? "Install app" : "Install"}</button>}</div>
     </header>
     <main className="main-area">
       <div className="studio-date-line"><span>{localDate.toUpperCase()}</span><span className="studio-date-rule"/><span>{timeZone.replaceAll("_", " ").toUpperCase()}</span><span className="studio-date-rule"/><span>YOUR TIME, YOUR TERMS</span></div>
       {(notice || error) && <div className={`toast ${error ? "toast-error" : ""}`}><span className="toast-mark">{error ? "!" : "✦"}</span><span>{error || notice}</span><button onClick={() => { setNotice(""); setError(""); }}><X size={14}/></button></div>}
       <div className="page-content">
-        <div hidden={tab !== "accounts"}><section><div className="page-heading"><div><span className="eyebrow">YOUR SERVICES, IN ONE PLACE</span><h1>Accounts<span className="heading-dot">.</span></h1><p>Connect your Google account to bring your reminders and calendar into UP.</p></div></div><div className="settings-list" data-reveal><GoogleCalendar alarms={alarms} onAccountChange={setGoogleAccountEmail}/></div></section></div>
+        <div hidden={tab !== "accounts"}><section><div className="page-heading"><div><span className="eyebrow">YOUR SERVICES, IN ONE PLACE</span><h1>Accounts<span className="heading-dot">.</span></h1><p>Connect your Google account to bring your reminders and calendar into UP.</p></div></div><div className="settings-list" data-reveal><GoogleCalendar alarms={alarms} onAccountChange={setGoogleAccount}/></div></section></div>
         {tab === "today" && <section className="today-page">
           <div className="eyebrow"><span className="live-dot"/> TODAY · {new Intl.DateTimeFormat([], { weekday: "long" }).format(now).toUpperCase()}</div>
           <div className="today-hero" data-reveal>
