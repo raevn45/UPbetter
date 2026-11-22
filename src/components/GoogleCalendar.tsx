@@ -53,7 +53,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
       callback: response => {
         if (response.error || !response.access_token) return;
         setToken(response.access_token);
-        setStatus("Google account reconnected.");
+        setStatus("Google signed in.");
         void fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + response.access_token } }).then(async response => { if (response.ok) { const profile = await response.json() as { email?: string }; setAccountEmail(profile.email || ""); } }).catch(() => undefined);
         void fetch("https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true", { headers: { Authorization: "Bearer " + response.access_token } }).then(async response => { if (response.ok) { const data = await response.json() as { items?: Array<{ snippet?: { title?: string } }> }; setYoutubeChannel(data.items?.[0]?.snippet?.title || "No YouTube channel found"); } }).catch(() => undefined);
       }
@@ -80,7 +80,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
         }
         setToken(response.access_token);
         void fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + response.access_token } }).then(async profileResponse => { if (!profileResponse.ok) return; const profile = await profileResponse.json() as { email?: string }; setAccountEmail(profile.email || ""); }).catch(() => undefined);
-        setStatus("Google account connected.");
+        setStatus("Google signed in.");
         void fetch("https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true", { headers: { Authorization: "Bearer " + response.access_token } }).then(async channelResponse => { if (!channelResponse.ok) return; const data = await channelResponse.json() as { items?: Array<{ snippet?: { title?: string } }> }; setYoutubeChannel(data.items?.[0]?.snippet?.title || "No YouTube channel found"); }).catch(() => undefined);
       }
     });
@@ -162,7 +162,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
 
   return <section className="setting-row google-calendar-setting">
     <div>
-      <strong>Google account</strong>
+      <strong>Google login</strong>
       <span>Connect Google to let UP work with your Calendar and reminders.</span>
       <small>{token ? (accountEmail ? `Connected as ${accountEmail}.` : status) : status}</small>
       {token && <small>{youtubeChannel ? "YouTube: " + youtubeChannel : "YouTube account access connected."}</small>}
@@ -170,7 +170,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     <div className="setting-actions">
       {token
         ? <button className="outline-btn" onClick={disconnect}><LogOut size={14}/> Disconnect</button>
-        : <button className="outline-btn" onClick={connect}><LogIn size={14}/> Connect Google</button>}
+        : <button className="outline-btn" onClick={connect}><LogIn size={14}/> Sign in with Google</button>}
     </div>
     {token && <>
       <div className="google-sync-alarm">
