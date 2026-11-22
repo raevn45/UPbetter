@@ -52,6 +52,6 @@ export async function pickNativeAlarmSound(existingUri?: string) {
   if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== "android") {
     return { supported: false as const, cancelled: true as const };
   }
-  const result = await NativeUPAlarm.pickAlarmSound({ existingUri });
+  const result = await NativeUPAlarm.pickAlarmSound(existingUri ? { existingUri } : {});
   return { supported: true as const, ...result };
 }
