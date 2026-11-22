@@ -6,6 +6,8 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.app.Activity
+import android.media.RingtoneManager
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
@@ -15,6 +17,40 @@ import com.getcapacitor.annotation.Permission
 
 @CapacitorPlugin(name = "UPAlarm", permissions = [Permission(alias = "notifications", strings = [Manifest.permission.POST_NOTIFICATIONS])])
 class UPAlarmPlugin : Plugin() {
+    @PluginMethod
+    fun pickAlarmSound(call: PluginCall) {
+        val intent = Intent(RingtoneManager.ACTION_RINGTONE_PICKER).apply {
+            putExtra(RingtoneManager.EXTRA_RINGTONE_TYPE, RingtoneManager.TYPE_ALARM)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_TITLE, "Choose UP alarm sound")
+            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_SILENT, false)
+            putExtra(RingtoneManager.EXTRA_RINGTONE_SHOW_DEFAULT, true)
+            call.getString("existingUri")?.takeIf { it.isNotBlank() }?.let {
+                putExtra(RingtoneManager.EXTRA_RINGTONE_EXISTING_URI, Uri.parse(it))
+            }
+        }
+        startActivityForResult(call, intent, "handleAlarmSoundPicked")
+    }
+
+    @ActivityCallback
+    private fun handleAlarmSoundPicked(call: PluginCall?, result: ActivityResult) {
+        if (call == null) return
+        if (result.resultCode != Activity.RESULT_OK) {
+            call.resolve(JSObject().put("cancelled", true))
+            return
+        }
+        val uri = result.data?.getParcelableExtra<Uri>(RingtoneManager.EXTRA_RINGTONE_PICKED_URI)
+        if (uri == null) {
+            call.reject("Android did not return an alarm sound.")
+            return
+        }
+        val title = RingtoneManager.getRingtone(context, uri)?.getTitle(context) ?: "Device alarm sound"
+        call.resolve(JSObject().apply {
+            put("cancelled", false)
+            put("uri", uri.toString())
+            put("title", title)
+        })
+    }
+
     @PluginMethod
     fun capabilities(call: PluginCall) {
         val manager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
