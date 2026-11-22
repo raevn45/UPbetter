@@ -45,8 +45,6 @@ This file is the source-of-truth feature inventory. "Implemented" means code exi
 ### Productivity
 - Local daily activity log, current and best streak, and a 12-week contribution grid.
 - Manual check-ins and deletion of individual activity entries.
-- Photo identification endpoint uses Gemini Flash when `GEMINI_API_KEY` is configured in Vercel.
-- UP does not write the uploaded image to its database or local activity history. The image is held in request memory for analysis and discarded by the app after the request. Google's API data handling/retention terms still apply; UP cannot promise deletion from a third-party provider's systems.
 
 ## Remaining work
 
@@ -69,9 +67,7 @@ This file is the source-of-truth feature inventory. "Implemented" means code exi
 - Never ask users to paste provider secrets into chat. Configure client IDs/tokens in the appropriate developer dashboards and secure deployment environment.
 
 ### Productivity and privacy
-- Test photo identification with the configured Gemini key and improve conservative evidence classification.
-- Add an explicit photo-processing consent step and a clear data-retention explanation before the first upload.
-- Keep only the activity label, date and source in the productivity log. Never store the original image.
+- Activity check-ins are manual. The proposed one-hour reminder and tap-to-confirm streak flow is not implemented yet.
 - Consider optional encrypted cross-device sync only after a separate privacy/security design.
 
 ## Permissions policy
