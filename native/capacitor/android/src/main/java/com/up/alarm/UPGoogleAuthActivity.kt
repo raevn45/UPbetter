@@ -3,6 +3,7 @@ package com.up.alarm
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
+import android.os.Build
 import android.app.PendingIntent
 
 class UPGoogleAuthActivity : Activity() {
@@ -13,7 +14,12 @@ class UPGoogleAuthActivity : Activity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val pendingIntent = intent.getParcelableExtra<PendingIntent>(EXTRA_PENDING_INTENT)
+        val pendingIntent = if (Build.VERSION.SDK_INT >= 33) {
+            intent.getParcelableExtra(EXTRA_PENDING_INTENT, PendingIntent::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra<PendingIntent>(EXTRA_PENDING_INTENT)
+        }
         if (pendingIntent == null) {
             setResult(RESULT_CANCELED)
             finish()
