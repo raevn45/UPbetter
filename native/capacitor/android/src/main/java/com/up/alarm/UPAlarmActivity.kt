@@ -143,19 +143,23 @@ class UPAlarmActivity : Activity() {
             else -> ""
         }
         val resourceId = if (resourceName.isNotEmpty()) resources.getIdentifier(resourceName, "raw", packageName) else 0
-        player = if (resourceId != 0) MediaPlayer.create(this, resourceId) else null
-        if (player == null) {
-            val fallback = android.media.RingtoneManager.getDefaultUri(android.media.RingtoneManager.TYPE_ALARM)
-            player = MediaPlayer().apply {
-                setDataSource(this@UPAlarmActivity, fallback); isLooping = true; prepare()
+        player = MediaPlayer().apply {
+            setAudioAttributes(AudioAttributes.Builder()
+                .setUsage(AudioAttributes.USAGE_ALARM)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                .build())
+            setWakeMode(this@UPAlarmActivity, android.os.PowerManager.PARTIAL_WAKE_LOCK)
+            isLooping = true
+            if (resourceId != 0) {
+                resources.openRawResourceFd(resourceId).use { descriptor ->
+                    setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+                }
+            } else {
+                val fallback = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                setDataSource(this@UPAlarmActivity, fallback)
             }
+            prepare()
         }
-        player?.isLooping = true
-        player?.setAudioAttributes(AudioAttributes.Builder()
-            .setUsage(AudioAttributes.USAGE_ALARM)
-            .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-            .build())
-        player?.setWakeMode(this, android.os.PowerManager.PARTIAL_WAKE_LOCK)
         val target = (record?.optDouble("volume", 0.8)?.toFloat() ?: 0.8f).coerceIn(0f, 1f)
         if (record?.optBoolean("gradualVolume", true) == true) {
             player?.setVolume(0.05f, 0.05f); player?.start(); handler.post(fade)
