@@ -203,8 +203,8 @@ export default function App() {
   const addCountdown = async () => {
     try {
       if (!countForm.date || !countForm.title.trim()) throw new Error("Add a title and target date first.");
-      const [year, month, day] = countForm.date.split("-").map(Number);
-      const [hour, minute] = countForm.time.split(":").map(Number);
+      const [year = 0, month = 0, day = 0] = countForm.date.split("-").map(Number);
+      const [hour = 0, minute = 0] = countForm.time.split(":").map(Number);
       const targetInstant = Temporal.ZonedDateTime.from({ timeZone: countForm.timeZone, year, month, day, hour, minute, second: 0 }).toInstant().toString();
       resultValue(await upCore.countdowns.create({ title: countForm.title, targetInstant, timeZone: countForm.timeZone }));
       setModal(null); setCountForm({ title: "", date: "", time: "09:00", timeZone }); await refresh(); setNotice("Countdown created.");
