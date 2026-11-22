@@ -67,6 +67,7 @@ export class SoundService {
       this.activeAudio.currentTime = 0;
       this.activeAudio = null;
     }
+    if (this.activeObjectUrl) { URL.revokeObjectURL(this.activeObjectUrl); this.activeObjectUrl = null; }
   }
 
   async importCustom(file: File): Promise<Result<SoundItem>> {
