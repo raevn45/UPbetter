@@ -74,9 +74,6 @@ if (!gradle.includes("desugar_jdk_libs")) {
 await writeFile(gradlePath, gradle);
 
 const sounds = [
-  ["up_classic_twinbell", "https://raw.githubusercontent.com/gretzke/open-alarm/main/OpenAlarm/Resources/Ringtones/ringtone_classic_twinbell.caf"],
-  ["up_classic_bedside", "https://raw.githubusercontent.com/gretzke/open-alarm/main/OpenAlarm/Resources/Ringtones/ringtone_classic_bedsideclock.caf"],
-  ["up_classic_buzzer", "https://raw.githubusercontent.com/gretzke/open-alarm/main/OpenAlarm/Resources/Ringtones/ringtone_classic_digitalalarm.caf"],
   ["up_rain_soft", "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.1.0-preview/rain-soft.wav"],
   ["up_rain_heavy", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-heavy.wav"],
   ["up_rain_tin_roof", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-tin-roof.wav"],
@@ -102,6 +99,42 @@ const sounds = [
 ];
 const rawDir = path.join(appMain, "res/raw");
 await mkdir(rawDir, { recursive: true });
+
+function makeAlarmWav(pattern, square = false) {
+  const rate = 22050;
+  const chunks = [];
+  for (let repeat = 0; repeat < 7; repeat++) {
+    for (const [hz, onMs, offMs] of pattern) {
+      const count = Math.floor(rate * onMs / 1000);
+      const samples = Buffer.alloc(count * 2);
+      for (let i = 0; i < count; i++) {
+        const t = i / rate;
+        const edge = Math.min(1, i / 220, (count - i) / 220);
+        const wave = square ? (Math.sin(2 * Math.PI * hz * t) >= 0 ? 1 : -1) : Math.sin(2 * Math.PI * hz * t);
+        samples.writeInt16LE(Math.round(wave * Math.max(0, edge) * 24500), i * 2);
+      }
+      chunks.push(samples, Buffer.alloc(Math.floor(rate * offMs / 1000) * 2));
+    }
+  }
+  const data = Buffer.concat(chunks);
+  const header = Buffer.alloc(44);
+  header.write("RIFF", 0); header.writeUInt32LE(36 + data.length, 4); header.write("WAVE", 8);
+  header.write("fmt ", 12); header.writeUInt32LE(16, 16); header.writeUInt16LE(1, 20);
+  header.writeUInt16LE(1, 22); header.writeUInt32LE(rate, 24); header.writeUInt32LE(rate * 2, 28);
+  header.writeUInt16LE(2, 32); header.writeUInt16LE(16, 34); header.write("data", 36);
+  header.writeUInt32LE(data.length, 40);
+  return Buffer.concat([header, data]);
+}
+const generatedAlarms = [
+  ["up_alarm_twinbell", [[880,280,180],[660,280,180],[880,280,180],[660,280,750]]],
+  ["up_alarm_digital", [[1320,180,120],[990,180,120],[1320,180,120],[990,180,750]]],
+  ["up_alarm_buzzer", [[480,620,120],[480,620,120],[480,620,750]], true],
+  ["up_alarm_pulse", [[740,120,120],[740,120,120],[740,120,480],[1040,240,600]]],
+  ["up_alarm_rise", [[520,350,80],[660,350,80],[820,350,80],[1040,550,550]]]
+];
+for (const [name, pattern, square] of generatedAlarms) {
+  await writeFile(path.join(rawDir, name + ".wav"), makeAlarmWav(pattern, square));
+}
 for (const [name, url] of sounds) {
   const response = await fetch(url);
   if (!response.ok) throw new Error(`Could not download ${name}: HTTP ${response.status}`);
@@ -112,4 +145,4 @@ for (const [name, url] of sounds) {
   await rm(wavPath, { force: true });
   if (conversion.status !== 0) throw new Error(`FFmpeg failed to convert ${name}`);
 }
-console.log("UP Android project prepared: native plugin registered, alarm receivers merged, CC0 audio bundled.");
+console.log("UP Android project prepared: native plugin registered, alarm receivers merged, CC0 ambience and original audible alarm tones bundled.");
