@@ -13,7 +13,7 @@ The Android bridge now includes:
 - Weekly recurrence calculated in the alarm's selected IANA timezone.
 - One-time alarm records retained while ringing so the selected sound and mission are still available to the ringing Activity.
 
-The native build workflow generates the Capacitor project and calls `scripts/prepare-native-android.mjs`. That script registers the plugin, merges the receivers and permissions, enables Java time desugaring, and downloads/transcodes the seven CC0 recordings into Android resources.
+The native build workflow generates the Capacitor project and calls `scripts/prepare-native-android.mjs`. That script registers the plugin, merges the receivers and permissions, enables Java time desugaring, and downloads/transcodes all 22 CC0 sounds into Android resources.
 
 ### Local Android build
 
