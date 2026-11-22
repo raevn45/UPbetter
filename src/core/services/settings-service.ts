@@ -7,6 +7,7 @@ export type UpSettings = {
   reducedMotion: boolean;
   wakeReason: string;
   pinnedCountdownId: string | null;
+  timeFormat: "12h" | "24h";
 };
 
 const DEFAULTS: UpSettings = {
@@ -14,7 +15,8 @@ const DEFAULTS: UpSettings = {
   motivationStyle: "direct",
   reducedMotion: false,
   wakeReason: "",
-  pinnedCountdownId: null
+  pinnedCountdownId: null,
+  timeFormat: "12h"
 };
 
 export class SettingsService {
