@@ -6,9 +6,11 @@ type CustomSoundRecord = { id: string; title: string; category: "Custom"; durati
 
 const SOUND_LIBRARY: LibrarySound[] = [
   { id: "device-alarm", title: "Device Alarm", category: "Alarm", durationSeconds: 8, source: "bundled", attribution: "Uses your device's default alarm tone" },
-  { id: "classic-twinbell", title: "Twin Bell Alarm Clock", category: "Classic", durationSeconds: 31, source: "bundled", previewUrl: "https://raw.githubusercontent.com/gretzke/open-alarm/main/OpenAlarm/Resources/Ringtones/ringtone_classic_twinbell.caf", attribution: "CC0 1.0 · cryptidcat · Freesound 743963" },
-  { id: "classic-bedside", title: "Bedside Quad", category: "Classic", durationSeconds: 12, source: "bundled", previewUrl: "https://raw.githubusercontent.com/gretzke/open-alarm/main/OpenAlarm/Resources/Ringtones/ringtone_classic_bedsideclock.caf", attribution: "CC0 1.0 · OpenAlarm project-generated tone" },
-  { id: "classic-buzzer", title: "Classic Buzzer", category: "Classic", durationSeconds: 10, source: "bundled", previewUrl: "https://raw.githubusercontent.com/gretzke/open-alarm/main/OpenAlarm/Resources/Ringtones/ringtone_classic_digitalalarm.caf", attribution: "CC0 1.0 · OpenAlarm project-generated tone" },
+  { id: "alarm-twinbell", title: "Twin Bell", category: "Alarm", durationSeconds: 30, source: "bundled", attribution: "Original UP alarm tone · generated locally" },
+  { id: "alarm-digital", title: "Digital Beeps", category: "Alarm", durationSeconds: 30, source: "bundled", attribution: "Original UP alarm tone · generated locally" },
+  { id: "alarm-buzzer", title: "Classic Buzzer", category: "Alarm", durationSeconds: 30, source: "bundled", attribution: "Original UP alarm tone · generated locally" },
+  { id: "alarm-pulse", title: "Pulse Alarm", category: "Alarm", durationSeconds: 30, source: "bundled", attribution: "Original UP alarm tone · generated locally" },
+  { id: "alarm-rise", title: "Rising Alarm", category: "Alarm", durationSeconds: 30, source: "bundled", attribution: "Original UP alarm tone · generated locally" },
   { id: "rain-soft", title: "Rain on the Window", category: "Rain", durationSeconds: 8, source: "bundled", previewUrl: "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.1.0-preview/rain-soft.wav", attribution: "CC0 1.0 · barkenov · Freesound 640655" },
   { id: "rain-heavy", title: "Rainstorm", category: "Rain", durationSeconds: 8, source: "bundled", previewUrl: "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-heavy.wav", attribution: "CC0 1.0 · Leminno original sound design" },
   { id: "rain-tin-roof", title: "Rain on a Tin Roof", category: "Rain", durationSeconds: 8, source: "bundled", previewUrl: "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-tin-roof.wav", attribution: "CC0 1.0 · Leminno original sound design" },
