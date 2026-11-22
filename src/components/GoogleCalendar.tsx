@@ -18,7 +18,7 @@ const dayCodes = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
   const [token, setToken] = useState("");
-  const [status, setStatus] = useState(clientId ? "Not connected" : "Google connection is being set up for UP.");
+  const [status, setStatus] = useState(clientId ? "Not connected" : "Google sign-in is not enabled in this UP deployment yet.");
   const [accountEmail, setAccountEmail] = useState("");
   const [youtubeChannel, setYoutubeChannel] = useState("");
   const [title, setTitle] = useState("");
@@ -62,7 +62,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
   }, [clientId, scriptReady]);
   const connect = () => {
     if (!clientId) {
-      setStatus("Google connection is not ready yet. You do not need to enter or configure anything.");
+      setStatus("Google sign-in is not enabled in this UP version yet.");
       return;
     }
     const google = window.google?.accounts?.oauth2;
