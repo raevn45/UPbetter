@@ -44,7 +44,10 @@ export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string |
   const [enabled, setEnabled] = useState(() => localStorage.getItem("up-voice-assistant-enabled") === "true");
   const [status, setStatus] = useState("OFF");
   const [hasVoice, setHasVoice] = useState(false);
-  const [recording, setRecording] = useState(false);\n  const [heard, setHeard] = useState("");\n  const [lastAnswer, setLastAnswer] = useState("");\n  const lastAnswerAt = useRef(0);
+  const [recording, setRecording] = useState(false);
+  const [heard, setHeard] = useState("");
+  const [lastAnswer, setLastAnswer] = useState("");
+  const lastAnswerAt = useRef(0);
   const recognition = useRef<RecognitionLike | null>(null);
   const recorder = useRef<MediaRecorder | null>(null);
   const stream = useRef<MediaStream | null>(null);
@@ -127,7 +130,9 @@ export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string |
       <button className={`toggle ${enabled ? "on" : ""}`} onClick={() => setEnabled(value => !value)} aria-label={enabled ? "Turn voice assistant off" : "Turn voice assistant on"}><span/></button>
       <button className="outline-btn" onClick={() => void answer()}><Volume2 size={14}/> Test</button>
     </div>
-    {heard && <small className="voice-debug-line">Heard: “{heard}”</small>}\n    {lastAnswer && <small className="voice-debug-line">UP answered: {lastAnswer}</small>}\n    <div className="voice-record-controls">
+    {heard && <small className="voice-debug-line">Heard: “{heard}”</small>}
+    {lastAnswer && <small className="voice-debug-line">UP answered: {lastAnswer}</small>}
+    <div className="voice-record-controls">
       <span>{hasVoice ? "Your recorded voice sample is saved on this device, but is not yet used for generated speech." : "Recording saves a sample only. It does not clone your voice or change the assistant's generated speech yet."}</span>
       {recording ? <button className="outline-btn" onClick={() => recorder.current?.stop()}><Square size={14}/> Stop recording</button> : <button className="outline-btn" onClick={() => void startRecording()}><Mic size={14}/> Record my voice</button>}
       {enabled ? <span><Radio size={13}/> {status}</span> : <span><MicOff size={13}/> Microphone off</span>}
