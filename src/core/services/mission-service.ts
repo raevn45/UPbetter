@@ -20,9 +20,11 @@ export class MissionService {
 
   create(config: MissionConfig): WakeChallenge {
     const id = randomId();
-    const challenge = this.build(id, config.kind, config.difficulty);
+    const available: MissionKind[] = ["math", "memory", "sequence", "typing", "logic", "checklist", "movement"];
+    const kind = config.kind === "random" ? available[Math.floor(Math.random() * available.length)]! : config.kind;
+    const challenge = this.build(id, kind, config.difficulty);
     this.answers.set(id, challenge.answer);
-    return { id, kind: config.kind, prompt: challenge.prompt, hint: challenge.hint, difficulty: config.difficulty };
+    return { id, kind, prompt: challenge.prompt, hint: challenge.hint, difficulty: config.difficulty };
   }
 
   check(challengeId: string, response: string): { correct: boolean; message: string } {
