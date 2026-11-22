@@ -81,7 +81,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
     event.currentTarget.setPointerCapture(event.pointerId);
     setDragging(true);
   };
-  const onPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
     const drag = dragRef.current;
     if (!drag || drag.id !== event.pointerId) return;
     const width = spotlight ? 190 : 126, height = spotlight ? 190 : 136;
