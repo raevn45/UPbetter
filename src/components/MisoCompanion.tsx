@@ -32,17 +32,14 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<PixelCatEngine | null>(null);
   const dragRef = useRef<{ id: number; x: number; y: number; left: number; top: number } | null>(null);
-  const [position, setPosition] = useState<Point>({ x: Math.max(12, window.innerWidth - 188), y: Math.max(72, window.innerHeight - 212) });
+  const [position, setPosition] = useState<Point>({ x: Math.max(12, window.innerWidth - 148), y: Math.max(72, window.innerHeight - 168) });
   const [ready, setReady] = useState(false);
   const [behavior, setBehavior] = useState("keeping you company");
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
     const saved = readPoint();
-    if (saved) setPosition({
-      x: Math.max(0, Math.min(window.innerWidth - 112, saved.x)),
-      y: Math.max(8, Math.min(window.innerHeight - 136, saved.y))
-    });
+    if (saved) setPosition({ x: Math.max(0, Math.min(window.innerWidth - 126, saved.x)), y: Math.max(8, Math.min(window.innerHeight - 136, saved.y)) });
   }, []);
 
   useEffect(() => {
@@ -70,10 +67,10 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
 
   useEffect(() => { engineRef.current?.setName(name); }, [name]);
   useEffect(() => {
-    const resize = () => setPosition(p => ({ x: Math.max(0, Math.min(window.innerWidth - 112, p.x)), y: Math.max(8, Math.min(window.innerHeight - 136, p.y)) }));
+    const resize = () => setPosition(p => ({ x: Math.max(0, Math.min(window.innerWidth - (spotlight ? 190 : 126), p.x)), y: Math.max(8, Math.min(window.innerHeight - (spotlight ? 190 : 136), p.y)) }));
     window.addEventListener("resize", resize);
     return () => window.removeEventListener("resize", resize);
-  }, []);
+  }, [spotlight]);
 
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).closest("button")) return;
@@ -85,15 +82,13 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
     const drag = dragRef.current;
     if (!drag || drag.id !== event.pointerId) return;
     const width = spotlight ? 190 : 126, height = spotlight ? 190 : 136;
-    setPosition({
-      x: Math.max(0, Math.min(window.innerWidth - width, drag.left + event.clientX - drag.x)),
-      y: Math.max(0, Math.min(window.innerHeight - height, drag.top + event.clientY - drag.y))
-    });
+    const next = { x: Math.max(0, Math.min(window.innerWidth - width, drag.left + event.clientX - drag.x)), y: Math.max(0, Math.min(window.innerHeight - height, drag.top + event.clientY - drag.y)) };
+    setPosition(next);
+    try { localStorage.setItem("up.miso.position", JSON.stringify(next)); } catch { /* position remains live for this session */ }
   };
   const finishDrag = () => {
     if (!dragRef.current) return;
     dragRef.current = null; setDragging(false);
-    try { localStorage.setItem("up.miso.position", JSON.stringify(position)); } catch { /* position is still live for this session */ }
   };
 
   return <div className={`miso-companion ${spotlight ? "miso-companion--spotlight" : ""} ${dragging ? "is-dragging" : ""}`}
