@@ -45,6 +45,21 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     return () => script?.removeEventListener("load", loaded);
   }, [clientId]);
 
+  useEffect(() => {
+    if (!clientId || !scriptReady || !window.google?.accounts?.oauth2) return;
+    const client = window.google.accounts.oauth2.initTokenClient({
+      client_id: clientId,
+      scope: "openid email profile https://www.googleapis.com/auth/calendar.events https://www.googleapis.com/auth/youtube.readonly",
+      callback: response => {
+        if (response.error || !response.access_token) return;
+        setToken(response.access_token);
+        setStatus("Google account reconnected.");
+        void fetch("https://www.googleapis.com/oauth2/v3/userinfo", { headers: { Authorization: "Bearer " + response.access_token } }).then(async response => { if (response.ok) { const profile = await response.json() as { email?: string }; setAccountEmail(profile.email || ""); } }).catch(() => undefined);
+        void fetch("https://www.googleapis.com/youtube/v3/channels?part=snippet&mine=true", { headers: { Authorization: "Bearer " + response.access_token } }).then(async response => { if (response.ok) { const data = await response.json() as { items?: Array<{ snippet?: { title?: string } }> }; setYoutubeChannel(data.items?.[0]?.snippet?.title || "No YouTube channel found"); } }).catch(() => undefined);
+      }
+    });
+    client.requestAccessToken({ prompt: "none" });
+  }, [clientId, scriptReady]);
   const connect = () => {
     if (!clientId) {
       setStatus("Google connection is not ready yet. You do not need to enter or configure anything.");
