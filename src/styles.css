@@ -1079,7 +1079,7 @@ body{
 .app-shell[data-reduced-motion=true] *, .app-shell[data-reduced-motion=true] *::before,.app-shell[data-reduced-motion=true] *::after{animation-duration:.01ms!important;transition-duration:.01ms!important}
 
 /* Motion runtime: viewport reveal, scroll-velocity lensing and matrix navigation. */
-.sound-art{transform:scaleX(calc(1 - var(--scroll-compress,0))) skewX(calc(var(--scroll-direction,1) * var(--scroll-skew,0deg)));transform-origin:center;will-change:transform}
+.sound-art{transform:scaleX(calc(1 - var(--scroll-compress,0))) skewX(var(--scroll-skew,0deg));transform-origin:center;will-change:transform}
 .dot-matrix-transition{position:fixed;z-index:75;inset:0;display:grid;grid-template-columns:repeat(12,minmax(0,1fr));grid-template-rows:repeat(12,minmax(0,1fr));pointer-events:none;overflow:hidden}
 .dot-matrix-transition i{display:block;background:rgba(196,92,67,.18);transform:scale(.08);opacity:0;animation:dot-cell-reveal .52s cubic-bezier(.2,.7,.2,1) both}
 @keyframes dot-cell-reveal{0%{opacity:0;transform:scale(.08)}32%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(.82)}}
