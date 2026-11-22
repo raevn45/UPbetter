@@ -32,7 +32,7 @@ export default function GoogleCalendar({ alarms, onAccountChange }: { alarms: Al
   const [scriptReady, setScriptReady] = useState(false);
   const tokenClient = useRef<{ requestAccessToken(options?: { prompt?: string }): void } | null>(null);
 
-  useEffect(() => { onAccountChange?.(token && accountEmail ? { email: accountEmail, picture: accountPicture || undefined } : null); }, [token, accountEmail, accountPicture, onAccountChange]);
+  useEffect(() => { onAccountChange?.(token && accountEmail ? (accountPicture ? { email: accountEmail, picture: accountPicture } : { email: accountEmail }) : null); }, [token, accountEmail, accountPicture, onAccountChange]);
 
   useEffect(() => {
     if (!clientId) return;
