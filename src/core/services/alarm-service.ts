@@ -8,6 +8,7 @@ export interface AlarmScheduler {
   capabilities(): Promise<AlarmCapabilities>;
   requestPermission(): Promise<AlarmCapabilities>;
   test(): Promise<void>;
+  consumeCompleted(): Promise<string[]>;
 }
 
 /** Safe web fallback: persists alarms but never pretends it can ring after the app closes. */
@@ -21,6 +22,7 @@ export class WebAlarmScheduler implements AlarmScheduler {
   }
   async requestPermission() { return this.capabilities(); }
   async test() { throw new Error("A native alarm engine is not connected in this build."); }
+  async consumeCompleted() { return []; }
 }
 
 const makeId = () => globalThis.crypto?.randomUUID?.() ?? `up-${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -50,6 +52,15 @@ export class AlarmService {
 
   async list(): Promise<Result<AlarmWithStatus[]>> {
     try {
+      const completedIds = await this.scheduler.consumeCompleted();
+      if (completedIds.length) {
+        for (const id of completedIds) {
+          const completed = await localStore.get("alarms", id);
+          if (completed && completed.repeatDays.length === 0) {
+            await localStore.put("alarms", { ...completed, enabled: false, updatedAt: new Date().toISOString() });
+          }
+        }
+      }
       const alarms = await localStore.all("alarms");
       const values = await Promise.all(alarms.map(alarm => this.withStatus(alarm)));
       return success(values.sort((a, b) => (a.nextOccurrence ?? "").localeCompare(b.nextOccurrence ?? "")));
