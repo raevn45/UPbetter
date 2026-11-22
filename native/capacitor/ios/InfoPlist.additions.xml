@@ -1,3 +1,8 @@
 <!-- Merge these keys into the generated iOS app Info.plist. -->
 <key>NSAlarmKitUsageDescription</key>
 <string>UP schedules the alarms you create so you can wake up on time.</string>
+
+<key>NSMicrophoneUsageDescription</key>
+<string>UP uses the microphone when you turn on its voice assistant so you can manage alarms by speaking.</string>
+<key>NSSpeechRecognitionUsageDescription</key>
+<string>UP uses speech recognition to understand voice commands for your alarms.</string>
