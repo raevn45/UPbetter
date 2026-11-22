@@ -88,6 +88,7 @@ export default function App() {
   const [cities, setCities] = useState<SavedCity[]>([]);
   const [countdowns, setCountdowns] = useState<Countdown[]>([]);
   const [settings, setSettings] = useState<UpSettings>({ catName: "Miso", motivationStyle: "direct", reducedMotion: false, wakeReason: "", pinnedCountdownId: null, timeFormat: "12h" });
+  useEffect(() => { void setNativeWakeMessage(settings.wakeReason).catch(() => undefined); }, [settings.wakeReason]);
   const [capabilities, setCapabilities] = useState<{ platform: string; nativeAlarmSupported: boolean; permissionGranted: boolean; notes: string[] } | null>(null);
   const [modal, setModal] = useState<"alarm" | "countdown" | "city" | null>(null);
   const [editing, setEditing] = useState<Alarm | null>(null);
