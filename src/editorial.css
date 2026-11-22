@@ -424,3 +424,28 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
   .studio-links{display:none}
   .studio-nav-end{margin-left:auto}
 }
+
+
+/* Mobile overflow menu uses the same light paper surface as the desktop menu.
+   Override the legacy dark-theme text colours so every menu item stays readable. */
+@media(max-width:760px){
+  .mobile-more-menu{
+    background:#fbf9f3;
+    color:#191916;
+    border:1px solid rgba(25,25,22,.18);
+    box-shadow:0 18px 50px rgba(25,25,22,.16);
+  }
+  .mobile-more-menu button{
+    color:#292821;
+    border-bottom:1px solid rgba(25,25,22,.10);
+    font-family:var(--sans);
+    font-size:13px;
+    font-weight:500;
+  }
+  .mobile-more-menu button:hover,
+  .mobile-more-menu button:focus-visible{
+    background:#eee9de;
+    color:#191916;
+  }
+  .mobile-more-menu button svg:last-child{color:var(--accent)}
+}
