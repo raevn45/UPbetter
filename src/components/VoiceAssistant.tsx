@@ -132,13 +132,13 @@ export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string |
   };
 
   return <div className="setting-row voice-assistant-setting">
-    <div><strong>Voice assistant</strong><span>Say “How much time?” while UP is open. It answers with only your remaining sleep time.</span><small>Microphone mode: {status}. Listening is opt-in and can be switched off here.</small></div>
+    <div><strong>Voice assistant</strong><span>Say “How much time?” while UP is open. It answers with only your remaining sleep time.</span><small>Microphone mode: {status}. Listening is opt-in and can be switched off here. It only stays active while the app is open and supported by the browser.</small></div>
     <div className="setting-actions">
       <button className={`toggle ${enabled ? "on" : ""}`} onClick={() => setEnabled(value => !value)} aria-label={enabled ? "Turn voice assistant off" : "Turn voice assistant on"}><span/></button>
       <button className="outline-btn" onClick={() => void answer()}><Volume2 size={14}/> Test</button>
     </div>
     <div className="voice-record-controls">
-      <span>{hasVoice ? "Your recorded voice greeting is saved on this device." : "Add a short greeting in your own voice."}</span>
+      <span>{hasVoice ? "Your recorded voice greeting is saved on this device." : "Record a short greeting in your own voice. It plays before the time response; dynamic speech still uses your device's speech voice."}</span>
       {recording ? <button className="outline-btn" onClick={() => recorder.current?.stop()}><Square size={14}/> Stop recording</button> : <button className="outline-btn" onClick={() => void startRecording()}><Mic size={14}/> Record my voice</button>}
       {enabled ? <span><Radio size={13}/> {status}</span> : <span><MicOff size={13}/> Microphone off</span>}
     </div>
