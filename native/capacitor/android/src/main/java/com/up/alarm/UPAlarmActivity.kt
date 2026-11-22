@@ -107,6 +107,11 @@ class UPAlarmActivity : Activity() {
             text = "Snooze"
             setOnClickListener { snoozeAlarm() }
         })
+        layout.addView(Button(this).apply {
+            text = "Emergency stop"
+            contentDescription = "Stop the alarm immediately without completing a wake-up challenge"
+            setOnClickListener { stopAlarm() }
+        })
         setContentView(layout)
     }
 
