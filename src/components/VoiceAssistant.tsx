@@ -109,7 +109,7 @@ export default function VoiceAssistant({ nextAlarmAt }: { nextAlarmAt?: string |
   }, [enabled, answer]);
 
   return <div className="setting-row voice-assistant-setting">
-    <div><strong>Voice assistant</strong><span>Talk to UP while the app is open. Ask about your next alarm or use the assistant for a conversation.</span><small>Microphone mode: {status}. Listening works while this page is open in supported browsers. UP answers time-until-alarm questions locally; open-ended AI chat needs the assistant service. Spoken replies use your device voice.</small></div>
+    <div><strong>Voice assistant</strong><span>Talk to UP while the app is open. Ask about your next alarm or use the assistant for a conversation.</span><small>Microphone mode: {status}. Listening works while this page is open in supported browsers. UP answers time-until-alarm questions locally; open-ended AI chat is temporarily unavailable. Spoken replies use your device voice.</small></div>
     <div className="setting-actions">
       <button className={`toggle ${enabled ? "on" : ""}`} onClick={() => setEnabled(value => !value)} aria-label={enabled ? "Turn voice assistant off" : "Turn voice assistant on"}><span/></button>
       <button className="outline-btn" onClick={() => void answer("How much time is left until my next alarm?")}><Volume2 size={14}/> Test</button>
