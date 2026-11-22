@@ -87,6 +87,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
     }
     tokenClient.current = google.initTokenClient({
       client_id: clientId,
+      scope: "openid email profile https://www.googleapis.com/auth/calendar.events",
       callback: response => {
         if (response.error || !response.access_token) {
           setStatus("Google authorization was not completed.");
