@@ -145,3 +145,11 @@ button:active{transform:scale(.975)}
 .parallel-timer{display:flex;align-items:center;gap:8px;padding:10px;background:#192729;border:1px solid var(--line)}
 .parallel-timer>div{display:grid;gap:4px;flex:1;min-width:0}.parallel-timer strong{font-size:10px;color:#e9e4d7}.parallel-timer span{font:8px var(--mono);color:#91a096}
 .parallel-timer button{background:transparent;border:1px solid #536157;color:#c8d0c7;padding:7px 9px;font-size:8px}.parallel-timer button:hover{border-color:var(--ochre);color:var(--ochre)}
+
+
+.pinned-countdown{display:flex;align-items:center;gap:14px;padding:15px 18px;margin:14px 0;background:linear-gradient(100deg,#263b32,#1a2928);border:1px solid #c49a5555}
+.pinned-countdown>div{display:grid;gap:5px;flex:1}.pinned-countdown strong{font:500 21px var(--serif);color:#eee4d2}.pinned-countdown>div>span{font:9px var(--mono);color:#c5a36e}
+.pinned-countdown>button{display:flex;align-items:center;gap:6px;background:transparent;border:0;border-bottom:1px solid #c49a55;color:#d6b77d;padding:7px 0;font-size:9px}
+.pinned-icon{color:var(--ochre)!important;background:#c49a551a}
+.city-card small{line-height:1.6;letter-spacing:.02em;text-transform:none;word-break:break-word}
+@media(max-width:760px){.pinned-countdown{align-items:flex-start;flex-wrap:wrap}.pinned-countdown>button{margin-left:0}}
