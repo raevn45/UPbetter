@@ -78,9 +78,9 @@ export default function EditorialRuntime() {
       targetVelocity *= .82;
       const intensity = Math.min(Math.abs(velocity) * .014, .035);
       root.style.setProperty("--scroll-velocity", velocity.toFixed(3));
-      root.style.setProperty("--scroll-direction", velocity < 0 ? "-1" : "1");
       root.style.setProperty("--scroll-compress", intensity.toFixed(4));
-      root.style.setProperty("--scroll-skew", `${Math.min(Math.abs(velocity) * .22, 1.2).toFixed(3)}deg`);
+      const signedSkew = Math.min(Math.abs(velocity) * .22, 1.2) * (velocity < 0 ? -1 : 1);
+      root.style.setProperty("--scroll-skew", `${signedSkew.toFixed(3)}deg`);
       if (Math.abs(velocity) > .003 || Math.abs(targetVelocity) > .003) frame = requestAnimationFrame(tick);
       else {
         velocity = 0; targetVelocity = 0;
