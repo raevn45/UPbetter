@@ -7,4 +7,5 @@ export interface NativeAlarmPlugin {
   requestPermission(): Promise<AlarmCapabilities>;
   test(): Promise<void>;
   pickAlarmSound(options: { existingUri?: string }): Promise<{ cancelled: boolean; uri?: string; title?: string }>;
+  consumeCompleted(): Promise<{ alarmIds: string[] }>;
 }
