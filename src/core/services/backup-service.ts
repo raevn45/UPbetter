@@ -74,6 +74,17 @@ export class BackupService {
     catch { return failure("INVALID_BACKUP_JSON", "This file is not valid JSON."); }
     if (!isBackup(payload)) return failure("INVALID_BACKUP", "This is not a supported UP backup file.");
     try {
+      // Decode portable audio before opening the transaction. IndexedDB transactions
+      // can auto-close while awaiting unrelated async work.
+      const restoredSettings = await Promise.all(payload.settings.map(async item => {
+        if (item.key !== "custom-sounds" || !Array.isArray(item.value)) return item;
+        const restored = item.value.map(sound => {
+          if (!isRecord(sound) || typeof sound.blobDataUrl !== "string") return sound;
+          const { blobDataUrl, blobType, ...metadata } = sound;
+          return { ...metadata, blob: dataUrlToBlob(blobDataUrl) };
+        });
+        return { ...item, value: restored };
+      }));
       const db = await getDatabase();
       const tx = db.transaction(["alarms", "countdowns", "cities", "timers", "settings"], "readwrite");
       await Promise.all([
@@ -83,15 +94,6 @@ export class BackupService {
         tx.objectStore("timers").clear(),
         tx.objectStore("settings").clear()
       ]);
-      const restoredSettings = await Promise.all(payload.settings.map(async item => {
-        if (item.key !== "custom-sounds" || !Array.isArray(item.value)) return item;
-        const restored = item.value.map(sound => {
-          if (!isRecord(sound) || typeof sound.blobDataUrl !== "string") return sound;
-          const { blobDataUrl, ...metadata } = sound;
-          return { ...metadata, blob: dataUrlToBlob(blobDataUrl) };
-        });
-        return { ...item, value: restored };
-      }));
       const writes = [
         ...payload.alarms.map(item => tx.objectStore("alarms").put(item)),
         ...payload.countdowns.map(item => tx.objectStore("countdowns").put(item)),
