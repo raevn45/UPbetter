@@ -45,18 +45,18 @@ export default function MissionStudio({ value, onChange, onComplete }: { value: 
   };
 
   return <section className="mission-studio">
-    <div className="mission-studio-head"><div><span className="eyebrow">WAKE-UP CHALLENGE</span><h3>Give your brain a gentle nudge.</h3><p>Pick the kind of check you want. Preview a real example before saving.</p></div><span className="mission-count">{value ? "01 SELECTED" : "OPTIONAL"}</span></div>
+    <div className="mission-studio-head"><div><span className="eyebrow">WAKE-UP CHALLENGE</span><h3>Give your brain a gentle nudge.</h3><p>Pick the kind of check you want. Preview a real example before saving.</p></div><span className="mission-count">CHALLENGE REQUIRED</span></div>
     <div className="mission-choice-grid">
-      {choices.map(choice => { const Icon = choice.icon; const active = value?.kind === choice.kind; return <button type="button" key={choice.kind} className={`mission-choice ${active ? "is-selected" : ""}`} data-tilt onClick={() => { onChange(active ? null : { kind: choice.kind, difficulty: value?.difficulty ?? "easy", rounds: value?.rounds ?? 1 }); setPreview(null); }}>
+      {choices.map(choice => { const Icon = choice.icon; const active = value?.kind === choice.kind; return <button type="button" key={choice.kind} className={`mission-choice ${active ? "is-selected" : ""}`} data-tilt onClick={() => { if (!active) onChange({ kind: choice.kind, difficulty: value?.difficulty ?? "hard", rounds: value?.rounds ?? 3 }); setPreview(null); }}>
         <span className="mission-choice-icon"><Icon size={18}/></span><span className="mission-choice-copy"><strong>{choice.title}</strong><small>{choice.subtitle}</small></span><span className="mission-choice-check">{active ? <CheckCircle2 size={17}/> : "+"}</span>
       </button>; })}
     </div>
     {value && <div className="mission-config">
       <div className="mission-selected-copy"><span className="eyebrow">YOUR SELECTION</span><strong>{selected?.title}</strong><p>{selected?.detail}</p></div>
-      <div className="mission-config-controls"><label>Difficulty<select value={value.difficulty} onChange={e => onChange({ ...value, difficulty: e.target.value as MissionConfig["difficulty"] })}><option value="easy">Easy</option><option value="medium">Medium</option><option value="hard">Hard</option></select></label><label>Rounds<select value={value.rounds} onChange={e => onChange({ ...value, rounds: Number(e.target.value) })}><option value={1}>1 round</option><option value={3}>3 rounds</option><option value={5}>5 rounds</option></select></label></div>
+      <div className="mission-config-controls"><label>Difficulty<select value={value.difficulty} onChange={e => onChange({ ...value, difficulty: e.target.value as MissionConfig["difficulty"] })}><option value="medium">Medium</option><option value="hard">Hard</option></select></label><label>Rounds<select value={value.rounds} onChange={e => onChange({ ...value, rounds: Number(e.target.value) })}><option value={3}>3 rounds</option><option value={5}>5 rounds</option></select></label></div>
       <button type="button" className="mission-preview-button" onClick={makePreview}><Sparkles size={16}/> Open interactive preview <span>↗</span></button>
     </div>}
-    {!value && <p className="mission-none">No challenge selected. Your alarm will ring normally, with snooze and stop controls.</p>}
+    {!value && <p className="mission-none">Choose a wake-up challenge. The default is random, hard, and three rounds.</p>}
     {preview && <div className="mission-preview-overlay" role="dialog" aria-modal="true" aria-label="Wake-up challenge preview">
       <div className="mission-preview-window">
         <div className="mission-preview-top"><span className="eyebrow">UP / MISSION SIMULATOR</span><button type="button" className="mission-close" onClick={() => setPreview(null)} aria-label="Close preview"><X size={18}/></button></div>
@@ -67,7 +67,7 @@ export default function MissionStudio({ value, onChange, onComplete }: { value: 
           <span className="mission-preview-label">01 / NOTICE</span>
           <div className="mission-preview-orbit"><div className="mission-preview-orbit-inner"><Sparkles size={26}/></div></div>
           <h3>A small check. A clearer start.</h3>
-          <p>This is a preview of the wake-up challenge. Your real alarm will generate a fresh one. You can always snooze or stop the alarm.</p>
+          <p>This is a preview of the wake-up challenge. Your real alarm will generate a fresh one. The alarm continues until the challenge is complete. Emergency stop remains available on the device.</p>
           <button type="button" className="mission-preview-submit" onClick={() => setPhase("question")}>Show me the challenge <span>↗</span></button>
         </div>}
         {phase === "question" && <div className="mission-phase-card">
