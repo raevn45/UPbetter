@@ -6,7 +6,7 @@ UP helps the user wake up, get oriented and start the day. It is an alarm clock 
 
 ## Locked product decisions
 
-- **Pet:** an original cat companion, not an emoji or a copied character.
+- **Pet:** Miso uses the MIT-licensed PixelPets sprite engine. Use the same pixel sprite and coat everywhere. Never substitute an emoji, SVG illustration, or alternate cat face.
 - **Phone targets:** Android and iPhone.
 - **Data:** local-first. The MVP requires no account, backend, or cloud sync. Data should remain on the device and be exportable where practical.
 - **Desktop:** Windows.
@@ -80,8 +80,9 @@ If the target city observes daylight saving, the alarm should follow that city's
 - Large, browsable sound catalogue
 - Categories, search, favourites and recently used
 - Preview controls with waveform/progress where practical
+- Recently played list and explicit stop control
 - Per-alarm sound assignment
-- Custom file import where supported
+- Custom file import where supported (local web preview; native alarm playback must clearly report support state)
 - Gradual volume increase and optional vibration
 - Clear sound attribution/licence metadata
 - Never bundle unlicensed commercial recordings
@@ -105,7 +106,7 @@ Provide accessible alternatives and an emergency stop. A mission is a wake-up ai
 
 ## Cat companion
 
-The cat is a small original character with a distinct silhouette, expressive face and a restrained animation set. It should feel integrated into the editorial visual system, not like a sticker pasted onto the interface.
+Miso is a single persistent pixel-art companion rendered by the licensed PixelPets engine. The same sprite, coat, proportions and face must be used everywhere. She remains mounted across navigation, follows the cursor, can be dragged anywhere inside the viewport, and offers consistent pet/treat/butterfly interactions. The editorial interface frames her without replacing her with a second illustration.
 
 Initial behaviour:
 - Idle animation on Today
@@ -169,6 +170,7 @@ Optional wake-time history and consistency trends. No body metrics, no sleep sco
 - User can create, edit, disable and delete multiple alarms.
 - Each alarm can use a different sound and mission.
 - Sound previews work before saving.
+- Custom audio can be imported locally, previewed, favourited and removed.
 - Timer and countdown remain usable independently of alarms.
 - World clock shows correct local times for selected cities.
 - Timezone alarm shows both target and device times before save.
