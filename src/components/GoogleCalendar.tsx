@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import { Capacitor, registerPlugin } from "@capacitor/core";
-import { CalendarDays, LogIn, LogOut, Plus } from "lucide-react";
+import { CalendarDays, LogIn, LogOut, Plus, UserRound } from "lucide-react";
 
 declare global {
   interface Window {
@@ -19,7 +19,7 @@ type AlarmToSync = {
 };
 const dayCodes = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 
-export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
+export default function GoogleCalendar({ alarms, onAccountChange }: { alarms: AlarmToSync[]; onAccountChange?: (email: string) => void }) {
   // Public Google OAuth Web client ID. Keep the env override for deployments with their own OAuth project.
   const clientId = (import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined) || "669883233575-b8qp2bv38e14gd3ls7l9hasof46qpt0i.apps.googleusercontent.com";
   const [token, setToken] = useState("");
@@ -29,7 +29,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
   const [when, setWhen] = useState("");
   const [busy, setBusy] = useState(false);
   const [scriptReady, setScriptReady] = useState(false);
-  const tokenClient = useRef<{ requestAccessToken(options?: { prompt?: string }): void } | null>(null);
+  const tokenClient = useRef<{ requestAccessToken(options?: { prompt?: string }): void } | null>(null);\n\n  useEffect(() => { onAccountChange?.(token && accountEmail ? accountEmail : ""); }, [token, accountEmail, onAccountChange]);
 
   useEffect(() => {
     if (!clientId) return;
@@ -177,14 +177,14 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
 
   return <section className="setting-row google-calendar-setting">
     <div>
-      <strong>Google login</strong>
-      <span>Connect Google to let UP work with your Calendar and reminders.</span>
-      <small>{token ? (accountEmail ? `Connected as ${accountEmail}.` : status) : status}</small>
+      <strong>Google account</strong>
+      <span>Use your Google account to keep your calendar reminders in sync with UP.</span>
+      <small>{token ? (accountEmail ? `Signed in as ${accountEmail}.` : "Google account connected.") : status}</small>
     </div>
     <div className="setting-actions">
       {token
-        ? <button className="outline-btn" onClick={disconnect}><LogOut size={14}/> Disconnect</button>
-        : <button className="outline-btn" onClick={connect}><LogIn size={14}/> Sign in with Google</button>}
+        ? <button className="outline-btn" onClick={disconnect}><LogOut size={14}/> Sign out</button>
+        : <button className="outline-btn google-connect-btn" onClick={connect}><UserRound size={14}/> Continue with Google</button>}
     </div>
     {token && <>
       <div className="google-sync-alarm">
