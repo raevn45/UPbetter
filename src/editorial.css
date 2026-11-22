@@ -303,3 +303,62 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
  .modal-body{padding:20px;gap:18px}
  .modal-foot{padding:16px 20px}
 }
+
+
+/* Navigation: keep the primary destinations visible and tuck the rest into one calm menu. */
+.studio-nav{position:sticky;isolation:isolate;gap:clamp(18px,3vw,42px)}
+.studio-links{position:relative;flex:1;min-width:0;overflow:visible;gap:8px}
+.studio-link{display:inline-flex;align-items:center;justify-content:center;gap:9px;min-height:42px;padding:10px 14px;font-size:12px;color:#55534c}
+.studio-link svg{flex:0 0 auto}
+.studio-link.active{color:#191916;background:#e9e4d8}
+.studio-more-trigger{margin-left:4px}
+.studio-more-menu{position:absolute;top:calc(100% + 17px);left:auto;right:0;z-index:60;width:260px;max-height:min(72vh,520px);overflow:auto;padding:8px;background:#fbf9f3;border:1px solid rgba(25,25,22,.18);box-shadow:0 18px 50px rgba(25,25,22,.14)}
+.studio-more-menu button{display:flex;align-items:center;gap:12px;width:100%;min-height:43px;padding:11px 13px;text-align:left;background:transparent;border:0;color:#292821;font-size:13px}
+.studio-more-menu button:hover,.studio-more-menu button:focus-visible{background:#eee9de;color:#191916}
+.studio-more-menu button svg:last-child{margin-left:auto;color:var(--accent)}
+.studio-menu-account{display:flex;align-items:center;gap:10px;padding:13px 12px;margin-top:6px;border-top:1px solid var(--line);color:var(--ink)}
+.studio-menu-account>span:last-child{display:grid;gap:3px;min-width:0}
+.studio-menu-account strong{font-size:11px;color:var(--ink)}
+.studio-menu-account small{font-size:10px;color:var(--ink-soft);overflow:hidden;text-overflow:ellipsis}
+.studio-menu-account .google-account-avatar{overflow:hidden;flex:0 0 28px}
+.studio-menu-account img{width:28px;height:28px;object-fit:cover;border-radius:50%}
+.studio-nav-end{flex:0 0 auto;gap:12px}
+.studio-live{font-size:9px;letter-spacing:.08em}
+@media(max-width:1100px){
+ .studio-nav{gap:14px;padding-left:22px;padding-right:22px}
+ .studio-brand{min-width:74px}
+ .studio-brand>span{font-size:43px}
+ .studio-brand small{font-size:7px}
+ .studio-links{gap:3px}
+ .studio-link{padding:9px 10px;font-size:11px}
+ .studio-live{display:none}
+}
+@media(max-width:760px){
+ .studio-nav{gap:10px}
+ .studio-links{display:none}
+ .studio-more-menu{display:none}
+}
+/* Restore strong text contrast where legacy dark-theme component rules were leaking through. */
+.page-content .eyebrow{color:#68665e}
+.page-content .page-heading p,.page-content .hero-note,.page-content .hero-time span{color:#55534c}
+.page-content .section-heading h2{color:#24231f}
+.page-content .next-main>span:last-child,.page-content .next-count span,.page-content .alarm-time-block>span,.page-content .alarm-status{color:#5f5d55}
+.page-content .capability-banner strong{color:#292821}
+.page-content .capability-banner span{color:#55534c}
+.page-content .empty-state{color:#55534c}
+.page-content .empty-state h3{color:#24231f}
+.page-content .empty-state p{color:#55534c}
+.page-content .sound-art>span{color:#fff}
+.page-content .sound-info small,.page-content .fine-print{color:#55534c}
+.page-content .timer-label-input label,.page-content .custom-time label,.page-content .timer-alert-choice label{color:#55534c}
+.page-content .parallel-timer strong,.page-content .parallel-timer span{color:#292821}
+.page-content .setting-row strong{color:#24231f}
+.page-content .setting-row span,.page-content .setting-row small{color:#55534c}
+.page-content .mission-studio,.page-content .mission-studio *{color:inherit}
+.page-content input::placeholder{color:#77746b;opacity:1}
+.page-content select,.page-content input,.page-content textarea{color:#24231f}
+.page-content button:not(.primary-btn):not(.sound-play):not(.studio-link){text-shadow:none}
+@media(max-width:760px){
+ .studio-nav-end{gap:8px}
+ .install-top-btn{padding:9px 10px;font-size:10px}
+}
