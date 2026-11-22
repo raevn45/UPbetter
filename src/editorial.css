@@ -361,3 +361,66 @@ button:focus-visible,input:focus-visible,select:focus-visible{outline:2px solid 
  .studio-nav-end{gap:8px}
  .install-top-btn{padding:9px 10px;font-size:10px}
 }
+
+
+/* Primary navigation: spacious, legible and deliberately limited to three destinations. */
+.studio-nav{
+  display:grid;
+  grid-template-columns:132px minmax(0,1fr) auto;
+  align-items:center;
+  gap:clamp(20px,3.2vw,52px);
+  height:88px;
+  padding-inline:clamp(24px,5vw,76px);
+}
+.studio-brand{min-width:0;justify-self:start}
+.studio-links{
+  min-width:0;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  gap:clamp(8px,1.25vw,18px);
+  overflow:visible;
+}
+.studio-link{
+  min-height:48px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:11px;
+  padding:0 clamp(17px,1.8vw,26px);
+  border:1px solid transparent;
+  border-radius:999px;
+  color:#514f48;
+  background:transparent;
+  font-size:13px;
+  font-weight:500;
+  letter-spacing:.005em;
+  transition:background .22s ease,color .22s ease,border-color .22s ease,transform .22s ease;
+}
+.studio-link svg{width:17px;height:17px;flex:none;color:currentColor}
+.studio-link:hover{background:#ebe7dc;color:#191916;transform:translateY(-1px)}
+.studio-link.active{
+  color:#fffdf7;
+  background:#25241f;
+  border-color:#25241f;
+  box-shadow:0 5px 16px rgba(37,36,31,.12);
+}
+.studio-link.active svg{color:#e3a18b}
+.studio-link.active{box-shadow:0 5px 16px rgba(37,36,31,.12)}
+.studio-more-trigger{gap:9px}
+.studio-more-trigger.active{background:#e9e4d8;border-color:#ded8ca;color:#24231f;box-shadow:none}
+.studio-more-trigger.active svg{color:inherit}
+.studio-nav-end{justify-self:end;gap:10px}
+.studio-live{display:none}
+.studio-more-menu{top:calc(100% + 12px);right:0;left:auto}
+@media(max-width:1100px){
+  .studio-nav{grid-template-columns:86px minmax(0,1fr) auto;gap:12px;padding-inline:22px;height:78px}
+  .studio-brand{min-width:0}
+  .studio-links{gap:4px}
+  .studio-link{min-height:44px;padding-inline:13px;gap:8px;font-size:12px}
+}
+@media(max-width:760px){
+  .studio-nav{display:flex;height:62px;padding:0 16px;gap:10px}
+  .studio-links{display:none}
+  .studio-nav-end{margin-left:auto}
+}
