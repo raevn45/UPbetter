@@ -121,6 +121,9 @@ class UPAlarmActivity : Activity() {
     private fun startAlarmAudio() {
         val soundId = record?.optString("soundId", "") ?: ""
         val resourceName = when (soundId) {
+            "classic-twinbell" -> "up_classic_twinbell"
+            "classic-bedside" -> "up_classic_bedside"
+            "classic-buzzer" -> "up_classic_buzzer"
             "rain-soft" -> "up_rain_soft"
             "rain-heavy" -> "up_rain_heavy"
             "rain-tin-roof" -> "up_rain_tin_roof"
