@@ -9,6 +9,7 @@ export default function EditorialRuntime() {
     let velocity = 0;
     let frame = 0;
     let targetVelocity = 0;
+    const onPointer = (event: PointerEvent) => { root.style.setProperty("--pointer-x", `${(event.clientX / Math.max(1, window.innerWidth) * 100).toFixed(2)}%`); root.style.setProperty("--pointer-y", `${(event.clientY / Math.max(1, window.innerHeight) * 100).toFixed(2)}%`); };
     const onScroll = () => {
       const now = performance.now();
       const y = window.scrollY;
@@ -27,7 +28,8 @@ export default function EditorialRuntime() {
       else { velocity = 0; targetVelocity = 0; root.style.setProperty("--scroll-velocity", "0"); frame = 0; }
     };
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => { window.removeEventListener("scroll", onScroll); if (frame) cancelAnimationFrame(frame); root.style.setProperty("--scroll-velocity", "0"); };
+    window.addEventListener("pointermove", onPointer, { passive: true });
+    return () => { window.removeEventListener("scroll", onScroll); window.removeEventListener("pointermove", onPointer); if (frame) cancelAnimationFrame(frame); root.style.setProperty("--scroll-velocity", "0"); };
   }, []);
   return null;
 }
