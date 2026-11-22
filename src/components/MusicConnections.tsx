@@ -112,11 +112,11 @@ export default function MusicConnections() {
 
   return <section className="music-connections">
     <div className="setting-row music-provider-row">
-      <div><strong><Music2 size={16}/> Spotify</strong><span>Connect your Spotify account. Spotify will ask you to approve UP.</span><small>{spotifyStatus} {spotifyToken ? "Access is held in memory and ends when this app session is cleared." : "Requires the UP publisher's Spotify Client ID and an approved redirect URI."}</small></div>
+      <div><strong><Music2 size={16}/> Spotify</strong><span>Connect your Spotify account. Spotify will ask you to approve UP.</span><small>{spotifyStatus}</small></div>
       {spotifyToken ? <button className="outline-btn" onClick={disconnectSpotify}><LogOut size={14}/> Disconnect</button> : <button className="outline-btn" onClick={() => void connectSpotify()}><LogIn size={14}/> Connect Spotify</button>}
     </div>
     <div className="setting-row music-provider-row">
-      <div><strong><Apple size={16}/> Apple Music</strong><span>Connect your Apple Music account. Apple will ask you to approve access.</span><small>{appleStatus} {appleDeveloperToken ? "The developer token is supplied by UP." : "Requires the UP publisher's Apple Music developer token and MusicKit setup."}</small></div>
+      <div><strong><Apple size={16}/> Apple Music</strong><span>Connect your Apple Music account. Apple will ask you to approve access.</span><small>{appleStatus}</small></div>
       {appleStatus.startsWith("Connected") ? <button className="outline-btn" onClick={() => void disconnectApple()}><LogOut size={14}/> Disconnect</button> : <button className="outline-btn" disabled={busy} onClick={() => void connectApple()}><Link2 size={14}/> {busy ? "Connecting…" : "Connect Apple Music"}</button>}
     </div>
     <p className="fine-print">UP only asks for the access needed to connect your account. You can disconnect at any time.</p>
