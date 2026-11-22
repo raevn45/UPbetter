@@ -30,11 +30,29 @@ const cityOptions = [
   { cityName: "Abu Dhabi", countryCode: "AE", timeZone: "Asia/Dubai" },
   { cityName: "London", countryCode: "GB", timeZone: "Europe/London" },
   { cityName: "New York", countryCode: "US", timeZone: "America/New_York" },
-  { cityName: "Tokyo", countryCode: "JP", timeZone: "Asia/Tokyo" },
-  { cityName: "Mumbai", countryCode: "IN", timeZone: "Asia/Kolkata" },
-  { cityName: "Singapore", countryCode: "SG", timeZone: "Asia/Singapore" },
+  { cityName: "Los Angeles", countryCode: "US", timeZone: "America/Los_Angeles" },
+  { cityName: "Toronto", countryCode: "CA", timeZone: "America/Toronto" },
+  { cityName: "Vancouver", countryCode: "CA", timeZone: "America/Vancouver" },
+  { cityName: "Mexico City", countryCode: "MX", timeZone: "America/Mexico_City" },
+  { cityName: "São Paulo", countryCode: "BR", timeZone: "America/Sao_Paulo" },
+  { cityName: "Paris", countryCode: "FR", timeZone: "Europe/Paris" },
   { cityName: "Berlin", countryCode: "DE", timeZone: "Europe/Berlin" },
-  { cityName: "Sydney", countryCode: "AU", timeZone: "Australia/Sydney" }
+  { cityName: "Rome", countryCode: "IT", timeZone: "Europe/Rome" },
+  { cityName: "Madrid", countryCode: "ES", timeZone: "Europe/Madrid" },
+  { cityName: "Istanbul", countryCode: "TR", timeZone: "Europe/Istanbul" },
+  { cityName: "Cairo", countryCode: "EG", timeZone: "Africa/Cairo" },
+  { cityName: "Johannesburg", countryCode: "ZA", timeZone: "Africa/Johannesburg" },
+  { cityName: "Nairobi", countryCode: "KE", timeZone: "Africa/Nairobi" },
+  { cityName: "Mumbai", countryCode: "IN", timeZone: "Asia/Kolkata" },
+  { cityName: "Bangkok", countryCode: "TH", timeZone: "Asia/Bangkok" },
+  { cityName: "Singapore", countryCode: "SG", timeZone: "Asia/Singapore" },
+  { cityName: "Hong Kong", countryCode: "HK", timeZone: "Asia/Hong_Kong" },
+  { cityName: "Manila", countryCode: "PH", timeZone: "Asia/Manila" },
+  { cityName: "Seoul", countryCode: "KR", timeZone: "Asia/Seoul" },
+  { cityName: "Tokyo", countryCode: "JP", timeZone: "Asia/Tokyo" },
+  { cityName: "Sydney", countryCode: "AU", timeZone: "Australia/Sydney" },
+  { cityName: "Melbourne", countryCode: "AU", timeZone: "Australia/Melbourne" },
+  { cityName: "Auckland", countryCode: "NZ", timeZone: "Pacific/Auckland" }
 ];
 const resultValue = <T,>(result: { ok: true; value: T } | { ok: false; error: { message: string } }): T => {
   if (!result.ok) throw new Error(result.error.message);
@@ -169,6 +187,20 @@ export default function App() {
       clearMagnetic();
     };
   }, []);
+  useEffect(() => {
+    if (!moreOpen) return;
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setMoreOpen(false); };
+    const closeOnOutside = (event: PointerEvent) => {
+      const target = event.target instanceof Element ? event.target : null;
+      if (target && !target.closest(".mobile-more-menu, .mobile-nav")) setMoreOpen(false);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    window.addEventListener("pointerdown", closeOnOutside);
+    return () => {
+      window.removeEventListener("keydown", closeOnEscape);
+      window.removeEventListener("pointerdown", closeOnOutside);
+    };
+  }, [moreOpen]);
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
     if (settings.reducedMotion || !("IntersectionObserver" in window)) {
