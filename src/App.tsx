@@ -107,6 +107,14 @@ export default function App() {
   }, [refresh]);
   useEffect(() => { const id = window.setInterval(() => setNow(new Date()), 1000); return () => window.clearInterval(id); }, []);
   useEffect(() => {
+    const move = (event: PointerEvent) => {
+      document.documentElement.style.setProperty("--pointer-x", `${(event.clientX / Math.max(1, window.innerWidth)) * 100}%`);
+      document.documentElement.style.setProperty("--pointer-y", `${(event.clientY / Math.max(1, window.innerHeight)) * 100}%`);
+    };
+    window.addEventListener("pointermove", move, { passive: true });
+    return () => window.removeEventListener("pointermove", move);
+  }, []);
+  useEffect(() => {
     if (!timerRunning || timerEnd === null) return;
     const interval = window.setInterval(() => {
       const remaining = Math.max(0, Math.ceil((timerEnd - Date.now()) / 1000));
