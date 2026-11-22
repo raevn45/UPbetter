@@ -18,7 +18,7 @@ const dayCodes = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
   const [token, setToken] = useState("");
-  const [status, setStatus] = useState("Not connected");
+  const [status, setStatus] = useState(clientId ? "Not connected" : "Google connection is being set up for UP.");
   const [accountEmail, setAccountEmail] = useState("");
   const [title, setTitle] = useState("");
   const [when, setWhen] = useState("");
@@ -46,7 +46,7 @@ export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
 
   const connect = () => {
     if (!clientId) {
-      setStatus("Google sign-in needs the UP publisher's OAuth client ID. It is not a personal API key.");
+      setStatus("Google connection is not ready yet. You do not need to enter or configure anything.");
       return;
     }
     const google = window.google?.accounts?.oauth2;
