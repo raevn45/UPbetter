@@ -58,6 +58,7 @@ const components = `
         <activity android:name="com.up.alarm.UPAlarmActivity" android:exported="false"
             android:showWhenLocked="true" android:turnScreenOn="true"
             android:excludeFromRecents="true" android:launchMode="singleTop" />
+        <activity android:name="com.up.alarm.UPGoogleAuthActivity" android:exported="false" />
 `;
 if (!manifest.includes("com.up.alarm.UPAlarmReceiver")) {
   manifest = manifest.replace("</application>", components + "\n    </application>");
