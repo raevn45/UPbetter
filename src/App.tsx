@@ -314,7 +314,7 @@ export default function App() {
     const scheduled = result.value.scheduleState === "scheduled";
     setNotice(scheduled ? `Created ${input.label} for ${spokenTime}.` : `Saved ${input.label} for ${spokenTime}, but device alarm permissions or background scheduling still need attention.`);
     return scheduled ? `Done. ${input.label} is set for ${spokenTime}.` : `I saved ${input.label} for ${spokenTime}, but it may not ring in the background until you finish enabling alarm permissions.`;
-  }, [refresh, settings.timeFormat]);
+  }, [refresh, settings.timeFormat, timeZone]);
   const deleteVoiceAlarm = useCallback(async (id: string) => {
     const result = await upCore.alarms.remove(id);
     if (!result.ok) throw new Error(result.error.message);
