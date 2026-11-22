@@ -130,7 +130,7 @@ export class SoundService {
         const master = context.createGain();
         master.gain.value = 0.32;
         master.connect(context.destination);
-        const patterns: Record<string, number[][]> = {
+        const patterns: Record<string, Array<[number, number, number]>> = {
           "alarm-twinbell": [[880,280,180],[660,280,180],[880,280,180],[660,280,750]],
           "alarm-digital": [[1320,180,120],[990,180,120],[1320,180,120],[990,180,750]],
           "alarm-buzzer": [[480,620,120],[480,620,120],[480,620,750]],
