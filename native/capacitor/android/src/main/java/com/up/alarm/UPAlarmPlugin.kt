@@ -62,16 +62,24 @@ class UPAlarmPlugin : Plugin() {
                 "classic-twinbell" -> "up_classic_twinbell"
                 "classic-bedside" -> "up_classic_bedside"
                 "classic-buzzer" -> "up_classic_buzzer"
+                "device-alarm" -> ""
                 else -> throw IllegalArgumentException("This sound has no native preview.")
             }
             val resourceId = context.resources.getIdentifier(resourceName, "raw", context.packageName)
-            if (resourceId == 0) throw IllegalStateException("The selected sound is not bundled in this build.")
+            if (resourceId == 0 && soundId != "device-alarm") throw IllegalStateException("The selected sound is not bundled in this build.")
             stopPreviewPlayer()
             val player = MediaPlayer()
             player.setAudioAttributes(AudioAttributes.Builder().setUsage(AudioAttributes.USAGE_ALARM)
                 .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION).build())
-            context.resources.openRawResourceFd(resourceId).use { descriptor ->
-                player.setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+            if (soundId == "device-alarm") {
+                val uri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                    ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+                player.setDataSource(context, uri)
+                player.isLooping = true
+            } else {
+                context.resources.openRawResourceFd(resourceId).use { descriptor ->
+                    player.setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+                }
             }
             player.setOnCompletionListener { stopPreviewPlayer() }
             player.prepare()
