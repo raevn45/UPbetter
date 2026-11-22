@@ -153,3 +153,6 @@ button:active{transform:scale(.975)}
 .pinned-icon{color:var(--ochre)!important;background:#c49a551a}
 .city-card small{line-height:1.6;letter-spacing:.02em;text-transform:none;word-break:break-word}
 @media(max-width:760px){.pinned-countdown{align-items:flex-start;flex-wrap:wrap}.pinned-countdown>button{margin-left:0}}
+
+
+.alarm-sound-choice{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center}.alarm-sound-choice .field-input{min-width:0;margin:0}.alarm-sound-choice .outline-btn{padding:10px 12px;font-size:9px;white-space:nowrap}
