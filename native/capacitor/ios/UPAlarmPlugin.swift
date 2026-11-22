@@ -17,7 +17,9 @@ public class UPAlarmPlugin: CAPPlugin, CAPBridgedPlugin {
         CAPPluginMethod(name: "requestPermission", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "schedule", returnType: CAPPluginReturnPromise),
         CAPPluginMethod(name: "cancel", returnType: CAPPluginReturnPromise),
-        CAPPluginMethod(name: "test", returnType: CAPPluginReturnPromise)
+        CAPPluginMethod(name: "test", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "scheduleTimer", returnType: CAPPluginReturnPromise),
+        CAPPluginMethod(name: "cancelTimer", returnType: CAPPluginReturnPromise)
     ]
 
     @objc func capabilities(_ call: CAPPluginCall) {
@@ -113,6 +115,46 @@ public class UPAlarmPlugin: CAPPlugin, CAPBridgedPlugin {
         Task {
             do { try await AlarmManager.shared.cancel(id: id); call.resolve() }
             catch { call.reject("Could not cancel alarm: \(error.localizedDescription)") }
+        }
+    }
+
+    @objc func scheduleTimer(_ call: CAPPluginCall) {
+        guard #available(iOS 26.0, *) else {
+            call.resolve(["state": "unsupported", "message": "AlarmKit timers require iOS 26 or later."]); return
+        }
+        guard let timerId = call.getString("timerId").flatMap(UUID.init(uuidString:)),
+              let endsAt = call.getString("endsAt"),
+              let instant = ISO8601DateFormatter().date(from: endsAt) else {
+            call.reject("Timer ID or end time is invalid."); return
+        }
+        guard AlarmManager.shared.authorizationState == .authorized else {
+            call.resolve(["state": "permission_required", "message": "Authorize UP to schedule timers."]); return
+        }
+        let label = call.getString("label") ?? "UP timer"
+        let stop = AlarmButton(text: "Stop", textColor: .white, systemImageName: "stop.circle")
+        let alert = AlarmPresentation.Alert(title: LocalizedStringResource(stringLiteral: label), stopButton: stop)
+        let attributes = AlarmAttributes<UPAlarmMetadata>(
+            presentation: AlarmPresentation(alert: alert),
+            metadata: UPAlarmMetadata(label: label),
+            tintColor: Color(red: 0.09, green: 0.24, blue: 0.26))
+        let configuration = AlarmManager.AlarmConfiguration<UPAlarmMetadata>(
+            schedule: .fixed(instant), attributes: attributes)
+        Task {
+            do {
+                try await AlarmManager.shared.schedule(id: timerId, configuration: configuration)
+                call.resolve(["state": "scheduled", "message": "Timer scheduled with Apple AlarmKit."])
+            } catch { call.resolve(["state": "failed", "message": error.localizedDescription]) }
+        }
+    }
+
+    @objc func cancelTimer(_ call: CAPPluginCall) {
+        guard #available(iOS 26.0, *) else { call.resolve(); return }
+        guard let id = call.getString("timerId").flatMap(UUID.init(uuidString:)) else {
+            call.reject("Timer ID must be a UUID for iOS AlarmKit."); return
+        }
+        Task {
+            do { try await AlarmManager.shared.cancel(id: id); call.resolve() }
+            catch { call.reject("Could not cancel timer: \(error.localizedDescription)") }
         }
     }
 
