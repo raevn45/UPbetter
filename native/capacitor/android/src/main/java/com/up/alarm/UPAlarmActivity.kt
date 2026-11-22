@@ -150,24 +150,34 @@ class UPAlarmActivity : Activity() {
         }
         val resourceId = if (resourceName.isNotEmpty()) resources.getIdentifier(resourceName, "raw", packageName) else 0
         val selectedDeviceUri = soundId.removePrefix("android-ringtone:")
-        player = MediaPlayer().apply {
-            setAudioAttributes(AudioAttributes.Builder()
-                .setUsage(AudioAttributes.USAGE_ALARM)
-                .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
-                .build())
-            setWakeMode(this@UPAlarmActivity, android.os.PowerManager.PARTIAL_WAKE_LOCK)
-            isLooping = true
-            if (selectedDeviceUri != soundId && selectedDeviceUri.isNotBlank()) {
-                setDataSource(this@UPAlarmActivity, Uri.parse(selectedDeviceUri))
-            } else if (resourceId != 0) {
-                resources.openRawResourceFd(resourceId).use { descriptor ->
-                    setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+        fun createPlayer(useSelectedSound: Boolean): MediaPlayer {
+            return MediaPlayer().apply {
+                setAudioAttributes(AudioAttributes.Builder()
+                    .setUsage(AudioAttributes.USAGE_ALARM)
+                    .setContentType(AudioAttributes.CONTENT_TYPE_SONIFICATION)
+                    .build())
+                setWakeMode(this@UPAlarmActivity, android.os.PowerManager.PARTIAL_WAKE_LOCK)
+                isLooping = true
+                if (useSelectedSound && selectedDeviceUri != soundId && selectedDeviceUri.isNotBlank()) {
+                    setDataSource(this@UPAlarmActivity, Uri.parse(selectedDeviceUri))
+                } else if (useSelectedSound && resourceId != 0) {
+                    resources.openRawResourceFd(resourceId).use { descriptor ->
+                        setDataSource(descriptor.fileDescriptor, descriptor.startOffset, descriptor.length)
+                    }
+                } else {
+                    val fallback = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
+                        ?: RingtoneManager.getDefaultUri(RingtoneManager.TYPE_RINGTONE)
+                    setDataSource(this@UPAlarmActivity, fallback)
                 }
-            } else {
-                val fallback = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM)
-                setDataSource(this@UPAlarmActivity, fallback)
+                prepare()
             }
-            prepare()
+        }
+        player = try {
+            createPlayer(true)
+        } catch (_: Exception) {
+            // If a user-selected ringtone was moved or revoked, keep the alarm alive
+            // with the phone's default alarm tone instead of crashing the ringing screen.
+            try { createPlayer(false) } catch (_: Exception) { null }
         }
         val target = (record?.optDouble("volume", 0.8)?.toFloat() ?: 0.8f).coerceIn(0f, 1f)
         if (record?.optBoolean("gradualVolume", true) == true) {
