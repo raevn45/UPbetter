@@ -15,7 +15,7 @@ const choices: { kind: MissionKind; title: string; subtitle: string; detail: str
   { kind: "random", title: "Surprise me", subtitle: "Keep it unpredictable", detail: "A quick surprise check. You can always snooze instead.", icon: Dices }
 ];
 
-export default function MissionStudio({ value, onChange }: { value: MissionConfig | null; onChange: (next: MissionConfig | null) => void }) {
+export default function MissionStudio({ value, onChange, onComplete }: { value: MissionConfig | null; onChange: (next: MissionConfig | null) => void; onComplete?: () => void }) {
   const [preview, setPreview] = useState<WakeChallenge | null>(null);
   const [answer, setAnswer] = useState("");
   const [feedback, setFeedback] = useState("");
@@ -32,6 +32,7 @@ export default function MissionStudio({ value, onChange }: { value: MissionConfi
     const action = preview.kind === "movement" || preview.kind === "checklist";
     const result = action ? upCore.missions.completeAction(preview.id).completed : upCore.missions.check(preview.id, answer).correct;
     setFeedback(result ? "Completed. This is how the wake-up check will feel." : "Not quite yet. Try again or make a fresh example.");
+    if (result) onComplete?.();
   };
 
   return <section className="mission-studio">
