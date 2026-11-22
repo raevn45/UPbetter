@@ -1,13 +1,13 @@
 import { useEffect, useRef } from "react";
 import "./GlassHello.css";
 
-const vertex = \`
+const vertex = `
 attribute vec2 aPosition;
 varying vec2 vUv;
 void main(){ vUv=aPosition*.5+.5; gl_Position=vec4(aPosition,0.,1.); }
-\`;
+`;
 
-const fragment = \`
+const fragment = `
 precision highp float;
 varying vec2 vUv;
 uniform sampler2D uText;
@@ -63,7 +63,7 @@ void main(){
   if(outAlpha<0.012) discard;
   gl_FragColor=vec4(colour,outAlpha);
 }
-\`;
+`;
 
 function shader(gl: WebGLRenderingContext, type: number, source: string) {
   const value=gl.createShader(type);
