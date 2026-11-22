@@ -168,7 +168,7 @@ export default function App() {
   }, []);
   useEffect(() => {
     const nodes = Array.from(document.querySelectorAll<HTMLElement>("[data-reveal]"));
-    if (!("IntersectionObserver" in window)) {
+    if (settings.reducedMotion || !("IntersectionObserver" in window)) {
       nodes.forEach(node => node.classList.add("is-visible"));
       return;
     }
@@ -181,7 +181,7 @@ export default function App() {
     }, { threshold: 0.12, rootMargin: "0px 0px -35px 0px" });
     nodes.forEach(node => observer.observe(node));
     return () => observer.disconnect();
-  }, [tab]);
+  }, [tab, settings.reducedMotion]);
   useEffect(() => {
     if (!timerRunning || timerEnd === null) return;
     const interval = window.setInterval(() => {
@@ -335,7 +335,7 @@ export default function App() {
   const exportBackup = async () => { const r = await upCore.backup.export(); if (!r.ok) return setError(r.error.message); const blob = new Blob([r.value], { type: "application/json" }); const url = URL.createObjectURL(blob); const a = document.createElement("a"); a.href = url; a.download = "up-backup.json"; a.click(); window.setTimeout(() => URL.revokeObjectURL(url), 1500); setNotice("Backup saved to your downloads. Nothing was uploaded."); };
   const importBackup = async (file?: File) => { if (!file) return; const confirmed = window.confirm("Restore this UP backup? It will replace the alarms, timers, countdowns, world clocks, settings, favourites and custom sounds currently stored on this device."); if (!confirmed) return; const r = await upCore.backup.import(await file.text()); if (!r.ok) setError(r.error.message); else { await refresh(); setNotice("Backup restored on this device."); } };
 
-  return <div className="app-shell">
+  return <div className="app-shell" data-reduced-motion={settings.reducedMotion}>
     <aside className="sidebar">
       <button className="brand" onClick={() => setTab("today")}><span className="brand-mark">u<span>p</span></span><span className="brand-sub">ALARM · TIMER · CLOCK</span></button>
       <div className="sidebar-label">YOUR SPACE</div>
