@@ -79,6 +79,15 @@ if (!gradle.includes("play-services-auth")) {
 }
 await writeFile(gradlePath, gradle);
 
+// Google Play services Auth 22 requires Android 7.0 (API 24) or newer.
+const variablesPath = path.join(root, "android/variables.gradle");
+let variables = await readFile(variablesPath, "utf8");
+if (!/minSdkVersion\s*=\s*\d+/.test(variables)) {
+  throw new Error("Could not find minSdkVersion in android/variables.gradle.");
+}
+variables = variables.replace(/minSdkVersion\s*=\s*\d+/, "minSdkVersion = 24");
+await writeFile(variablesPath, variables);
+
 const sounds = [
   ["up_rain_soft", "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.1.0-preview/rain-soft.wav"],
   ["up_rain_heavy", "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-heavy.wav"],
