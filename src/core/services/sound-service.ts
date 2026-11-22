@@ -5,6 +5,7 @@ type LibrarySound = Omit<SoundItem, "isFavourite">;
 type CustomSoundRecord = { id: string; title: string; category: "Custom"; durationSeconds: number; source: "user"; attribution: string; blob: Blob };
 
 const SOUND_LIBRARY: LibrarySound[] = [
+  { id: "device-alarm", title: "Device Alarm", category: "Alarm", durationSeconds: 8, source: "bundled", attribution: "Uses your device's default alarm tone" },
   { id: "rain-soft", title: "Rain on the Window", category: "Rain", durationSeconds: 8, source: "bundled", previewUrl: "https://github.com/DNAABR/ambient-sounds-library/releases/download/v0.1.0-preview/rain-soft.wav", attribution: "CC0 1.0 · barkenov · Freesound 640655" },
   { id: "rain-heavy", title: "Rainstorm", category: "Rain", durationSeconds: 8, source: "bundled", previewUrl: "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-heavy.wav", attribution: "CC0 1.0 · Leminno original sound design" },
   { id: "rain-tin-roof", title: "Rain on a Tin Roof", category: "Rain", durationSeconds: 8, source: "bundled", previewUrl: "https://github.com/Leminno-org/ambient-sounds-library/releases/download/v0.4.0-preview/rain-tin-roof.wav", attribution: "CC0 1.0 · Leminno original sound design" },
@@ -33,6 +34,8 @@ export class SoundService {
   private activeAudio: HTMLAudioElement | null = null;
   private previewTimeout: number | null = null;
   private activeObjectUrl: string | null = null;
+  private activeContext: AudioContext | null = null;
+  private activeOscillator: OscillatorNode | null = null;
 
   async list(): Promise<Result<SoundItem[]>> {
     try {
@@ -68,6 +71,8 @@ export class SoundService {
       this.activeAudio = null;
     }
     if (this.activeObjectUrl) { URL.revokeObjectURL(this.activeObjectUrl); this.activeObjectUrl = null; }
+    if (this.activeOscillator) { try { this.activeOscillator.stop(); } catch { /* already stopped */ } this.activeOscillator = null; }
+    if (this.activeContext) { void this.activeContext.close(); this.activeContext = null; }
   }
 
   async importCustom(file: File): Promise<Result<SoundItem>> {
@@ -114,6 +119,25 @@ export class SoundService {
       this.stopPreview();
       let source = sound?.previewUrl;
       let duration = sound?.durationSeconds ?? 30;
+      if (soundId === "device-alarm") {
+        const context = new AudioContext();
+        await context.resume();
+        const oscillator = context.createOscillator();
+        const gain = context.createGain();
+        oscillator.type = "square";
+        oscillator.frequency.setValueAtTime(880, context.currentTime);
+        oscillator.frequency.setValueAtTime(660, context.currentTime + 0.42);
+        oscillator.frequency.setValueAtTime(880, context.currentTime + 0.84);
+        oscillator.frequency.setValueAtTime(660, context.currentTime + 1.26);
+        gain.gain.value = 0.18;
+        oscillator.connect(gain);
+        gain.connect(context.destination);
+        oscillator.start();
+        this.activeContext = context;
+        this.activeOscillator = oscillator;
+        this.previewTimeout = window.setTimeout(() => this.stopPreview(), 8_000);
+        return success(undefined);
+      }
       if (!sound) {
         const db = await getDatabase();
         const custom = (await db.get("settings", "custom-sounds") as CustomSoundRecord[] | undefined) ?? [];
