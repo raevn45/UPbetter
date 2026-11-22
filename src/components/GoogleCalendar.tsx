@@ -9,10 +9,10 @@ declare global {
   }
 }
 
-type AlarmToSync = { alarm: { id: string; label: string; hour: number; minute: number; repeatDays: number[]; timeZone: string }; nextOccurrence: string };
+type AlarmToSync = { alarm: { id: string; label: string; hour: number; minute: number; repeatDays: number[]; timeZone: string; enabled: boolean }; nextOccurrence: string | null };
 const dayCodes = ["SU", "MO", "TU", "WE", "TH", "FR", "SA"];
 
-export default function GoogleCalendar({ nextAlarm }: { nextAlarm: AlarmToSync | null }) {
+export default function GoogleCalendar({ alarms }: { alarms: AlarmToSync[] }) {
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID as string | undefined;
   const [token, setToken] = useState("");
   const [status, setStatus] = useState("Not connected");
@@ -56,87 +56,45 @@ export default function GoogleCalendar({ nextAlarm }: { nextAlarm: AlarmToSync |
     tokenClient.current.requestAccessToken({ prompt: "consent" });
   };
 
-  const syncNextAlarm = async () => {
-    if (!token || !nextAlarm) return;
+  const syncAlarms = async () => {
+    if (!token) return;
+    const upcoming = alarms.filter(item => item.alarm.enabled && item.nextOccurrence);
+    if (!upcoming.length) { setStatus("No enabled upcoming UP alarms to sync."); return; }
     setBusy(true);
     try {
-      const start = new Date(nextAlarm.nextOccurrence);
-      const end = new Date(start.getTime() + 5 * 60 * 1000);
-      const body: Record<string, unknown> = {
-        summary: "UP · " + (nextAlarm.alarm.label || "Alarm"),
-        description: "Synced from UP. Manage this alarm in the UP app.",
-        start: { dateTime: start.toISOString(), timeZone: nextAlarm.alarm.timeZone },
-        end: { dateTime: end.toISOString(), timeZone: nextAlarm.alarm.timeZone },
-        reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 10 }, { method: "popup", minutes: 0 }] },
-        extendedProperties: { private: { upAlarmId: nextAlarm.alarm.id } }
-      };
-      if (nextAlarm.alarm.repeatDays?.length) {
-        const byDay = nextAlarm.alarm.repeatDays.slice().sort().map(day => dayCodes[day]).filter(Boolean);
+      let synced = 0;
+      for (const item of upcoming) {
+        const start = new Date(item.nextOccurrence as string);
+        const end = new Date(start.getTime() + 5 * 60 * 1000);
+        const byDay = (item.alarm.repeatDays || []).slice().sort().map(day => dayCodes[day]).filter(Boolean);
+        const body: Record<string, unknown> = {
+          summary: "UP · " + (item.alarm.label || "Alarm"),
+          description: "Synced from UP. Manage this alarm in the UP app.",
+          start: { dateTime: start.toISOString(), timeZone: item.alarm.timeZone },
+          end: { dateTime: end.toISOString(), timeZone: item.alarm.timeZone },
+          reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 10 }, { method: "popup", minutes: 0 }] },
+          extendedProperties: { private: { upAlarmId: item.alarm.id } }
+        };
         if (byDay.length) body.recurrence = ["RRULE:FREQ=WEEKLY;BYDAY=" + byDay.join(",")];
+        const lookupUrl = "https://www.googleapis.com/calendar/v3/calendars/primary/events?privateExtendedProperty=" + encodeURIComponent("upAlarmId=" + item.alarm.id) + "&singleEvents=false";
+        const lookup = await fetch(lookupUrl, { headers: { Authorization: "Bearer " + token } });
+        if (!lookup.ok) throw new Error("Google Calendar could not check existing UP reminders.");
+        const existing = await lookup.json() as { items?: Array<{ id: string }> };
+        const eventId = existing.items?.[0]?.id;
+        const url = eventId
+          ? "https://www.googleapis.com/calendar/v3/calendars/primary/events/" + encodeURIComponent(eventId)
+          : "https://www.googleapis.com/calendar/v3/calendars/primary/events";
+        const response = await fetch(url, {
+          method: eventId ? "PATCH" : "POST",
+          headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
+          body: JSON.stringify(body)
+        });
+        if (response.status === 401) { setToken(""); setStatus("Google session expired. Sign in again."); return; }
+        if (!response.ok) throw new Error("Google Calendar could not sync " + item.alarm.label + ".");
+        synced++;
       }
-      const response = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
-        method: "POST",
-        headers: { Authorization: "Bearer " + token, "Content-Type": "application/json" },
-        body: JSON.stringify(body)
-      });
-      if (!response.ok) {
-        if (response.status === 401) { setToken(""); setStatus("Google session expired. Sign in again."); }
-        else throw new Error("Google Calendar could not sync this UP alarm.");
-      } else setStatus("Next UP alarm added to Google Calendar with popup reminders.");
+      setStatus(synced + " enabled UP alarm(s) synced to Google Calendar with popup reminders.");
     } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Could not sync the alarm.");
+      setStatus(error instanceof Error ? error.message : "Could not sync UP alarms.");
     } finally { setBusy(false); }
   };
-
-  const disconnect = () => { setToken(""); setStatus("Disconnected"); };
-
-  const addReminder = async (event: React.FormEvent) => {
-    event.preventDefault();
-    if (!token || !title.trim() || !when) return;
-    setBusy(true);
-    try {
-      const start = new Date(when);
-      const end = new Date(start.getTime() + 30 * 60 * 1000);
-      const response = await fetch("https://www.googleapis.com/calendar/v3/calendars/primary/events", {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: JSON.stringify({
-          summary: title.trim(),
-          start: { dateTime: start.toISOString() },
-          end: { dateTime: end.toISOString() },
-          reminders: { useDefault: false, overrides: [{ method: "popup", minutes: 10 }, { method: "popup", minutes: 0 }] }
-        })
-      });
-      if (!response.ok) {
-        if (response.status === 401) { setToken(""); setStatus("Session expired. Connect Google again."); }
-        else throw new Error("Google Calendar could not create that reminder.");
-      } else {
-        setTitle("");
-        setWhen("");
-        setStatus("Reminder added to your primary Google Calendar.");
-      }
-    } catch (error) {
-      setStatus(error instanceof Error ? error.message : "Could not add the reminder.");
-    } finally { setBusy(false); }
-  };
-
-  return <section className="setting-row google-calendar-setting">
-    <div>
-      <strong>Google Calendar</strong>
-      <span>Connect your Google account and add UP reminders directly to your primary calendar.</span>
-      <small>{status}. Connect once per app session. Google requires a client ID configured by the app publisher; no personal Gemini key is needed for Calendar.</small>
-    </div>
-    <div className="setting-actions">
-      {token ? <button className="outline-btn" onClick={disconnect}><LogOut size={14}/> Disconnect</button> : <button className="outline-btn" onClick={connect}><LogIn size={14}/> Sign in with Google</button>}
-    </div>
-    {token && <div className="google-sync-alarm">
-      <div><strong>UP alarm sync</strong><span>{nextAlarm ? "Next alarm: " + nextAlarm.alarm.label + " · " + new Date(nextAlarm.nextOccurrence).toLocaleString() : "No enabled upcoming UP alarm."}</span></div>
-      <button className="outline-btn" type="button" onClick={() => void syncNextAlarm()} disabled={busy || !nextAlarm}><CalendarDays size={14}/>{busy ? "Syncing…" : "Add next UP alarm to Calendar"}</button>
-    </div>}
-    {token && <form className="google-reminder-form" onSubmit={addReminder}>
-      <input className="field-input" value={title} onChange={event => setTitle(event.target.value)} placeholder="Reminder title" maxLength={120} required />
-      <input className="field-input" type="datetime-local" value={when} onChange={event => setWhen(event.target.value)} required />
-      <button className="primary-btn" type="submit" disabled={busy || !title.trim() || !when}><Plus size={14}/>{busy ? "Adding…" : "Add reminder"}</button>
-    </form>}
-  </section>;
-}
