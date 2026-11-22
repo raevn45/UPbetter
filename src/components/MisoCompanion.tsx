@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState, type PointerEvent } from "react";
-import { Heart, Sparkles, Gift, Move, Palette } from "lucide-react";
+import { Heart, Sparkles, Gift, Palette } from "lucide-react";
 
 type PixelCatEngine = {
   destroy(): void; setName(name: string): void; setButterfly(on: boolean, soon?: boolean): void;
@@ -78,6 +78,24 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
     return () => window.removeEventListener("resize", resize);
   }, [spotlight]);
 
+  useEffect(() => {
+    if (reducedMotion) return;
+    const roam = () => {
+      if (dragRef.current || document.hidden) return;
+      const width = spotlight ? 130 : 88;
+      const height = spotlight ? 130 : 96;
+      const next = {
+        x: Math.max(8, Math.round(Math.random() * Math.max(8, window.innerWidth - width - 8))),
+        y: Math.max(8, Math.round(Math.random() * Math.max(8, window.innerHeight - height - 8)))
+      };
+      setPosition(next);
+      try { localStorage.setItem("up.miso.position", JSON.stringify(next)); } catch { /* session-only movement */ }
+      engineRef.current?.greet();
+    };
+    const id = window.setInterval(roam, 14000);
+    return () => window.clearInterval(id);
+  }, [reducedMotion, spotlight]);
+
   const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).closest("button")) return;
     dragRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, left: position.x, top: position.y };
@@ -100,7 +118,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   return <div className={`miso-companion ${spotlight ? "miso-companion--spotlight" : ""} ${dragging ? "is-dragging" : ""}`}
     style={{ left: position.x, top: position.y }}
     onPointerDown={onPointerDown} onPointerMove={onPointerMove} onPointerUp={finishDrag} onPointerCancel={finishDrag}
-    aria-label={`${name}, your movable pixel cat companion`}>
+    aria-label={`${name}, your roaming pixel cat companion`}>
     <div className="miso-speech" aria-live="polite">{behavior}</div>
     <canvas ref={canvasRef} className="miso-companion-canvas" aria-label={`${name}, animated pixel cat. Drag to move and tap to pet.`} />
     <div className="miso-float-tools">
@@ -108,7 +126,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
       <button type="button" title="Give Miso a treat" onClick={() => { engineRef.current?.gift(); setBehavior("thank you for the treat!"); }}><Gift size={13}/></button>
       <button type="button" title={butterflyOn?"Hide butterfly":"Bring back butterfly"} onClick={() => { const next = !butterflyOn; setButterflyOn(next); engineRef.current?.setButterfly(next, true); setBehavior(next?"butterfly patrol":"quiet time"); }}><Sparkles size={13}/></button>
       <button type="button" title="Change Miso’s coat" onClick={() => { const next = (coatIndex + 1) % 14; setCoatIndex(next); engineRef.current?.setCoat(next); try { localStorage.setItem("up.miso.coat", String(next)); } catch { /* optional persistence */ } setBehavior("new look, same Miso"); }}><Palette size={13}/></button>
-      <button type="button" title="Move Miso to the lower corner" onClick={() => { const next = { x: Math.max(8, window.innerWidth - 142), y: Math.max(8, window.innerHeight - 152) }; setPosition(next); try { localStorage.setItem("up.miso.position", JSON.stringify(next)); } catch { /* optional persistence */ } }}><Move size={13}/></button>
+      
     </div>
     {!ready && <span className="miso-loading">MISO IS WAKING UP</span>}
   </div>;
