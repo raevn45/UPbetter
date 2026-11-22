@@ -147,7 +147,7 @@ export default function App() {
       setTimerSeconds(remaining);
       if (remaining <= 0) {
         setTimerRunning(false); setTimerEnd(null);
-        if (activeTimerId) void upCore.timers.cancel(activeTimerId).then(()=>refresh());
+        if (activeTimerId) { setNotifiedTimerIds(current => current.includes(activeTimerId) ? current : [...current, activeTimerId]); void upCore.timers.cancel(activeTimerId).then(()=>refresh()); }
         setActiveTimerId(null);
         void upCore.sounds.preview(timerSoundId);
         setNotice("Timer complete. Take a breath.");
