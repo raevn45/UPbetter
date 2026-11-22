@@ -55,3 +55,15 @@ export async function pickNativeAlarmSound(existingUri?: string) {
   const result = await NativeUPAlarm.pickAlarmSound(existingUri ? { existingUri } : {});
   return { supported: true as const, ...result };
 }
+
+export async function previewNativeAlarmSound(soundId: string) {
+  if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== "android") return false;
+  await NativeUPAlarm.previewSound({ soundId });
+  return true;
+}
+
+export async function stopNativeAlarmSoundPreview() {
+  if (Capacitor.isNativePlatform() && Capacitor.getPlatform() === "android") {
+    await NativeUPAlarm.stopSoundPreview();
+  }
+}
