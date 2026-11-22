@@ -28,7 +28,7 @@ const readPoint = (): Point | null => {
   catch { return null; }
 };
 
-export default function MisoCompanion({ name, reducedMotion = false, spotlight = false }: { name: string; reducedMotion?: boolean; spotlight?: boolean }) {
+export default function MisoCompanion({ name, reducedMotion = false, spotlight = false, cue = "welcome" }: { name: string; reducedMotion?: boolean; spotlight?: boolean; cue?: string }) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const engineRef = useRef<PixelCatEngine | null>(null);
   const dragRef = useRef<{ id: number; x: number; y: number; left: number; top: number } | null>(null);
@@ -66,6 +66,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   }, []);
 
   useEffect(() => { engineRef.current?.setName(name); }, [name]);
+  useEffect(() => { if (!cue || cue === "welcome") return; if (cue === "alarm-created") { engineRef.current?.gift(); setBehavior("a new plan!"); } else engineRef.current?.greet("you got this ♥"); }, [cue]);
   useEffect(() => {
     const resize = () => setPosition(p => ({ x: Math.max(0, Math.min(window.innerWidth - (spotlight ? 190 : 126), p.x)), y: Math.max(8, Math.min(window.innerHeight - (spotlight ? 190 : 136), p.y)) }));
     window.addEventListener("resize", resize);
