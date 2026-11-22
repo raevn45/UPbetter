@@ -21,6 +21,12 @@ export class CapacitorAlarmScheduler implements AlarmScheduler {
     }
   }
 
+  async consumeCompleted(): Promise<string[]> {
+    if (!Capacitor.isNativePlatform() || Capacitor.getPlatform() !== "android") return [];
+    const result = await NativeUPAlarm.consumeCompleted();
+    return result.alarmIds ?? [];
+  }
+
   async cancel(alarmId: string): Promise<void> {
     if (Capacitor.isNativePlatform()) await NativeUPAlarm.cancel({ alarmId });
   }
