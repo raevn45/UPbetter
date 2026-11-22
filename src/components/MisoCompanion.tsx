@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from "react";
-import { Heart, Sparkles, Gift, Move, X } from "lucide-react";
+import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { Heart, Sparkles, Gift, Move } from "lucide-react";
 
 type PixelCatEngine = {
   destroy(): void; setName(name: string): void; setButterfly(on: boolean, soon?: boolean): void;
@@ -35,7 +35,6 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
   const [position, setPosition] = useState<Point>({ x: Math.max(12, window.innerWidth - 188), y: Math.max(72, window.innerHeight - 212) });
   const [ready, setReady] = useState(false);
   const [behavior, setBehavior] = useState("keeping you company");
-  const [menuOpen, setMenuOpen] = useState(false);
   const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
@@ -54,7 +53,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
       if (cancelled || !canvasRef.current || !window.PixelCatLive) return;
       const engine = window.PixelCatLive.init(canvasRef.current, {
         name, coatIndex: 0, cycleCoatOnClick: false, butterfly: true, reducedMotion,
-        onMeow: () => { setBehavior("says hello"); setMenuOpen(true); },
+        onMeow: () => { setBehavior("says hello"); },
         onHearts: () => setBehavior("very pleased with you"),
         onBehavior: label => setBehavior(label || "keeping you company"),
         onPurrStart: () => setBehavior("purring"),
@@ -76,7 +75,7 @@ export default function MisoCompanion({ name, reducedMotion = false, spotlight =
     return () => window.removeEventListener("resize", resize);
   }, []);
 
-  const onPointerDown = (event: React.PointerEvent<HTMLDivElement>) => {
+  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
     if ((event.target as HTMLElement).closest("button")) return;
     dragRef.current = { id: event.pointerId, x: event.clientX, y: event.clientY, left: position.x, top: position.y };
     event.currentTarget.setPointerCapture(event.pointerId);
