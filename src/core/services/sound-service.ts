@@ -76,7 +76,7 @@ export class SoundService {
     try {
       const db = await getDatabase();
       const custom = (await db.get("settings", "custom-sounds") as CustomSoundRecord[] | undefined) ?? [];
-      const title = file.name.replace(/\\.[^.]+$/, "").slice(0, 48) || "My sound";
+      const title = file.name.replace(/\.[^.]+$/, "").slice(0, 48) || "My sound";
       const record: CustomSoundRecord = { id: `custom-${globalThis.crypto?.randomUUID?.() ?? Date.now()}`, title, category: "Custom", durationSeconds: 30, source: "user", attribution: "Imported from your device", blob: file };
       await db.put("settings", [...custom, record], "custom-sounds");
       return success({ id: record.id, title: record.title, category: record.category, durationSeconds: record.durationSeconds, source: record.source, attribution: record.attribution, isFavourite: false });
