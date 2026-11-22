@@ -28,11 +28,11 @@ const plistPath = path.join(appDir, "Info.plist");
 const additionsPath = path.join(root, "native/capacitor/ios/InfoPlist.additions.xml");
 let plist = await readFile(plistPath, "utf8");
 const additions = await readFile(additionsPath, "utf8");
-const plistEntries = [...additions.matchAll(/<key>([^<]+)<\\/key>\\s*<string>([\\s\\S]*?)<\\/string>/g)];
+const plistEntries = [...additions.matchAll(/<key>([^<]+)<\/key>\s*<string>([\s\S]*?)<\/string>/g)];
 for (const [, key, value] of plistEntries) {
   if (!plist.includes(`<key>${key}</key>`)) {
-    plist = plist.replace("</dict>", `    <key>${key}</key>\\n    <string>${value}</string>\\n</dict>`);
+    plist = plist.replace("</dict>", `    <key>${key}</key>\n    <string>${value}</string>\n</dict>`);
   }
 }
 await writeFile(plistPath, plist);
-console.log("UP iOS project prepared: AlarmKit plugin registered and usage description installed.");
+console.log("UP iOS project prepared: AlarmKit, microphone, and speech-recognition usage descriptions installed.");
