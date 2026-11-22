@@ -1036,3 +1036,5 @@ body{
 }
 
 @keyframes miso-walk-bob{0%,100%{translate:0 0}50%{translate:0 -3px}} .miso-companion.is-walking .miso-companion-canvas{animation:miso-walk-bob .22s steps(2,end) infinite} .miso-companion.is-walking{transition-timing-function:linear}
+
+.google-reminder-form{grid-column:1/-1;display:grid;grid-template-columns:minmax(0,1fr) minmax(190px,.8fr) auto;gap:8px;width:100%;margin-top:8px}.voice-transcript{grid-column:1/-1;color:#b9c7ad;font:8px/1.6 var(--mono);overflow-wrap:anywhere}@media(max-width:760px){.google-reminder-form{grid-template-columns:minmax(0,1fr)}}
