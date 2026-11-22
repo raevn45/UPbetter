@@ -10,8 +10,8 @@ The local-first React/Vite app is connected to the typed core and IndexedDB stor
 
 - **Android:** AlarmManager exact scheduling, permission checks, boot/time-change recovery, full-screen alarm notification, selected CC0 sound playback, snooze, and native wake-challenge flow. The native build workflow generates a debug APK.
 - **iOS:** AlarmKit bridge for iOS 26+, one-time alarms and weekly recurrence when the alarm timezone matches the iPhone's current timezone. The build workflow generates an unsigned simulator build.
-- **Sounds:** 22 CC0 1.0 soundscapes, including seven recorded field sounds and 15 original designed ambiences, with creator credits. Android build assets are compressed and bundled for offline alarm playback.
-- **Miso:** animated, cursor-reactive, draggable pixel cat based on the MIT-licensed PixelPets renderer, with pet/treat/butterfly interactions.
+- **Sounds:** 22 CC0 1.0 soundscapes, including seven recorded field sounds and 15 original designed ambiences, with creator credits. Custom audio can be imported and previewed locally on the web; the Android APK bundles the curated CC0 library.
+- **Miso:** one persistent PixelPets pixel cat across every page, draggable anywhere in the viewport, with cursor tracking, pet/treat/butterfly controls, coat changes and contextual reactions.
 - **Web:** Vercel PWA remains a preview and cannot guarantee background ringing after the browser is closed or the device is suspended.
 
 Native builds are not the same as device verification. Physical Android and iPhone tests are still required before treating UP as a dependable wake-up alarm. iOS currently uses the system alarm sound and does not yet run the custom mission challenge in the system alarm UI. Windows still uses the installed web app; a native Windows installer is not built.
