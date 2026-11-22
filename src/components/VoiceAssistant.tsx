@@ -6,7 +6,7 @@ type RecognitionResult = { [index: number]: { transcript: string }; isFinal: boo
 type RecognitionLike = {
   continuous: boolean; interimResults: boolean; lang: string;
   onresult: ((event: { results: ArrayLike<RecognitionResult> }) => void) | null;
-  onend: (() => void) | null; onerror: (() => void) | null;
+  onend: (() => void) | null; onerror: ((event?: { error?: string }) => void) | null;
   start(): void; stop(): void;
 };
 type RecognitionConstructor = new () => RecognitionLike;
@@ -21,7 +21,7 @@ type VoiceAssistantProps = {
 };
 
 function localTimeReply(message: string, nextAlarmAt: string | null | undefined, nextAlarmLabel: string, timeFormat: "12h" | "24h") {
-  if (!(/\\balarm\\b/i.test(message) && /\\b(when|what time|how long|how much|time left|until|next)\\b/i.test(message))) return null;
+  if (!(/\balarm\b/i.test(message) && /\b(when|what time|how long|how much|time left|until|next)\b/i.test(message))) return null;
   if (!nextAlarmAt) return "You do not have an upcoming alarm set in UP yet.";
   const target = new Date(nextAlarmAt);
   if (!Number.isFinite(target.getTime())) return "I could not read your next alarm time. Please check your Alarms page.";
